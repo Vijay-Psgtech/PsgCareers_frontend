@@ -14,6 +14,7 @@ export default function JobPostingForm() {
   const [locationOptions,setLocationOptions]  = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedGender, setSelectedGender] = useState(null);
+  const [institutionOptions,setInstitutionOptions] = useState([]);
   const [selectedInstitutions, setSelectedInstitutions] = useState(null);
   const [department,setDepartment] = useState('');
   const [jobCategory, setJobCategory] = useState("");
@@ -49,14 +50,6 @@ export default function JobPostingForm() {
     label:gen,
     value:gen
   }));
-  const institutionOptions = [
-    'PSG Institute of Mangement', 'PSG Industrial Institute', 'PSG Institute of Advance Studies', 
-    'PSG College of Technology', 'PSG Polytechnic College', 'PSG Institute of Technology & Applied Research', 
-    'PSG Institute of Architecture and Planning', 'PSG College of Arts & Science', 'PSG Public School'
-  ].map((inst=>({
-    label:inst,
-    value:inst
-  })));
   const jobTypeOptions = [
     'Full Time', 'Internship', 'Contract', 'Part Time', 
     'Temporary', 'Seasonal', 'Volunteer'
@@ -87,15 +80,26 @@ export default function JobPostingForm() {
 
   const fetchLocations = async() =>{
     try{
-      const res = await axiosInstance.get('/api/locations/getLocations');
+      const res = await axiosInstance.get('/api/dropDown/getLocations');
       const formattedOptions = res.data.map((loc) => ({
         label: loc.name,
         value: loc.name
       }));
       setLocationOptions(formattedOptions);
-      console.log('Locations',res.data);
     }catch(err){
       console.error("failed to fetch locations",err);
+    }
+  }
+  const fetchInstitutions = async() => {
+    try{
+      const res = await axiosInstance.get('/api/dropDown/getInstitutions');
+      const formattedOptions = res.data.map((inst)=>({
+        label: inst.name,
+        value: inst.name
+      }));
+      setInstitutionOptions(formattedOptions);
+    } catch(err) {
+      console.error("failed to fetch institutions",err);
     }
   }
   {/*--DropDown options--*/}
@@ -255,6 +259,7 @@ export default function JobPostingForm() {
 
   useEffect(()=>{
     fetchLocations();
+    fetchInstitutions();
     validateForm();
 
     // react quill text-editor
