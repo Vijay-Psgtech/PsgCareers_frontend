@@ -8,7 +8,7 @@ export default function PrivateRoute({children}){
         // Not logged In redirect to login
         return <Navigate to="/login" replace/>;
     }
-    if(auth.role!=='admin'){
+    if(auth.role == 'user'){
         toast.error('Access Denied');
         return <Navigate to="/careers" replace/>;
     }

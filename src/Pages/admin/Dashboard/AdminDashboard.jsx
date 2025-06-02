@@ -1,10 +1,11 @@
 import React, {useState,useEffect} from 'react'
 import { useNavigate } from 'react-router-dom'
-// import axios from 'axios';
 import axiosInstance from '../../../utils/axiosInstance'
 import {CircularProgressbar,buildStyles} from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import { FaSearch } from 'react-icons/fa';
+import { useAuth } from "../../../Context/AuthContext";
+import Select from "react-select"
 
 const AdminDashboard = () => {
     const [jobs,setJobs] = useState([]);
@@ -13,32 +14,64 @@ const AdminDashboard = () => {
     const [isDrawerOpen,setIsDrawerOpen] = useState(false);
     const [statusType,setStatusType] = useState('active');
     const [searchTerm,setSearchTerm] = useState(''); 
+    const [institutionOptions,setInstitutionOptions] = useState([]);
+    const [selectedInstitutions, setSelectedInstitutions] = useState(null);
+    const [selectedCategory,setSelectedCategory] = useState(null);
+
     const [page,setPage] = useState(1);
-    const jobsPerPage = 6;
+    const jobsPerPage = 9;
+    const {auth} = useAuth();
+
+    const jobCategoryOptions = ["Teaching", "Non Teaching"].map((jobCat)=>({
+      label : jobCat,
+      value : jobCat
+    }));
+
+    const fetchJobs = async() =>{
+      try{
+        const res = await axiosInstance.get('/api/jobPost/getJobs',{
+          headers:{
+            Authorization: `Bearer ${auth.token}`,
+          }
+        });
+        console.log('Jobs-data',res.data);
+        setJobs(res.data);
+      }catch(err){
+        console.error("Failed to fetch jobs", err);
+      }
+    }
+
+    const fetchInstitutions = async() => {
+      try{
+        const res = await axiosInstance.get('/api/dropDown/getInstitutions');
+        const formattedOptions = res.data.map((inst)=>({
+          label: inst.name,
+          value: inst.name
+        }));
+        setInstitutionOptions(formattedOptions);
+      } catch(err) {
+        console.error("failed to fetch institutions",err);
+      }
+    }
 
     useEffect(()=>{
-        const fetchJobs = async() =>{
-            try{
-                const res = await axiosInstance.get('/api/jobPost/getJobs');
-                console.log('Jobs-data',res.data);
-                setJobs(res.data);
-            }catch(err){
-                 console.error("Failed to fetch jobs", err);
-            }
-        }
-        fetchJobs();
+      fetchJobs();
+      fetchInstitutions();
     },[]);
 
-    const filteredJobs = jobs.filter((item)=>{
-      const jobStatus = item.status === statusType;
-      const jobSearch = item.jobTitle.toLowerCase().includes(searchTerm.toLowerCase());
-      return jobStatus && jobSearch;
+    const filteredJobs = jobs.filter((job)=>{
+      const jobStatus = job.status === statusType;
+      const jobSearch = job.jobTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      const institutionMatch = !selectedInstitutions || job.institution === selectedInstitutions.value;
+      const categoryMatch = !selectedCategory || job.jobCategory === selectedCategory.value;
+      return jobStatus && jobSearch && institutionMatch && categoryMatch;
     });
 
     const paginatedJobs = filteredJobs.slice((page - 1) * jobsPerPage, page * jobsPerPage);
     const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
 
     const handleDetailsClick = (job) =>{
+      console.log('jobCreated',job.createdBy)
       setSelectedJob(job);
       setIsDrawerOpen(true);
     };
@@ -47,23 +80,19 @@ const AdminDashboard = () => {
       setIsDrawerOpen(false);
       setSelectedJob(null);
     };
+
+    const handlejobAppliedDetails = (jobId,jobTitle) => {
+      navigate(`/admin/jobDetails/${jobId}`,{state:{jobTitle}});
+    };
+
+    useEffect(()=>{
+      setPage(1);
+    },[searchTerm,selectedInstitutions,selectedCategory,statusType])
  
     return (
       <div className="p-6">
-        <div className='flex justify-end gap-4 mb-6'>
-          <div className='relative max-w-sm'>
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchTerm}
-              onChange={(e)=>setSearchTerm(e.target.value)}
-            />
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
-          </div>
-        </div>
-        <div className="flex justify-between mb-4">
-          <div className='inline-flex gap-4'>
+        <div className="flex flex-wrap gap-4 justify-between mb-6">
+          <div className='inline-flex gap-6 flex-col md:flex-row'>
             <button 
               onClick={()=>setStatusType('active')} 
               className={`${statusType === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-black' } px-4 py-2 rounded`}
@@ -79,14 +108,54 @@ const AdminDashboard = () => {
           </div>
           
           
-          <button onClick={()=>navigate('/admin/careers')} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Add Job Posting
-          </button>
+          {auth.role === 'superadmin' && (
+            <button onClick={()=>navigate('/admin/careers')} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              Add Job Posting
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap  gap-4 justify-between mb-4">
+          <div className="inline-flex gap-6 flex-col md:flex-row">
+              {auth.role === 'superadmin' && (
+              <Select
+                name="institution"
+                options={institutionOptions}
+                value={selectedInstitutions}
+                onChange={setSelectedInstitutions}
+                placeholder="All Institutions"
+                className="min-h-[40px] rounded"
+                isClearable
+              />
+            )}
+            <Select 
+              name="jobCategory"
+              options={jobCategoryOptions}
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              placeholder="All Categories"
+              className="min-h-[40px]  rounded" 
+              isClearable
+            />
+          </div>
+          <div>
+             <div className='relative max-w-sm'>
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border  focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e)=>setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
+          </div>
+          </div>
+         
         </div>
 
         <div className="py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {paginatedJobs.map((job, idx) => (
-            <div key={idx} className="relative rounded-lg p-4 shadow-lg bg-white ">
+            <div key={idx} className="relative rounded-xl p-4 shadow-2xl bg-white">
 
               <div className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
                 {10} 
@@ -97,7 +166,7 @@ const AdminDashboard = () => {
               </div>
               <h3 className="font-semibold text-lg truncate">{job.jobTitle}</h3>
 
-              <div className="w-30 h-35 mx-auto my-4">
+              <div className="w-30 h-35 mx-auto my-4 cursor-pointer transition-transform duration-300 hover:scale-105" onClick={()=>handlejobAppliedDetails(job.jobId,job.jobTitle)}>
                 <CircularProgressbar
                  value={198}
                  maxValue={500}
@@ -169,7 +238,9 @@ const AdminDashboard = () => {
                         hour12: true,
                       })}
                     </div>
-                    <div><strong>Posted By:</strong>Vijay</div>
+                    <div><strong>Posted By:</strong> 
+                       { selectedJob.createdBy !== undefined ? selectedJob.createdBy.first_name : 'Admin' }
+                    </div>
                   </div>
                 </div>
               </div>
