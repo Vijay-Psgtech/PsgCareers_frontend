@@ -134,10 +134,10 @@ export default function JobPostingForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const ctcMin = selectedCtcMin;
-    const ctcMax = selectedCtcMax;
-    const minExperience = experienceMin;
-    const maxExperience = experienceMax;
+    const ctcMin = parseFloat(selectedCtcMin);
+    const ctcMax = parseFloat(selectedCtcMax);
+    const minExperience = parseInt(experienceMin);
+    const maxExperience = parseInt(experienceMax);
 
     if (ctcMin && ctcMax && ctcMin > ctcMax) {
       toast.error("CTC Min cannot be greater than Max");
