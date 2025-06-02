@@ -27,12 +27,12 @@ const Login = () => {
         e.preventDefault();
         try{
             const res = await axiosInstance.post('/api/auth/login',form);
-            if(res.data.token){
+             if(res.data.token){
                 login(res.data.token,res.data.role,res.data.name,res.data.userId);
-                if(res.data.role ==='admin'){
-                    navigate('/admin/dashboard');
-                }else{
+                if(res.data.role ==='user'){
                     navigate('/dashboard');
+                }else{
+                    navigate('/admin/dashboard');
                 }
             } else {
                 toast.error(res.data.message || 'Login failed');

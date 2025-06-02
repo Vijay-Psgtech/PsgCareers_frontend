@@ -2,10 +2,11 @@ import React,{useState} from 'react'
 import {Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,IconButton,TablePagination, } from "@mui/material"
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from "@mui/icons-material/Delete";
+import FileCopyRoundedIcon from '@mui/icons-material/FileCopyRounded';
 import Tooltip from "@mui/material/Tooltip";
 import { CheckCircle, Cancel } from "@mui/icons-material";
 
-const DataTable = ({columns,rows,onEdit,onDelete,onStatusChange,rowsPerPageOptions=[10,15,25]}) => {
+const DataTable = ({columns,rows,onEdit,onDelete,onStatusChange,onCopy,rowsPerPageOptions=[10,15,25]}) => {
     const [page,setPage] = useState(0);
     const [rowsPerPage,setRowsPerPage] = useState(rowsPerPageOptions[0]);
     const handleChangePage = (event,newPage) =>{
@@ -57,15 +58,21 @@ const DataTable = ({columns,rows,onEdit,onDelete,onStatusChange,rowsPerPageOptio
                                     {(onEdit || onDelete) && (
                                         <TableCell align="center">
                                             {onEdit && (
-                                                <IconButton color="primary" onClick={()=>onEdit(row)}>
+                                                <IconButton color="primary" onClick={()=>onEdit(row)} title='Edit'>
                                                     <EditIcon/>
                                                 </IconButton>
                                             )}
                                             {onDelete && (
-                                                <IconButton color='error' onClick={()=>onDelete(row.id || row._id)}>
+                                                <IconButton color='error' onClick={()=>onDelete(row.id || row._id)} title='Delete'>
                                                     <DeleteIcon/>
                                                 </IconButton>
                                             )}
+                                            {onCopy && (
+                                                <IconButton color="primary" onClick={()=>onCopy(row.jobId)} title='copy'>
+                                                    <FileCopyRoundedIcon/>
+                                                </IconButton>
+                                            )}
+                                            
                                         </TableCell>
                                     )}
                                 </TableRow>

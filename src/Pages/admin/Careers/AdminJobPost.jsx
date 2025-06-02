@@ -42,7 +42,6 @@ export default function JobPostingForm() {
     'web developer': ['HTML', 'CSS', 'JavaScript', 'React', 'Node', 'Php'],
     'HR' : ['Talent acqusition','Strong interpersonal skills','Communication Skills'],
     'Professor': ['passion for teaching', 'research work', 'written and oral communication skills',],
-    
   };
 
   {/*--DropDown options--*/}
@@ -105,7 +104,7 @@ export default function JobPostingForm() {
   {/*--DropDown options--*/}
 
   const validateForm = () =>{
-    const hasRequiredFields = jobTitle;
+    const hasRequiredFields = jobTitle && jobCategory && experienceMin && experienceMax;
     setIsFormValid(hasRequiredFields);
   }
 
@@ -175,8 +174,25 @@ export default function JobPostingForm() {
     };
 
     try {
-      const res = await axiosInstance.post('/api/jobPost/addJobPost', formData);
-      toast.success("Job saved with ID: " + res.data.jobId);
+      if(jobId!==undefined && jobId!==null && jobId!==''){
+        const res = await axiosInstance.put(`/api/jobPost/updateByJobId/${jobId}`, formData , {
+          headers:{
+            Authorization: `Bearer ${auth.token}`,
+          }
+        });
+        toast.success("Job modified successfully");
+        setTimeout(()=>{
+          navigate('/admin/jobs-list');
+        },1000)
+      }else {
+        const res = await axiosInstance.post('/api/jobPost/addJobPost', formData, {
+          headers:{
+            Authorization: `Bearer ${auth.token}`,
+          }
+        });
+        toast.success("Job saved with ID: " + res.data.jobId);
+      } 
+
       //Reset form fiels after submitting
       ResetSelectedForms();
     } catch (err) {
@@ -216,7 +232,7 @@ export default function JobPostingForm() {
   };
 
   useEffect(() => {
-    if (jobId) {
+    if (jobId!==undefined && jobId!==null && jobId!=='') {
       axiosInstance.get(`/api/jobPost/getJobs/${jobId}`).then(res => {
         console.log('JobEdit-data',res.data);
         const job = res.data;
@@ -243,9 +259,10 @@ export default function JobPostingForm() {
       }).catch(err => {
         console.error('Failed to fetch job:', err);
       });
+        setTimeout(()=>{
+          setIsFormValid(true);
+        },2000);
     }
-
-    validateForm();
   }, [jobId]);
 
 
@@ -276,23 +293,26 @@ export default function JobPostingForm() {
       // Store instance to avoid reinitializing
       quillRef.current.__quill = quill;
     }
-  },[navigate]);
+     // Append job description if already fetched
+    if (quillRef.current?.__quill && jobDescription) {
+      quillRef.current.__quill.root.innerHTML = jobDescription;
+    }
+  },[navigate,jobDescription]);
   
-  return auth.role!=='admin' ? (  <h2 className="p-4 font-bold text-lg">Admin Job Post - Restricted Access</h2> ) : (
+  return auth.role !=='superadmin' ? (  <h2 className="p-4 font-bold text-lg">Admin Job Post - Restricted Access</h2> ) : (
     <div className="p-6">
         <div className="flex justify-between mb-4">
           <div className='inline-flex gap-4'>
             <h2 className="text-2xl font-semibold">Jobs</h2>
-            <p className="text-xl italic mt-1">Add jobs</p>
+            <p className="text-xl italic mt-1">{(jobId!==undefined && jobId!==null && jobId!=='') ? 'Edit jobs' : 'Add jobs'}</p>
           </div>
-          
-          
           <button onClick={()=>navigate('/admin/jobs-list')} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Job posted lists
           </button>
         </div>
       <div className="min-h-screen flex items-center justify-center ">
       <form onSubmit={handleSubmit} className="p-12 max-w-full bg-white rounded-lg shadow-md grid justify-center grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+
       {/* Basic Information */}
       <div>
         <h2 className="text-lg font-semibold mb-4">Job Posting</h2>
@@ -385,7 +405,10 @@ export default function JobPostingForm() {
                   name="jobCategory"
                   value="Teaching"
                   checked={jobCategory === "Teaching"}
-                  onChange={(e) => {setJobCategory(e.target.value)}}
+                  onChange={(e) => {
+                    setJobCategory(e.target.value),
+                    validateForm()
+                  }}
                   className="accent-blue-600"
                 />
                 <span>Teaching</span>
@@ -396,7 +419,10 @@ export default function JobPostingForm() {
                   name="jobCategory"
                   value="Non Teaching"
                   checked={jobCategory === "Non Teaching"}
-                  onChange={(e) => setJobCategory(e.target.value)}
+                  onChange={(e) => {
+                    setJobCategory(e.target.value),
+                    validateForm()
+                  }}
                   className="accent-blue-600"
                 />
                 <span>Non Teaching</span>
@@ -518,7 +544,10 @@ export default function JobPostingForm() {
               placeholder="Min" 
               className="border p-2 rounded w-full" 
               value={experienceMin}
-              onChange={(e)=>setExperienceMin(e.target.value)}
+              onChange={(e)=>{
+                setExperienceMin(e.target.value),
+                validateForm()  
+              }}
             />
             <input 
               type="number" 
@@ -526,7 +555,10 @@ export default function JobPostingForm() {
               placeholder="Max" 
               className="border p-2 rounded w-full" 
               value={experienceMax}
-              onChange={(e)=>setExperienceMax(e.target.value)}
+              onChange={(e)=>{
+                setExperienceMax(e.target.value),
+                validateForm()
+              }}
             />
           </div>
           <div className="text-sm text-gray-600 mt-2">in Years</div>
@@ -583,7 +615,7 @@ export default function JobPostingForm() {
         <button 
           type="submit" 
           className={`px-4 py-4 rounded text-white ${isformVaild ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
-           disabled={!isformVaild}
+          disabled={!isformVaild}
         >
           Save and Proceed
         </button>

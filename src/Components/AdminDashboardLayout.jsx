@@ -6,16 +6,17 @@ import { FaUser } from "react-icons/fa";
 import { FiLogOut,FiMenu,FiX } from "react-icons/fi";
 
 export default function AdminDashboardLayout({children}) {
-     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const {auth,logout} = useAuth();
     const navigate = useNavigate();
-    const menus = [
+    const allMenus = [
         { name: 'Dashboard', path: '/admin/dashboard' },
         { name: 'Jobs Lists', path: '/admin/jobs-list' },
-        { name: 'Add Job posting', path: '/admin/careers' },
-    ]
+        { name: 'Add Job posting', path: '/admin/careers' }
+    ];
+    const menus = auth.role === 'superadmin' ? allMenus : allMenus.filter(menu=>menu.name === 'Dashboard');
     useEffect(()=>{
-        if(auth.role!=='admin')
+        if(auth.role === 'user')
         {
             toast.error('Access Denied');
             navigate('/careers');
@@ -25,24 +26,24 @@ export default function AdminDashboardLayout({children}) {
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
             <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gray-600 text-white transition-all duration-300`}>
-                <div className="flex items-center justify-between p-4">
-                <h1 className={`${sidebarOpen ? 'text-xl' : 'hidden'} font-bold uppercase`}>{auth.role} - <span className="text-sm">{auth.name}</span></h1>
-                <button onClick={() => setSidebarOpen(!sidebarOpen)}>
-                    {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-                </button>
+                <div className="flex items-center justify-between p-4 border-b">
+                    <h1 className={`${sidebarOpen ? 'text-xl' : 'hidden'} font-bold uppercase`}>{auth.role}</h1>
+                    <button onClick={() => setSidebarOpen(!sidebarOpen)}>
+                        {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+                    </button>
                 </div>
                 
                 {/* Menu links */}
                 <nav className="flex flex-col p-4 gap-2">
                 {menus.map((menu, idx) => (
                     <Link
-                    key={idx}
-                    to={menu.path}
-                    className={`flex items-center gap-3 p-2 rounded-md hover:bg-blue-500 ${
-                        location.pathname === menu.path ? 'bg-blue-500' : ''
-                    }`}
+                        key={idx}
+                        to={menu.path}
+                        className={`flex items-center gap-3 p-2 rounded-md hover:bg-blue-500 ${
+                            location.pathname === menu.path ? 'bg-blue-500' : ''
+                        }`}
                     >
-                    <span className={`${sidebarOpen ? 'capitalize' : 'hidden'} font-bold`}>{menu.name}</span>
+                        <span className={`${sidebarOpen ? 'capitalize' : 'hidden'} font-bold`}>{menu.name}</span>
                     </Link>
                 ))}
                 </nav>
@@ -54,9 +55,6 @@ export default function AdminDashboardLayout({children}) {
                         <img src={logo} className="w-10 h-10 rounded"/>
                         <p className="text-lg font-semibold text-blue-900 mt-2">PSG Careers</p>
                     </div>
-                    {/* <h2 className="text-xl font-semibold capitalize">
-                        {location.pathname.split('/').pop() || 'Dashboard'}
-                    </h2> */}
                     <div className="flex items-center gap-4">
                         <FaUser className="text-gray-600" />
                         <span className='text-blue-700'>{auth.name}</span>
