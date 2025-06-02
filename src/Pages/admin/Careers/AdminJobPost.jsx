@@ -293,11 +293,16 @@ export default function JobPostingForm() {
       // Store instance to avoid reinitializing
       quillRef.current.__quill = quill;
     }
-     // Append job description if already fetched
-    if (quillRef.current?.__quill && jobDescription) {
+    
+  },[navigate]);
+
+  useEffect(() => {
+    // Only populate once on first load or edit
+    if (quillRef.current?.__quill && jobDescription && !quillRef.current.__isPopulated) {
       quillRef.current.__quill.root.innerHTML = jobDescription;
+      quillRef.current.__isPopulated = true; // Mark as done
     }
-  },[navigate,jobDescription]);
+  }, [jobDescription]);
   
   return auth.role !=='superadmin' ? (  <h2 className="p-4 font-bold text-lg">Admin Job Post - Restricted Access</h2> ) : (
     <div className="p-6">
