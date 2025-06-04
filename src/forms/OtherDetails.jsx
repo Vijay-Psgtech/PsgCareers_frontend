@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axiosInstance from '../utils/axiosInstance';
 
-export default function OtherDetails({ data, updateFormData }) {
+export default function OtherDetails({ userId, jobId, data, updateFormData }) {
   const nextSectionRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -14,10 +15,39 @@ export default function OtherDetails({ data, updateFormData }) {
     vacancySource: '',
     otherComments: '',
     resume: null,
+    resumeUrl: '', // To show existing uploaded resume link
   });
 
+  // Fetch existing data from backend when userId/jobId changes
   useEffect(() => {
-    if (data) setForm((prev) => ({ ...prev, ...data }));
+    async function fetchData() {
+      if (!userId || !jobId) return;
+      try {
+        const res = await axiosInstance.get(`/api/otherDetails/${userId}/${jobId}`);
+        if (res.data) {
+          const { reference1, reference2, resumeUrl, ...rest } = res.data;
+          setForm({
+            ...rest,
+            reference1: reference1 || { name: '', address: '', designation: '', mobile: '', email: '' },
+            reference2: reference2 || { name: '', address: '', designation: '', mobile: '', email: '' },
+            resume: null,
+            resumeUrl: resumeUrl || '',
+          });
+          updateFormData(res.data); // sync with parent if needed
+        }
+      } catch (err) {
+        // Handle fetch error silently or show a message
+        console.error('Failed to fetch other details:', err);
+      }
+    }
+    fetchData();
+  }, [userId]);
+
+  useEffect(() => {
+    if (data) {
+      // If data prop changes, update form (optional, depending on usage)
+      setForm((prev) => ({ ...prev, ...data }));
+    }
   }, [data]);
 
   const handleChange = (e, ref = null) => {
@@ -36,13 +66,52 @@ export default function OtherDetails({ data, updateFormData }) {
     setForm((prev) => ({ ...prev, resume: e.target.files[0] }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateFormData(form);
-    localStorage.setItem('otherDetails', JSON.stringify(form));
-    setTimeout(() => {
-      nextSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 200);
+
+    if (!userId || !jobId) {
+      alert('Missing user ID or job ID.');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('userId', userId);
+      formData.append('jobId', jobId);
+      formData.append('reference1', JSON.stringify(form.reference1));
+      formData.append('reference2', JSON.stringify(form.reference2));
+      formData.append('lastPay', form.lastPay);
+      formData.append('expectedPay', form.expectedPay);
+      formData.append('joiningTime', form.joiningTime);
+      formData.append('relativesAtPSG', form.relativesAtPSG);
+      formData.append('attendedPSGInterview', form.attendedPSGInterview);
+      formData.append('vacancySource', form.vacancySource);
+      formData.append('otherComments', form.otherComments);
+      if (form.resume) {
+        formData.append('resume', form.resume);
+      }
+
+      const res = await axiosInstance.post('/api/otherDetails', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data) {
+        updateFormData(res.data); // update parent with saved data (including resumeUrl)
+        setForm((prev) => ({
+          ...prev,
+          resumeUrl: res.data.resumeUrl || prev.resumeUrl,
+          resume: null, // reset file input
+        }));
+
+        // Scroll to Declaration section after save
+        setTimeout(() => {
+          nextSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 200);
+      }
+    } catch (err) {
+      console.error('Failed to save other details:', err);
+      alert('Failed to save other details. Please try again.');
+    }
   };
 
   const renderReferenceFields = (refKey, title) => (
@@ -78,7 +147,6 @@ export default function OtherDetails({ data, updateFormData }) {
       {renderReferenceFields('reference1', 'Reference 1')}
       {renderReferenceFields('reference2', 'Reference 2')}
 
-      {/* Pay & Joining */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div>
           <label htmlFor="lastPay" className="block font-medium mb-1">Last Drawn Pay</label>
@@ -117,7 +185,6 @@ export default function OtherDetails({ data, updateFormData }) {
         </div>
       </div>
 
-      {/* Relatives */}
       <div>
         <label htmlFor="relativesAtPSG" className="block font-medium mb-1">
           Close relatives employed in PSG Institutions (Name, Relationship, Designation)
@@ -132,7 +199,6 @@ export default function OtherDetails({ data, updateFormData }) {
         />
       </div>
 
-      {/* Select Fields */}
       <div className="grid md:grid-cols-2 gap-6">
         <div>
           <label htmlFor="attendedPSGInterview" className="block font-medium mb-1">
@@ -171,7 +237,6 @@ export default function OtherDetails({ data, updateFormData }) {
         </div>
       </div>
 
-      {/* Comments */}
       <div>
         <label htmlFor="otherComments" className="block font-medium mb-1">Any other comments</label>
         <textarea
@@ -184,7 +249,15 @@ export default function OtherDetails({ data, updateFormData }) {
         />
       </div>
 
-      {/* Resume Upload */}
+      {/* Show existing uploaded resume link */}
+      {form.resumeUrl && (
+        <div className="mb-4 text-sm text-blue-600">
+          <a href={form.resumeUrl} target="_blank" rel="noreferrer">
+            View Uploaded Resume
+          </a>
+        </div>
+      )}
+
       <div>
         <label htmlFor="resume" className="block font-medium mb-1 text-gray-700">
           Upload Resume <span className="text-red-600">*</span>
@@ -194,13 +267,10 @@ export default function OtherDetails({ data, updateFormData }) {
           type="file"
           accept=".pdf,.doc,.docx"
           onChange={handleFileChange}
-          required
-          aria-required="true"
           className="w-full border rounded px-3 py-2"
         />
       </div>
 
-      {/* Submit */}
       <div className="text-right">
         <button
           type="submit"
@@ -210,6 +280,7 @@ export default function OtherDetails({ data, updateFormData }) {
         </button>
       </div>
 
+      {/* The next section to scroll to */}
       <div ref={nextSectionRef}></div>
     </form>
   );

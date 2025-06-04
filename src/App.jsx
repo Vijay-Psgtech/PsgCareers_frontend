@@ -20,6 +20,8 @@ import EducationDetails from "./forms/EducationDetails";
 import ResearchContribution from "./forms/ResearchContribution";
 import WorkExperience from "./forms/WorkExperience";
 import OtherDetails from "./forms/OtherDetails";
+import AdminJobDetails from "./Pages/admin/Careers/AdminJobDetails";
+import AdminCandidateDetails from "./Pages/admin/Careers/AdminCandidateDetails";
 
 function App() {
   return (
@@ -65,9 +67,25 @@ function App() {
           </PrivateRoute>
         }/>
 
+        <Route path="/admin/jobDetails/:jobId" element={
+          <PrivateRoute>
+            <AdminDashboardLayout>
+              <AdminJobDetails/>
+            </AdminDashboardLayout>
+          </PrivateRoute>
+        }/>
+
+        <Route path="/admin/candidateDetails/:userId/:jobId" element={
+          <PrivateRoute>
+            <AdminDashboardLayout>
+              <AdminCandidateDetails/>
+            </AdminDashboardLayout>
+          </PrivateRoute>
+        }/>
+
         <Route path="/careers" element={<CareerPage/>}/>
         <Route path="/job/:id" element={<JobDescription />} />
-        <Route path="/application-form/:id" element={<ApplicationForm />} />
+        <Route path="/application-form/:jobId" element={<ApplicationForm />} />
 
          <Route path="/" element={<MainLayout />}>
             <Route path="dashboard" element={<UserDashboard />} />
@@ -75,12 +93,24 @@ function App() {
             <Route path="profile" element={<ViewAndUpdateProfile />} />
          </Route>
 
-          {/* Nested Profile Routes with :id */}
-          <Route path="profile/personal-details/:id" element={<PersonalDetails />} />
-          <Route path="profile/educational-details/:id" element={<EducationDetails />} />
-          <Route path="profile/research-contribution/:id" element={<ResearchContribution />} />
-          <Route path="profile/work-experience/:id" element={<WorkExperience />} />
-          <Route path="profile/other-details/:id" element={<OtherDetails />} />
+          {/* Application Form Sections (kebab-case paths) */}
+          <Route
+            path="personal-details/:userId/:jobId"
+            element={<PersonalDetails />}
+          />
+          <Route path="educationDetails/:userId/:jobId" element={<EducationDetails />} />
+          <Route
+            path="research-contribution/:userId/:jobId"
+            element={<ResearchContribution />}
+          />
+          <Route
+            path="work-experience/:userId/:jobId"
+            element={<WorkExperience />}
+          />
+          <Route
+            path="other-details/:userId/:jobId"
+            element={<OtherDetails />}
+          />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </BrowserRouter>

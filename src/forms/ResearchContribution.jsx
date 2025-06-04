@@ -1,34 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axiosInstance from "../utils/axiosInstance";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent
+} from "@radix-ui/react-accordion";
+import { useAuth } from "../Context/AuthContext";
 
-const defaultEntry = {
-  projects: [],
-  patents: [],
-  pdfs: [],
-  consultancy: [],
-  conferences: [],
-  visits: [],
-};
+export default function ResearchContribution({ updateFormData, jobId }) {
+  const { auth } = useAuth();
+  const userId = auth.userId;
 
-export default function ResearchContribution({ data = {}, updateFormData }) {
   const [form, setForm] = useState({
     sci: '', scopus: '', ugc: '', other: '',
     scopusId: '', hGoogle: '', hScopus: '',
-    booksPublishedNational: '', booksPublishedInternational: '',
-    booksEditedNational: '', booksEditedInternational: '',
-    chaptersPublishedNational: '', chaptersPublishedInternational: '',
-    chaptersEditedNational: '', chaptersEditedInternational: '',
     minorProjects: '', majorProjects: '',
-    file: null,
-    ...defaultEntry,
-    ...data,
+    appliedPatents: '', publishedPatents: '', grantedPatents: '',
+    books: [], chapters: [], journals: [], projects: [], patents: [], pdfs: [],
+    consultancy: [], conferences: [], visits: []
   });
 
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axiosInstance.get(`/api/research/${userId}?jobId=${jobId}`);
+        if (res.data) {
+          setForm(prev => ({
+            ...prev,
+            ...res.data,
+            books: res.data.books || [],
+            chapters: res.data.chapters || [],
+            journals: res.data.journals || [],
+            projects: res.data.projects || [],
+            patents: res.data.patents || [],
+            pdfs: res.data.pdfs || [],
+            consultancy: res.data.consultancy || [],
+            conferences: res.data.conferences || [],
+            visits: res.data.visits || []
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching research contribution data", error);
+      }
+    };
+    if (userId && jobId) fetchData();
+  }, [userId, jobId]);
+
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: files ? files[0] : value
-    }));
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleDynamicChange = (key, index, field, value) => {
@@ -39,124 +62,196 @@ export default function ResearchContribution({ data = {}, updateFormData }) {
 
   const addEntry = (key, fields) => {
     const entry = fields.reduce((acc, f) => ({ ...acc, [f]: '' }), {});
-    setForm(prev => ({ ...prev, [key]: [...prev[key], entry] }));
+    setForm(prev => ({
+      ...prev,
+      [key]: [...(prev[key] || []), entry]
+    }));
   };
 
   const removeEntry = (key, index) => {
-    const updated = [...form[key]];
+    const updated = [...(form[key] || [])];
     updated.splice(index, 1);
     setForm(prev => ({ ...prev, [key]: updated }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    updateFormData(form);
+  const validate = () => {
+    const requiredFields = [
+      'sci', 'scopus', 'ugc', 'other',
+      'scopusId', 'hGoogle', 'hScopus',
+      'minorProjects', 'majorProjects',
+      'appliedPatents', 'publishedPatents', 'grantedPatents'
+    ];
+
+    const newErrors = {};
+    requiredFields.forEach(field => {
+      if (!form[field] || form[field].toString().trim() === '') {
+        newErrors[field] = 'This field is required';
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const input = "border p-2 rounded w-full";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-  return (
-    <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-xl p-8 space-y-8">
-      <h3 className="text-3xl font-bold text-blue-800 border-b pb-2">Research Contribution</h3>
+    try {
+      const res = await axiosInstance.post(`/api/research/${userId}`, {
+        ...form,
+        jobId,
+      });
+      if (res.data) {
+        updateFormData && updateFormData(form);
+        const nextSection = document.getElementById("work-experience");
+        if (nextSection) {
+          nextSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    } catch (error) {
+      console.error("Error saving research contributions", error);
+    }
+  };
 
-      {/* Papers Published */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {['sci', 'scopus', 'ugc', 'other'].map((field) => (
-          <div key={field}>
-            <label className="block text-sm font-medium capitalize">{field.replace(/([A-Z])/g, ' $1')}</label>
-            <input name={field} type="number" min="0" className={input} value={form[field]} onChange={handleChange} placeholder="0" />
-          </div>
-        ))}
-      </div>
+  const Label = ({ text }) => (
+    <label className="text-sm font-semibold">{text}</label>
+  );
 
-      {/* Indexing & IDs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input name="scopusId" className={input} value={form.scopusId} onChange={handleChange} placeholder="Scopus ID" />
-        <input name="hGoogle" className={input} value={form.hGoogle} onChange={handleChange} placeholder="H-Index (Google Scholar)" />
-        <input name="hScopus" className={input} value={form.hScopus} onChange={handleChange} placeholder="H-Index (Scopus)" />
-      </div>
-
-      {/* Books & Chapters */}
-      {[
-        ['booksPublishedNational', 'booksPublishedInternational', 'Books Published'],
-        ['booksEditedNational', 'booksEditedInternational', 'Books Edited'],
-        ['chaptersPublishedNational', 'chaptersPublishedInternational', 'Chapters Published'],
-        ['chaptersEditedNational', 'chaptersEditedInternational', 'Chapters Edited']
-      ].map(([nat, intl, label]) => (
-        <div key={label}>
-          <label className="block font-semibold">{label}</label>
-          <div className="grid grid-cols-2 gap-4">
-            <input name={nat} value={form[nat]} onChange={handleChange} className={input} placeholder="National" />
-            <input name={intl} value={form[intl]} onChange={handleChange} className={input} placeholder="International" />
-          </div>
-        </div>
-      ))}
-
-      {/* File Upload */}
-      <div>
-        <label className="block text-sm mb-1">Upload publication file (PDF / DOC)</label>
-        <input type="file" name="file" onChange={handleChange} className="block" />
-      </div>
-
-      {/* Projects */}
-      <div>
-        <label className="block text-lg font-semibold mb-2">Projects</label>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <input name="minorProjects" value={form.minorProjects} onChange={handleChange} className={input} placeholder="Minor Projects" />
-          <input name="majorProjects" value={form.majorProjects} onChange={handleChange} className={input} placeholder="Major Projects" />
-        </div>
-        {form.projects.map((p, i) => (
-          <div key={i} className="grid md:grid-cols-5 gap-2 mb-2">
-            <input placeholder="PI/CO-PI" value={p.pi || ''} onChange={e => handleDynamicChange('projects', i, 'pi', e.target.value)} className={input} />
-            <input placeholder="Title" value={p.title || ''} onChange={e => handleDynamicChange('projects', i, 'title', e.target.value)} className={input} />
-            <input placeholder="Agency" value={p.agency || ''} onChange={e => handleDynamicChange('projects', i, 'agency', e.target.value)} className={input} />
-            <input placeholder="Status" value={p.status || ''} onChange={e => handleDynamicChange('projects', i, 'status', e.target.value)} className={input} />
-            <input placeholder="Duration (e.g. 2020–2023)" value={p.duration || ''} onChange={e => handleDynamicChange('projects', i, 'duration', e.target.value)} className={input} />
-            <button type="button" className="text-red-600" onClick={() => removeEntry('projects', i)}>Remove</button>
-          </div>
-        ))}
-        <button type="button" className="text-blue-600" onClick={() => addEntry('projects', ['pi', 'title', 'agency', 'status', 'duration'])}>+ Add Project</button>
-      </div>
-
-      {/* Repeatable Dynamic Sections for: Patents, PDFs, Consultancy, Conferences, Visits */}
-      {[
-        ['patents', ['authorship', 'title', 'status'], 'Patent'],
-        ['pdfs', ['type', 'institute'], 'PDF'],
-        ['consultancy', ['title', 'organization', 'scope', 'duration', 'amount'], 'Consultancy'],
-        ['conferences', ['title', 'event', 'organizer', 'date'], 'Conference'],
-        ['visits', ['country', 'purpose', 'funded'], 'Foreign Visit'],
-      ].map(([key, fields, label]) => (
-        <div key={key}>
-          <label className="block text-lg font-semibold mb-2">{label}</label>
-          {form[key].map((entry, i) => (
-            <div key={i} className="grid md:grid-cols-3 gap-2 mb-2">
-              {fields.map(field => (
+  const renderDynamicFields = (key, fields, label) => (
+    <AccordionItem value={key} className="border rounded-lg p-4 my-2">
+      <AccordionTrigger className="text-lg font-semibold cursor-pointer">{label}</AccordionTrigger>
+      <AccordionContent>
+        {(form[key] || []).map((entry, i) => (
+          <div key={i} className="grid md:grid-cols-3 gap-4 mb-3">
+            {fields.map(field => (
+              <div key={field}>
+                <Label text={field} />
                 <input
-                  key={field}
+                  type="text"
                   placeholder={field}
                   value={entry[field] || ''}
                   onChange={e => handleDynamicChange(key, i, field, e.target.value)}
-                  className={input}
+                  className="border p-2 rounded w-full"
                 />
-              ))}
-              <button type="button" className="text-red-600" onClick={() => removeEntry(key, i)}>Remove</button>
-            </div>
-          ))}
-          <button type="button" className="text-blue-600" onClick={() => addEntry(key, fields)}>+ Add {label}</button>
-        </div>
-      ))}
+              </div>
+            ))}
+            <button type="button" className="text-red-600" onClick={() => removeEntry(key, i)}>Remove</button>
+          </div>
+        ))}
+        <button type="button" onClick={() => addEntry(key, fields)} className="text-blue-600 mt-2">+ Add {label}</button>
+      </AccordionContent>
+    </AccordionItem>
+  );
 
-      <div className="text-right pt-6">
-        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow">
-          Save & Continue
-        </button>
+  return (
+    <form onSubmit={handleSubmit} className="bg-white shadow p-6 rounded-xl space-y-6">
+      <h2 className="text-2xl font-bold text-blue-800">Research Contribution</h2>
+      <Accordion type="multiple" className="space-y-2">
+        <AccordionItem value="basic" className="border rounded-lg p-4">
+          <AccordionTrigger className="text-lg font-semibold cursor-pointer">Basic Metrics</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid md:grid-cols-4 gap-4">
+              {['sci', 'scopus', 'ugc', 'other'].map(field => (
+                <div key={field}>
+                  <Label text={field.toUpperCase()} />
+                  <input
+                    type="number"
+                    name={field}
+                    min="0"
+                    value={form[field]}
+                    onChange={handleChange}
+                    className="border p-2 rounded w-full"
+                  />
+                  {errors[field] && <p className="text-red-600 text-sm">{errors[field]}</p>}
+                </div>
+              ))}
+            </div>
+            <div className="grid md:grid-cols-3 gap-4 mt-4">
+              {['scopusId', 'hGoogle', 'hScopus'].map(field => (
+                <div key={field}>
+                  <Label text={field} />
+                  <input
+                    type="text"
+                    name={field}
+                    value={form[field]}
+                    onChange={handleChange}
+                    className="border p-2 rounded w-full"
+                  />
+                  {errors[field] && <p className="text-red-600 text-sm">{errors[field]}</p>}
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {renderDynamicFields('books', ['title', 'publication', 'author', 'isbn', 'edition', 'year'], 'Books Published / Edited')}
+        {renderDynamicFields('chapters', ['title', 'publication', 'author', 'isbn', 'edition', 'year'], 'Chapters Published / Edited')}
+        {renderDynamicFields('journals', ['title', 'publication', 'author', 'isbn', 'edition', 'year'], 'Journals')}
+
+        <AccordionItem value="projects" className="border rounded-lg p-4">
+          <AccordionTrigger className="text-lg font-semibold cursor-pointer">Projects</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              {['minorProjects', 'majorProjects'].map(field => (
+                <div key={field}>
+                  <Label text={field} />
+                  <input
+                    type="text"
+                    name={field}
+                    value={form[field]}
+                    onChange={handleChange}
+                    className="border p-2 rounded w-full"
+                  />
+                  {errors[field] && <p className="text-red-600 text-sm">{errors[field]}</p>}
+                </div>
+              ))}
+            </div>
+            {renderDynamicFields('projects', ['pi', 'title', 'agency', 'status', 'duration'], 'Project')}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="patents" className="border rounded-lg p-4">
+          <AccordionTrigger className="text-lg font-semibold cursor-pointer">Patents</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-3 gap-4">
+              {['appliedPatents', 'publishedPatents', 'grantedPatents'].map(field => (
+                <div key={field}>
+                  <Label text={field} />
+                  <input
+                    type="text"
+                    name={field}
+                    value={form[field]}
+                    onChange={handleChange}
+                    className="border p-2 rounded w-full"
+                  />
+                  {errors[field] && <p className="text-red-600 text-sm">{errors[field]}</p>}
+                </div>
+              ))}
+            </div>
+            {renderDynamicFields('patents', ['authors', 'title', 'status'], 'Patent')}
+          </AccordionContent>
+        </AccordionItem>
+
+        {renderDynamicFields('pdfs', ['type', 'institute'], 'Post Doctoral Fellowship')}
+        {renderDynamicFields('consultancy', ['title', 'organization', 'scope', 'duration', 'amount'], 'Consultancy Undertaken')}
+        {renderDynamicFields('conferences', ['title', 'conference', 'type', 'institution', 'conferenceDate', 'publishedDate'], 'Paper Presentation & Conferences')}
+        {renderDynamicFields('visits', ['country', 'purpose', 'funded'], 'Foreign Visit')}
+      </Accordion>
+
+      <div className="text-right mt-4">
+        <button type="submit" className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800">Save & Continue</button>
       </div>
     </form>
   );
 }
 
 
-// Tailwind class "input" can be defined in your styles:
-// .input {
-//   @apply w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-400;
-// }
+
+
+
+
+
+
+
+  
