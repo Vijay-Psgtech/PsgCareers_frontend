@@ -17,6 +17,7 @@ const AdminDashboard = () => {
     const [institutionOptions,setInstitutionOptions] = useState([]);
     const [selectedInstitutions, setSelectedInstitutions] = useState(null);
     const [selectedCategory,setSelectedCategory] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const [page,setPage] = useState(1);
     const jobsPerPage = 9;
@@ -29,13 +30,15 @@ const AdminDashboard = () => {
 
     const fetchJobs = async() =>{
       try{
-        const res = await axiosInstance.get('/api/jobPost/getJobs',{
+        const res = await axiosInstance.get('/api/jobPost/JobsWithCount',{
           headers:{
             Authorization: `Bearer ${auth.token}`,
           }
         });
         console.log('Jobs-data',res.data);
         setJobs(res.data);
+        setLoading(false);
+
       }catch(err){
         console.error("Failed to fetch jobs", err);
       }
@@ -81,14 +84,16 @@ const AdminDashboard = () => {
       setSelectedJob(null);
     };
 
-    const handlejobAppliedDetails = (jobId,jobTitle) => {
-      navigate(`/admin/jobDetails/${jobId}`,{state:{jobTitle}});
+    const handlejobAppliedDetails = (jobId,jobTitle,candidateCount) => {
+      if(candidateCount!==0) navigate(`/admin/jobDetails/${jobId}`,{state:{jobTitle}});
     };
 
     useEffect(()=>{
       setPage(1);
     },[searchTerm,selectedInstitutions,selectedCategory,statusType])
  
+    if (loading) return <p className="text-center">Loading...</p>;
+    
     return (
       <div className="p-6">
         <div className="flex flex-wrap gap-4 justify-between mb-6">
@@ -158,7 +163,7 @@ const AdminDashboard = () => {
             <div key={idx} className="relative rounded-xl p-4 shadow-2xl bg-white">
 
               <div className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                {10} 
+                {job.newCandidateCount} 
               </div>
 
               <div className="text-sm text-gray-500 mb-2">
@@ -166,11 +171,11 @@ const AdminDashboard = () => {
               </div>
               <h3 className="font-semibold text-lg truncate">{job.jobTitle}</h3>
 
-              <div className="w-30 h-35 mx-auto my-4 cursor-pointer transition-transform duration-300 hover:scale-105" onClick={()=>handlejobAppliedDetails(job.jobId,job.jobTitle)}>
+              <div className="w-30 h-35 mx-auto my-4 cursor-pointer transition-transform duration-300 hover:scale-105" onClick={()=>handlejobAppliedDetails(job.jobId,job.jobTitle,job.candidateCount)}>
                 <CircularProgressbar
-                 value={198}
-                 maxValue={500}
-                 text={'198'}
+                 value={job.candidateCount}
+                 maxValue={50}
+                 text={`${job.candidateCount}`}
                  styles={buildStyles({
                   textColor: "#1D4ED8",
                   pathColor: "#3B82F6",
@@ -239,7 +244,7 @@ const AdminDashboard = () => {
                       })}
                     </div>
                     <div><strong>Posted By:</strong> 
-                       { selectedJob.createdBy !== undefined ? selectedJob.createdBy.first_name : 'Admin' }
+                       { selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'Admin' }
                     </div>
                   </div>
                 </div>

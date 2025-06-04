@@ -1,239 +1,475 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { User, Calendar, Phone, Mail, Home } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../utils/axiosInstance";
+import { useParams } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+import { toast } from "react-toastify";
+dayjs.extend(duration);
 
-export default function PersonalDetails({ updateFormData }) {
-  const { id: userId } = useParams();
+export default function PersonalDetails({updateFormData}) {
+  const { jobId } = useParams();
+  const { auth } = useAuth();
+  const userId = auth.userId;
 
   const [form, setForm] = useState({
-    fullName: '', dob: '', gender: '', motherTongue: '', religion: '', community: '', category: '', maritalStatus: '',
-    spouseName: '', fatherName: '', physicallyChallenged: '', natureOfChallenge: '', aadhar: '', pan: '', mobile: '',
-    email: '', permanentAddress: '', permanentCity: '', permanentState: '', permanentCountry: '', permanentPincode: '',
-    sameAsPermanent: false, communicationAddress: '', communicationCity: '', communicationState: '',
-    communicationCountry: '', communicationPincode: '', languagesKnown: [], resume: null, photo: null
+    fullName: "",
+    dob: "",
+    gender: "",
+    motherTongue: "",
+    religion: "",
+    community: "",
+    category: "",
+    maritalStatus: "",
+    spouseName: "",
+    fatherName: "",
+    physicallyChallenged: "",
+    natureOfChallenge: "",
+    aadhar: "",
+    pan: "",
+    mobile: "",
+    email: "",
+    permanentAddress: "",
+    permanentCity: "",
+    permanentState: "",
+    permanentCountry: "",
+    permanentPincode: "",
+    sameAsPermanent: false,
+    communicationAddress: "",
+    communicationCity: "",
+    communicationState: "",
+    communicationCountry: "",
+    communicationPincode: "",
+    languagesKnown: [],
+    resume: null,
+    photo: null,
   });
 
+  const [age, setAge] = useState({ years: "", months: "", days: "" });
+
+  // Calculate age from DOB
   useEffect(() => {
-    const stored = localStorage.getItem(`user_${userId}_personal`);
-    if (stored) {
-      setForm(JSON.parse(stored));
+    if (form.dob) {
+      const today = dayjs();
+      const dobDate = dayjs(form.dob);
+      const diffInMonths = today.diff(dobDate, "month");
+      const years = Math.floor(diffInMonths / 12);
+      const months = diffInMonths % 12;
+      const days = today.date() - dobDate.date();
+
+      setAge({
+        years,
+        months: months < 0 ? 0 : months,
+        days: days < 0 ? 0 : days,
+      });
+    } else {
+      setAge({ years: "", months: "", days: "" });
     }
-  }, [userId]);
+  }, [form.dob]);
 
-  const updateAndPersist = (updatedForm) => {
-    setForm(updatedForm);
-    localStorage.setItem(`user_${userId}_personal`, JSON.stringify(updatedForm));
-  };
+  // Fetch saved personal details
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userId) return;
+      try {
+        const res = await axiosInstance.get(
+          `/api/personalDetails/${userId}`
+        );
+        const data = res.data;
+        const formatDate = (date) => {
+          return date ? new Date(date).toISOString().split('T')[0] : '';
+        }
 
-  const handleChange = e => {
+        setForm((prev) => ({
+          ...prev,
+          ...data,
+          dob: formatDate(data.dob),
+          languagesKnown: Array.isArray(data.languagesKnown)
+            ? data.languagesKnown
+            : [],
+          sameAsPermanent:
+            data.communicationAddress === data.permanentAddress &&
+            data.communicationCity === data.permanentCity &&
+            data.communicationState === data.permanentState &&
+            data.communicationCountry === data.permanentCountry &&
+            data.communicationPincode === data.permanentPincode,
+          photo: null,
+          resume: null,
+        }));
+      } catch (err) {
+        console.error("Error fetching personal details:", err);
+      }
+    };
+    fetchData();
+  }, [userId,jobId]);
+
+  const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-    if (type === 'file') {
+
+    if (type === "file") {
       const file = files[0];
       if (file && file.size > 20 * 1024 * 1024) {
-        alert(`${name === 'photo' ? 'Photo' : 'Resume'} must be under 20MB`);
+        alert(`${name === "photo" ? "Photo" : "Resume"} must be under 20MB`);
         return;
       }
-      updateAndPersist({ ...form, [name]: file });
-    } else {
-      updateAndPersist({
-        ...form,
-        [name]: type === 'checkbox' ? checked : value,
-        ...(name === 'sameAsPermanent' && checked ? {
-          communicationAddress: form.permanentAddress,
-          communicationCity: form.permanentCity,
-          communicationState: form.permanentState,
-          communicationCountry: form.permanentCountry,
-          communicationPincode: form.permanentPincode
-        } : {})
-      });
+      setForm((prev) => ({ ...prev, [name]: file }));
+      return;
     }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+      ...(name === "sameAsPermanent" && checked
+        ? {
+            communicationAddress: prev.permanentAddress,
+            communicationCity: prev.permanentCity,
+            communicationState: prev.permanentState,
+            communicationCountry: prev.permanentCountry,
+            communicationPincode: prev.permanentPincode,
+          }
+        : name === "sameAsPermanent" && !checked
+        ? {
+            communicationAddress: "",
+            communicationCity: "",
+            communicationState: "",
+            communicationCountry: "",
+            communicationPincode: "",
+          }
+        : {}),
+    }));
   };
 
   const handleLanguageChange = (index, field, value) => {
     const updated = [...form.languagesKnown];
     updated[index] = { ...updated[index], [field]: value };
-    updateAndPersist({ ...form, languagesKnown: updated });
+    setForm((prev) => ({ ...prev, languagesKnown: updated }));
   };
 
   const addLanguage = () => {
-    updateAndPersist({
-      ...form,
-      languagesKnown: [...form.languagesKnown, { language: '', read: false, write: false, speak: false }]
-    });
+    setForm((prev) => ({
+      ...prev,
+      languagesKnown: [
+        ...prev.languagesKnown,
+        { language: "", read: false, write: false, speak: false },
+      ],
+    }));
   };
 
-  const removeLanguage = index => {
+  const removeLanguage = (index) => {
     const updated = [...form.languagesKnown];
     updated.splice(index, 1);
-    updateAndPersist({ ...form, languagesKnown: updated });
+    setForm((prev) => ({ ...prev, languagesKnown: updated }));
   };
 
-  const validateForm = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const mobileRegex = /^\d{10}$/;
-    const aadharRegex = /^\d{12}$/;
-    const panRegex = /^[A-Z]{5}\d{4}[A-Z]$/;
-    const pincodeRegex = /^\d{6}$/;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    if (!form.fullName.trim()) return 'Full Name is required';
-    if (!form.dob) return 'Date of Birth is required';
-    if (!form.gender) return 'Please select Gender';
-    if (!form.category.trim()) return 'Category is required';
-    if (!form.maritalStatus) return 'Marital Status is required';
-
-    if (!mobileRegex.test(form.mobile.trim())) return 'Enter a valid 10-digit Mobile Number';
-    if (!emailRegex.test(form.email.trim())) return 'Enter a valid Email address';
-
-    if (form.aadhar && !aadharRegex.test(form.aadhar.trim())) return 'Aadhar must be a 12-digit number';
-    if (form.pan && !panRegex.test(form.pan.trim())) return 'PAN must be in valid format (e.g., ABCDE1234F)';
-
-    if (!form.permanentAddress.trim()) return 'Permanent Address is required';
-    if (form.permanentPincode && !pincodeRegex.test(form.permanentPincode.trim())) return 'Permanent Pincode must be 6 digits';
-
-    if (!form.communicationAddress.trim()) return 'Communication Address is required';
-    if (form.communicationPincode && !pincodeRegex.test(form.communicationPincode.trim())) return 'Communication Pincode must be 6 digits';
-
-    for (let i = 0; i < form.languagesKnown.length; i++) {
-      const lang = form.languagesKnown[i];
-      if (!lang.language.trim()) return `Language ${i + 1} is missing a name`;
-      if (!lang.read && !lang.write && !lang.speak) return `Select at least one skill for language ${lang.language || i + 1}`;
+    if (!form.dob) {
+      alert("Please select your Date of Birth.");
+      return;
     }
 
-    return null;
+    const dobDate = dayjs(form.dob);
+    const today = dayjs();
+    const ageYears = today.diff(dobDate, "year");
+
+    if (ageYears < 18) {
+      alert("You must be at least 18 years old.");
+      return;
+    }
+
+    try {
+      const submission = { ...form, userId};
+      const formData = new FormData();
+
+      for (const key in submission) {
+        if (key === "languagesKnown") {
+          formData.append(key, JSON.stringify(submission[key]));
+        } else if (submission[key] instanceof File) {
+          formData.append(key, submission[key]);
+        } else {
+          formData.append(key, submission[key] ?? "");
+        }
+      }
+
+      const response = await axiosInstance.post(
+        "/api/personalDetails/save",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success('PersonDetails updated Successfully');
+        updateFormData(form);
+      } else {
+        alert("Failed to save personal details.");
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      if (err.response) {
+        alert(`Error: ${err.response.data.message || "Submission failed"}`);
+      } else {
+        alert("Submission failed. Please try again.");
+      }
+    }
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    const error = validateForm();
-    if (error) return alert(error);
-    updateFormData(form);
-    alert("Personal details saved successfully!");
-  };
-
-  const renderLabeledInput = (label, name, type = 'text', required = false, icon = null) => (
-    <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
-      <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800">
-        {icon && <span className="text-gray-400 mr-2">{icon}</span>}
-        <input
-          type={type}
-          name={name}
-          value={form[name] || ''}
-          onChange={handleChange}
-          required={required}
-          className="w-full bg-transparent focus:outline-none text-sm text-gray-800 dark:text-white"
-        />
-      </div>
+  const renderLabeledInput = (label, name, type = "text", required = false) => (
+    <div>
+      <label htmlFor={name} className="block text-sm font-medium mb-1">
+        {label}
+      </label>
+      <input
+        id={name}
+        type={type}
+        name={name}
+        value={form[name] || ""}
+        onChange={handleChange}
+        required={required}
+        className="w-full border rounded px-4 py-2"
+      />
     </div>
   );
 
   const renderSelect = (label, name, options, required = false) => (
-    <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
+    <div>
+      <label htmlFor={name} className="block text-sm font-medium mb-1">
+        {label}
+      </label>
       <select
+        id={name}
         name={name}
-        value={form[name] || ''}
+        value={form[name] || ""}
         onChange={handleChange}
         required={required}
-        className="w-full border border-gray-300 dark:border-gray-600 rounded px-4 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+        className="w-full border rounded px-4 py-2 bg-white"
       >
         <option value="">Select</option>
-        {options.map(option => (
-          <option key={option} value={option}>{option}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
         ))}
       </select>
     </div>
   );
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-10 space-y-10 max-w-7xl mx-auto">
-      <h3 className="text-4xl font-extrabold text-blue-800 dark:text-blue-300 border-b pb-3">Personal Information</h3>
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white shadow-md rounded-xl p-8 space-y-10 max-w-5xl mx-auto"
+    >
+      <h3 className="text-3xl font-bold text-blue-800 border-b pb-2">
+        Personal Information
+      </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {renderLabeledInput('Full Name', 'fullName', 'text', true, <User size={16} />)}
-        {renderLabeledInput('Date of Birth', 'dob', 'date', true, <Calendar size={16} />)}
-        {renderSelect('Gender', 'gender', ['Male', 'Female', 'Transgender'], true)}
-        {renderLabeledInput('Mother Tongue', 'motherTongue')}
-        {renderLabeledInput('Religion', 'religion')}
-        {renderLabeledInput('Community', 'community')}
-        {renderSelect('Category', 'category', ['FC', 'BC', 'OBC', 'BMC', 'MBC', 'SC', 'ST', 'DNC', 'OTHERS'], true)}
-        {renderSelect('Marital Status', 'maritalStatus', ['Single', 'Married', 'Divorced', 'Widow'], true)}
-        {renderLabeledInput('Spouse Name', 'spouseName')}
-        {renderLabeledInput("Father's Name", 'fatherName')}
-        {renderSelect('Physically Challenged', 'physicallyChallenged', ['Yes', 'No'])}
-        {form.physicallyChallenged === 'Yes' && renderLabeledInput('Nature of Challenge', 'natureOfChallenge')}
-        {renderLabeledInput('Aadhar Number', 'aadhar')}
-        {renderLabeledInput('PAN Number', 'pan')}
-        {renderLabeledInput('Mobile Number', 'mobile', 'text', true, <Phone size={16} />)}
-        {renderLabeledInput('Email', 'email', 'email', true, <Mail size={16} />)}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {renderLabeledInput("Full Name", "fullName", "text", true)}
+        {renderLabeledInput("Date of Birth", "dob", "date", true)}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Upload Photo (Max 20MB)</label>
-          <input type="file" name="photo" accept="image/jpeg" onChange={handleChange} className="text-sm" />
-          {form.photo && <p className="text-sm text-green-600 mt-2">{form.photo.name}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Upload Resume (PDF, Max 20MB)</label>
-          <input type="file" name="resume" accept="application/pdf" onChange={handleChange} className="text-sm" />
-          {form.resume && <p className="text-sm text-green-600 mt-2">{form.resume.name}</p>}
-        </div>
-      </div>
-
-      <h4 className="text-2xl font-bold text-gray-700 dark:text-gray-300">Permanent Address</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {renderLabeledInput('Address', 'permanentAddress', 'text', true, <Home size={16} />)}
-        {renderLabeledInput('City', 'permanentCity')}
-        {renderLabeledInput('State', 'permanentState')}
-        {renderLabeledInput('Country', 'permanentCountry')}
-        {renderLabeledInput('Pincode', 'permanentPincode')}
-      </div>
-
-      <label className="flex items-center gap-2 mt-4 text-gray-700 dark:text-gray-300">
-        <input type="checkbox" name="sameAsPermanent" checked={form.sameAsPermanent} onChange={handleChange} />
-        Same as Permanent Address
-      </label>
-
-      <h4 className="text-2xl font-bold text-gray-700 dark:text-gray-300">Communication Address</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {renderLabeledInput('Address', 'communicationAddress', 'text', true)}
-        {renderLabeledInput('City', 'communicationCity')}
-        {renderLabeledInput('State', 'communicationState')}
-        {renderLabeledInput('Country', 'communicationCountry')}
-        {renderLabeledInput('Pincode', 'communicationPincode')}
-      </div>
-
-      <h4 className="text-2xl font-bold text-gray-700 dark:text-gray-300">Languages Known</h4>
-      <div className="space-y-4">
-        {form.languagesKnown.map((lang, index) => (
-          <div key={index} className="flex flex-wrap items-center gap-4">
+          <label className="block text-sm font-medium mb-1">
+            Age (Years / Months / Days)
+          </label>
+          <div className="flex gap-2">
             <input
-              placeholder="Language"
-              value={lang.language}
-              onChange={(e) => handleLanguageChange(index, 'language', e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded px-4 py-2 w-40"
+              type="text"
+              value={age.years}
+              readOnly
+              placeholder="Years"
+              className="w-1/3 border px-2 py-1 rounded bg-gray-100"
             />
-            {['read', 'write', 'speak'].map(skill => (
-              <label key={skill} className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
-                <input
-                  type="checkbox"
-                  checked={lang[skill]}
-                  onChange={(e) => handleLanguageChange(index, skill, e.target.checked)}
-                /> {skill.charAt(0).toUpperCase() + skill.slice(1)}
-              </label>
-            ))}
-            <button type="button" onClick={() => removeLanguage(index)} className="text-red-600 text-sm">Remove</button>
+            <input
+              type="text"
+              value={age.months}
+              readOnly
+              placeholder="Months"
+              className="w-1/3 border px-2 py-1 rounded bg-gray-100"
+            />
+            <input
+              type="text"
+              value={age.days}
+              readOnly
+              placeholder="Days"
+              className="w-1/3 border px-2 py-1 rounded bg-gray-100"
+            />
+          </div>
+        </div>
+        {renderSelect(
+          "Gender",
+          "gender",
+          ["Male", "Female", "Transgender"],
+          true
+        )}
+        {renderLabeledInput("Mother Tongue", "motherTongue")}
+        {renderLabeledInput("Religion", "religion")}
+        {renderLabeledInput("Community", "community")}
+        {renderSelect("Category", "category", ["General", "OBC", "SC", "ST"])}
+        {renderSelect("Marital Status", "maritalStatus", [
+          "Married",
+          "Unmarried",
+          "Divorced",
+          "Widowed",
+        ])}
+        {form.maritalStatus === "Married" &&
+          renderLabeledInput("Spouse Name", "spouseName")}
+        {renderLabeledInput("Father's Name", "fatherName")}
+        {renderSelect("Physically Challenged", "physicallyChallenged", [
+          "Yes",
+          "No",
+        ])}
+        {form.physicallyChallenged === "Yes" &&
+          renderLabeledInput("Nature of Challenge", "natureOfChallenge")}
+        {renderLabeledInput("Aadhar Number", "aadhar")}
+        {renderLabeledInput("PAN Number", "pan")}
+        {renderLabeledInput("Mobile Number", "mobile", "tel")}
+        {renderLabeledInput("Email", "email", "email")}
+      </div>
+
+      <div>
+        <h4 className="text-xl font-semibold mb-3">Permanent Address</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {renderLabeledInput("Address", "permanentAddress")}
+          {renderLabeledInput("City", "permanentCity")}
+          {renderLabeledInput("State", "permanentState")}
+          {renderLabeledInput("Country", "permanentCountry")}
+          {renderLabeledInput("Pincode", "permanentPincode")}
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <label className="inline-flex items-center space-x-2">
+          <input
+            type="checkbox"
+            name="sameAsPermanent"
+            checked={form.sameAsPermanent}
+            onChange={handleChange}
+          />
+          <span>Communication Address Same as Permanent Address</span>
+        </label>
+      </div>
+
+      {!form.sameAsPermanent && (
+        <div className="mt-4">
+          <h4 className="text-xl font-semibold mb-3">Communication Address</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {renderLabeledInput("Address", "communicationAddress")}
+            {renderLabeledInput("City", "communicationCity")}
+            {renderLabeledInput("State", "communicationState")}
+            {renderLabeledInput("Country", "communicationCountry")}
+            {renderLabeledInput("Pincode", "communicationPincode")}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-8">
+        <h4 className="text-xl font-semibold mb-3">Languages Known</h4>
+        {form.languagesKnown.map((lang, idx) => (
+          <div
+            key={idx}
+            className="border p-4 mb-4 rounded flex flex-col md:flex-row items-center md:space-x-6 space-y-3 md:space-y-0"
+          >
+            <input
+              type="text"
+              placeholder="Language"
+              value={lang.language || ""}
+              onChange={(e) =>
+                handleLanguageChange(idx, "language", e.target.value)
+              }
+              className="border rounded px-3 py-1 flex-grow"
+            />
+            <label className="inline-flex items-center space-x-1">
+              <input
+                type="checkbox"
+                checked={lang.read || false}
+                onChange={(e) =>
+                  handleLanguageChange(idx, "read", e.target.checked)
+                }
+              />
+              <span>Read</span>
+            </label>
+            <label className="inline-flex items-center space-x-1">
+              <input
+                type="checkbox"
+                checked={lang.write || false}
+                onChange={(e) =>
+                  handleLanguageChange(idx, "write", e.target.checked)
+                }
+              />
+              <span>Write</span>
+            </label>
+            <label className="inline-flex items-center space-x-1">
+              <input
+                type="checkbox"
+                checked={lang.speak || false}
+                onChange={(e) =>
+                  handleLanguageChange(idx, "speak", e.target.checked)
+                }
+              />
+              <span>Speak</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => removeLanguage(idx)}
+              className="text-red-600 font-semibold hover:underline ml-auto md:ml-0"
+              aria-label={`Remove language ${lang.language || idx + 1}`}
+            >
+              Remove
+            </button>
           </div>
         ))}
-        <button type="button" onClick={addLanguage} className="text-blue-600 text-sm hover:underline">
-          + Add Language
+        <button
+          type="button"
+          onClick={addLanguage}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Add Language
         </button>
       </div>
 
-      <div className="text-right">
-        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow">
-          Save & Continue
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="photo">
+            Photo (Max 20MB)
+          </label>
+          <input
+            id="photo"
+            type="file"
+            name="photo"
+            accept="image/*"
+            onChange={handleChange}
+          />
+          {form.photo && (
+            <img
+              src={URL.createObjectURL(form.photo)}
+              alt="Preview"
+              className="mt-2 max-w-xs max-h-48 rounded"
+            />
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1" htmlFor="resume">
+            Resume (Max 20MB)
+          </label>
+          <input
+            id="resume"
+            type="file"
+            name="resume"
+            accept=".pdf,.doc,.docx"
+            onChange={handleChange}
+          />
+          {form.resume && <p className="mt-2 text-sm">{form.resume.name}</p>}
+        </div>
+      </div>
+
+      <div className="mt-10">
+        <button
+          type="submit"
+          className="bg-blue-800 text-white px-8 py-3 rounded font-semibold hover:bg-blue-900"
+        >
+          Save and Continue
         </button>
       </div>
     </form>

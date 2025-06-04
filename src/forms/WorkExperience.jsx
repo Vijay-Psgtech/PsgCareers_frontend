@@ -1,18 +1,57 @@
 import React, { useState } from 'react';
+import { useAuth } from "../Context/AuthContext";
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useEffect } from 'react';
+import axiosInstance from '../utils/axiosInstance';
 
 export default function WorkExperience({ data, updateFormData, jobCategory }) {
+  const { auth } = useAuth();
+  const userId = auth.userId;
+  const {jobId} = useParams();
   const [form, setForm] = useState({
     teaching: data.teaching || [{
-      designation: '', institution: '', address: '',
+      designation: '', institution: '', specialization:'',address: '',
       certificate: '', from: '', to: ''
     }],
     industry: data.industry || [{
-      designation: '', institution: '', address: '',
+      designation: '', institution: '', specialization : '', address: '',
       certificate: '', from: '', to: ''
     }]
   });
-
   const [errors, setErrors] = useState({ teaching: [], industry: [] });
+
+  useEffect(()=>{
+    const fetchWorkExperienceData = async() =>{
+      try{
+        const res = await axiosInstance.get(`/api/workExperience/get`, {
+          params: { userId },
+        });
+        const data = res.data;
+        const formatDate = (date) => {
+          return date ? new Date(date).toISOString().split('T')[0] : '';
+        }
+        const formattedTeaching = data.teaching?.map(entry => ({
+          ...entry,
+          from: formatDate(entry.from),
+          to: formatDate(entry.to),
+        })) || [];
+        const formattedIndustry = data.industry?.map(entry => ({
+          ...entry,
+          from: formatDate(entry.from),
+          to: formatDate(entry.to),
+        })) || [];
+        setForm(prev => ({
+          ...prev,
+          teaching: formattedTeaching,
+          industry: formattedIndustry,
+        }));
+      } catch(err) {
+        console.error("Error fetching Work experience details:", err);
+      }
+    }
+    if (userId) fetchWorkExperienceData();
+  },[userId,jobId])
 
   const handleChange = (type, index, field, value) => {
     const updated = [...form[type]];
@@ -24,7 +63,7 @@ export default function WorkExperience({ data, updateFormData, jobCategory }) {
     setForm(prev => ({
       ...prev,
       [type]: [...prev[type], {
-        designation: '', institution: '', address: '',
+        designation: '', institution: '', specialization:'',address: '',
         certificate: '', from: '', to: ''
       }]
     }));
@@ -41,7 +80,7 @@ export default function WorkExperience({ data, updateFormData, jobCategory }) {
     const newErrors = { teaching: [], industry: [] };
 
     const isValidEntry = (entry) =>
-      entry.designation && entry.institution && entry.address &&
+      entry.designation && entry.institution && entry.specialization && entry.address &&
       entry.certificate && entry.from && entry.to;
 
     if (jobCategory === 'Teaching') {
@@ -57,15 +96,56 @@ export default function WorkExperience({ data, updateFormData, jobCategory }) {
     return valid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    const filteredData = {
-      teaching: jobCategory === 'Teaching' ? form.teaching : [],
+    const submission = {
+      userId,
+      teaching : jobCategory === 'Teaching' ? form.teaching : [],
       industry: form.industry
     };
-    updateFormData(filteredData);
+
+    const formData = new FormData();
+
+    // Append simple fields
+    formData.append('userId', userId);
+
+    const teachingArray = submission.teaching.map((item, index) => {
+      if (item.certificate instanceof File) {
+        formData.append(`teachingCertificates`, item.certificate); // multiple files
+        return { ...item, certificate: item.certificate.name };
+      }
+      return item;
+    });
+
+    const industryArray = submission.industry.map((item, index) => {
+      if (item.certificate instanceof File) {
+        formData.append(`industryCertificates`, item.certificate); // multiple files
+        return { ...item, certificate: item.certificate.name };
+      }
+      return item;
+    });
+
+    formData.append('teaching', JSON.stringify(teachingArray));
+    formData.append('industry', JSON.stringify(industryArray));
+
+    try {
+      const res = await axiosInstance.post('/api/workExperience/save', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (res.status === 200 || res.status === 201)  {
+        updateFormData && updateFormData(formData);
+        toast.success('Work Experience Details updated Successfully');
+      } else {
+        toast.error("Failed to save. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error saving Work Experience data:", err);
+      toast.error("Failed to save. Please try again.");
+    }
   };
 
   const renderSection = (label, type) => (
@@ -94,14 +174,36 @@ export default function WorkExperience({ data, updateFormData, jobCategory }) {
             </div>
           </div>
 
-          <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Specialization *</label>
+              <input
+                type="text"
+                value={entry.specialization}
+                onChange={(e) => handleChange(type, index, 'specialization', e.target.value)}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Location *</label>
+              <input
+                type="text"
+                value={entry.address}
+                onChange={(e) => handleChange(type, index, 'address', e.target.value)}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </div>
+
+
+          {/* <div>
             <label className="block font-medium text-gray-700 mb-1">Address of Institution *</label>
             <textarea
               value={entry.address}
               onChange={(e) => handleChange(type, index, 'address', e.target.value)}
               className="w-full border rounded px-3 py-2 h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
