@@ -61,20 +61,29 @@ const AdminJobDetails = () => {
         return (
             <div className="flex items-center justify-start mt-2 gap-2">
             {stageOptions.map((stage, idx) => {
-                const isActive = stageOptions.indexOf(currentStage) >= idx;
+                const isCurrent = stage === currentStage;
+                const isNotSelected = currentStage === 'Not Selected';
                 return (
-                <React.Fragment key={idx}>
-                    <div
-                    className={`w-4 h-4 rounded-full text-xs flex items-center justify-center font-semibold 
-                                ${isActive ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}
-                    title={stage}
-                    >
-                    {idx + 1}
-                    </div>
-                    {idx !== stageOptions.length - 1 && (
-                    <div className={`w-6 h-1 ${isActive ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-                    )}
-                </React.Fragment>
+                    <React.Fragment key={idx}>
+                        <div
+                            className={`w-4 h-4 rounded-full text-xs flex items-center justify-center font-semibold
+                            ${isNotSelected && isCurrent ? 'bg-red-500 text-white'
+                                : stageOptions.indexOf(currentStage) >= idx ? 'bg-blue-500 text-white'
+                                : 'bg-gray-300 text-gray-600'}`}
+                            title={stage}
+                        >
+                            {idx + 1}
+                        </div>
+                        {idx !== stageOptions.length - 1 && (
+                            <div
+                            className={`w-6 h-1 ${
+                                isNotSelected ? 'bg-gray-300'
+                                : stageOptions.indexOf(currentStage) > idx ? 'bg-blue-500'
+                                : 'bg-gray-300'
+                            }`}
+                            ></div>
+                        )}
+                    </React.Fragment>
                 );
             })}
             </div>
