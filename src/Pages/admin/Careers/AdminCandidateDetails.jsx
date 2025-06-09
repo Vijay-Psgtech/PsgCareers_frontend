@@ -9,20 +9,26 @@ export default function CandidateDetails() {
   const [personal, setPersonal] = useState({});
   const [education, setEducation] = useState({});
   const [work, setWork] = useState({});
+  const [research, setResearch] = useState({});
+  const [otherData, setOtherData] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAllDetails = async () => {
       try {
-        const [personalRes, eduRes, workRes] = await Promise.all([
+        const [personalRes, eduRes, workRes, researchRes, otherRes] = await Promise.all([
           axiosInstance.get(`/api/personalDetails/${userId}`),
           axiosInstance.get('/api/education/get', { params: { userId } }),
-          axiosInstance.get('/api/workExperience/get', { params: { userId } })
+          axiosInstance.get('/api/workExperience/get', { params: { userId } }),
+          axiosInstance.get(`/api/research/${userId}`),
+          axiosInstance.get(`/api/otherDetails/${userId}`)
         ]);
 
         setPersonal(personalRes.data || {});
         setEducation(eduRes.data || {});
         setWork(workRes.data || {});
+        setResearch(researchRes.data || {});
+        setOtherData(otherRes.data || {});
     
         // Update stage to "Viewed"
         await axiosInstance.put('/api/applications/updateStatus', {
@@ -51,6 +57,8 @@ export default function CandidateDetails() {
                 personal={personal}
                 education={education}
                 experience={work}
+                research={research}
+                otherDetails={otherData}
             />
         </div>
   );

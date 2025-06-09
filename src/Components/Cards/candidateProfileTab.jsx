@@ -2,16 +2,20 @@ import { Tab } from '@headlessui/react'
 import PersonalDetails from './personalDetailsCard'
 import EducationDetails from './educationDetailsCard'
 import WorkExperienceDetails from './workExperienceDetailsCard'
+import ResearchCard from './researchDetailsCard'
+import OtherDetailsCard from './otherDetailsCard'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function CandidateProfileTabs({ personal, education, experience }) {
+export default function CandidateProfileTabs({ personal, education, experience, research, otherDetails }) {
   const tabs = {
     'Personal Details': <PersonalDetails data={personal} />,
     'Education': <EducationDetails education={education} />,
     'Work Experience': <WorkExperienceDetails work={experience} />,
+    'Research Contribution' : <ResearchCard data={research}/>,
+    'Other Details': <OtherDetailsCard data={otherDetails}/>
   }
 
   return (
