@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axiosInstance from '../../utils/axiosInstance';
 import { useAuth } from "../../Context/AuthContext";
+import Header from "../../Components/common/MainHeader";
+import { WarehouseRounded } from "@mui/icons-material";
 
 const Fonts = () => (
   <style>
@@ -79,7 +81,7 @@ function CareerPage() {
   const [jobs, setJobs] = useState([]);
   const [filter, setFilter] = useState({ institution: '', jobCategory: '' });
   const [page, setPage] = useState(1);
-  const jobsPerPage = 3;
+  const jobsPerPage = 4;
   const {auth} = useAuth();
 
   const fetchActiveJobs = async () => {
@@ -170,6 +172,12 @@ function CareerPage() {
   return (
     <>
       <Fonts />
+      <div id="header-placeholder" /> {/* Placeholder for fixed header */}
+      <Header />
+
+      {/* Spacer so content begins below fixed header */}
+      <div className="h-20" />
+
       <header className="relative h-[450px] md:h-[550px] w-full overflow-hidden">
         <video
           className="absolute top-0 left-0 w-full h-full object-cover brightness-75"
@@ -184,7 +192,7 @@ function CareerPage() {
             className="text-5xl md:text-7xl font-playfair font-extrabold mb-4 drop-shadow-lg"
             initial={{ y: -70, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1.4, ease: 'easeOut' }}
+            transition={{ duration: 1.4, ease: "easeOut" }}
           >
             Join PSG Institutions
           </motion.h1>
@@ -192,38 +200,49 @@ function CareerPage() {
             className="max-w-3xl text-xl md:text-2xl font-lora font-light drop-shadow-md"
             initial={{ y: 70, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 1.4, ease: 'easeOut' }}
+            transition={{ delay: 0.4, duration: 1.4, ease: "easeOut" }}
           >
-            Discover rewarding careers and grow with a community dedicated to excellence and innovation.
+            Discover rewarding careers and grow with a community dedicated to
+            excellence and innovation.
           </motion.p>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 sm:px-12 py-16 bg-gradient-to-b from-gray-50 to-white rounded-t-3xl -mt-36 relative z-20 shadow-xl">
+      <main className="max-w-7xl mx-auto px-7 sm:px-12 py-13 bg-white rounded-t-3xl -mt-36 relative z-20 shadow-xl">
         <section className="flex flex-wrap justify-center gap-6 mb-16">
           <select
             value={filter.institution}
-            onChange={(e) => setFilter((prev) => ({ ...prev, institution: e.target.value }))}
+            onChange={(e) =>
+              setFilter((prev) => ({ ...prev, institution: e.target.value }))
+            }
             className="px-5 py-3 rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 font-lora text-lg"
           >
             <option value="">All Institutions</option>
             {[...new Set(jobs.map((j) => j.institution))].map((inst) => (
-              <option key={inst} value={inst}>{inst}</option>
+              <option key={inst} value={inst}>
+                {inst}
+              </option>
             ))}
           </select>
           <select
             value={filter.jobCategory}
-            onChange={(e) => setFilter((prev) => ({ ...prev, jobCategory: e.target.value }))}
+            onChange={(e) =>
+              setFilter((prev) => ({ ...prev, jobCategory: e.target.value }))
+            }
             className="px-5 py-3 rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 font-lora text-lg"
           >
             <option value="">All Categories</option>
             {[...new Set(jobs.map((j) => j.jobCategory))].map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
             ))}
           </select>
         </section>
-        {renderJobSection('Teaching')}
-        {renderJobSection('Non Teaching')}
+
+        {renderJobSection("Teaching")}
+        {renderJobSection("Non Teaching")}
+
         <Carousel />
       </main>
     </>
