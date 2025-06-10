@@ -3,12 +3,80 @@ import axiosInstance from "../../utils/axiosInstance";
 import { useAuth } from "../../Context/AuthContext";
 import { motion } from "framer-motion";
 
-const applicationStages = [
-  { label: "Applied", key: "appliedDate" },
-  { label: "Application Sent", key: "sentDate" },
-  { label: "Awaiting Recruiter Action", key: "awaitingDate" },
-  { label: "Status Delivered", key: "deliveredDate" },
-];
+
+const StageBar = ({ currentStage }) => {
+  const stageSteps = [
+    "Applied",
+    "Profile Screening",
+    "Lvl 1 Screening",
+    "Lvl 2 Screening",
+    "Interview",
+    "Selected",
+    "Not Selected"
+  ];
+
+  const currentIndex = stageSteps.indexOf(currentStage);
+  const progressPercent = ((currentIndex + 1) / stageSteps.length) * 100;
+
+  // Color logic
+  const getColor = () => {
+    if (currentStage === "Selected") return "bg-green-500";
+    if (currentStage === "Not Selected") return "bg-red-500";
+    return "bg-blue-500";
+  };
+
+  const getTextColor = () => {
+    if (currentStage === "Selected") return "text-green-600";
+    if (currentStage === "Not Selected") return "text-red-600";
+    return "text-blue-600";
+  };
+
+  return (
+    <div className="w-full px-2">
+      <div className="text-sm font-medium mb-2">
+        Current Stage: <span className={getTextColor()}>{currentStage}</span>
+      </div>
+
+      <div className="relative w-full flex items-center gap-2">
+        {/* Step Dots with Tooltip */}
+        {stageSteps.map((stage, index) => (
+          <div key={stage} className="flex flex-col items-center relative group">
+            <div
+              className={`w-6 h-6 rounded-full text-xs flex items-center justify-center ${
+                index <= currentIndex ? getColor() : "bg-gray-300"
+              } text-white transition-all duration-300`}
+            >
+              {index + 1}
+            </div>
+            <div className="absolute top-8 w-max text-sm text-gray-900 whitespace-nowrap opacity-0 group-hover:opacity-100 transition">
+              {stage}
+            </div>
+            {/* Connecting line */}
+            {index < stageSteps.length - 1 && (
+              <div className="absolute left-full top-1/2 w-10 h-1 bg-gray-300 -translate-y-1/2 z-0">
+                {index < currentIndex && (
+                  <div className={`h-full ${getColor()} transition-all duration-300`} />
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Progress Bar */}
+      <div className="w-full mt-4 bg-gray-200 rounded-full h-2">
+        <div
+          className={`h-2 rounded-full transition-all duration-500 ${getColor()}`}
+          style={{ width: `${progressPercent}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+};
+
+
+
+
 
 export default function UserDashboard() {
   const { auth } = useAuth();
@@ -35,13 +103,7 @@ export default function UserDashboard() {
     loadApplications();
   }, [userId]);
 
-  const getCompletedCount = (timeline) => {
-    let count = 0;
-    applicationStages.forEach((stage, idx) => {
-      if (timeline[stage.key]) count = idx + 1;
-    });
-    return count;
-  };
+
 
   if (loading) {
     return (
@@ -85,15 +147,7 @@ export default function UserDashboard() {
 
         <div className="space-y-8">
           {applications.map((app, index) => {
-            const timeline = app.timeline || {};
-            const completedCount = getCompletedCount(timeline);
-            const progressPercent = Math.round(
-              (completedCount / applicationStages.length) * 100
-            );
-            const currentStage =
-              applicationStages[
-                Math.min(completedCount, applicationStages.length - 1)
-              ].label;
+
 
             return (
               <motion.div
@@ -118,84 +172,11 @@ export default function UserDashboard() {
                   <p className="text-lg font-semibold text-gray-800">
                     Status for <span className="text-blue-600">{app.jobTitle}</span>
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Current Stage: <strong>{currentStage}</strong>
-                  </p>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="px-6 py-5">
-                  <div className="relative flex justify-between items-center">
-                    {applicationStages.map((stage, idx) => {
-                      const isCompleted = idx < completedCount;
-                      const isCurrent = idx === completedCount;
-                      const dateLabel = timeline[stage.key];
-
-                      const circleBorder = isCompleted
-                        ? "border-blue-600"
-                        : isCurrent
-                        ? "border-yellow-500"
-                        : "border-gray-300";
-                      const circleBg = isCompleted
-                        ? "bg-blue-600"
-                        : isCurrent
-                        ? "bg-white"
-                        : "bg-gray-200";
-                      const iconColor = isCompleted
-                        ? "text-white"
-                        : isCurrent
-                        ? "text-yellow-500"
-                        : "text-gray-500";
-
-                      return (
-                        <div key={stage.key} className="flex flex-col items-center w-1/4 relative">
-                          {idx > 0 && (
-                            <div
-                              className={`absolute top-5 -left-1/2 w-full h-1 ${
-                                isCompleted ? "bg-blue-500" : "bg-gray-300"
-                              }`}
-                            />
-                          )}
-                          <div
-                            className={`w-10 h-10 rounded-full border-2 ${circleBorder} ${circleBg} flex items-center justify-center`}
-                          >
-                            {isCompleted ? (
-                              <svg
-                                className="h-5 w-5 text-white"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M16.707 5.293a1 1 0 010 1.414L9 14.414l-3.707-3.707a1 1 0 011.414-1.414L9 11.586l6.293-6.293a1 1 0 011.414 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            ) : (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className={`h-5 w-5 ${iconColor}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M12 8v4l3 3"
-                                />
-                              </svg>
-                            )}
-                          </div>
-                          <p className="mt-2 text-sm font-medium text-gray-700">{stage.label}</p>
-                          {dateLabel && (
-                            <p className="text-xs text-gray-500">{dateLabel}</p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <StageBar currentStage={app.stage} />
                 </div>
 
                 {/* Footer */}
@@ -203,7 +184,6 @@ export default function UserDashboard() {
                   <span>
                     Last Updated: {new Date(app.updatedAt).toLocaleDateString()}
                   </span>
-                  <span className="italic">Progress: {progressPercent}%</span>
                 </div>
               </motion.div>
             );

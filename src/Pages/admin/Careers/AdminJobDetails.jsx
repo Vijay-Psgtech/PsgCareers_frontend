@@ -17,6 +17,8 @@ const AdminJobDetails = () => {
     const jobTitle = location.state?.jobTitle;
     const [selectedStage, setSelectedStage] = useState("All Stages");
     const [selectedApplicantStatus, setSelectedApplicantStatus] = useState("All Applicants");
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const applicantStatusOptions = ["New", "Viewed"];
     const stageOptions= ["Applied", "Profile Screening", "Lvl 1 Screening", "Lvl 2 Screening", "Interview", "Selected", "Not Selected"];
@@ -30,9 +32,12 @@ const AdminJobDetails = () => {
 
     const fetchApplicants = async() => {
         try {
-            const res = await axiosInstance.get(`/api/applications/candidates/${jobId}`);
+            const res = await axiosInstance.get(`/api/applications/candidates/${jobId}`,{
+                params: { page, limit: 10 }
+            });
             console.log('Candidate-Details',res.data);
-            setApplicants(res.data);
+            setApplicants(res.data.data);
+            setTotalPages(res.data.totalPages);
         } catch (err) {
             console.error("Failed to load applicants", err);
         }
@@ -54,20 +59,22 @@ const AdminJobDetails = () => {
     
     useEffect(()=>{
         fetchApplicants();
-    },[jobId])
+    },[page, jobId])
 
 
     function StageProgress({ currentStage }) {
         return (
-            <div className="flex items-center justify-start mt-2 gap-2">
+            <div className="relative w-full flex items-center mt-4 gap-2">
             {stageOptions.map((stage, idx) => {
                 const isCurrent = stage === currentStage;
                 const isNotSelected = currentStage === 'Not Selected';
+                const isSelected = currentStage === 'Selected';
                 return (
-                    <React.Fragment key={idx}>
+                    <div key={idx} className="flex flex-col items-center relative group">
                         <div
-                            className={`w-4 h-4 rounded-full text-xs flex items-center justify-center font-semibold
+                            className={`w-6 h-6 rounded-full text-xs flex items-center justify-center
                             ${isNotSelected && isCurrent ? 'bg-red-500 text-white'
+                                : isSelected && isCurrent ? 'bg-green-500 text-white'
                                 : stageOptions.indexOf(currentStage) >= idx ? 'bg-blue-500 text-white'
                                 : 'bg-gray-300 text-gray-600'}`}
                             title={stage}
@@ -75,15 +82,18 @@ const AdminJobDetails = () => {
                             {idx + 1}
                         </div>
                         {idx !== stageOptions.length - 1 && (
-                            <div
-                            className={`w-6 h-1 ${
-                                isNotSelected ? 'bg-gray-300'
-                                : stageOptions.indexOf(currentStage) > idx ? 'bg-blue-500'
-                                : 'bg-gray-300'
-                            }`}
-                            ></div>
+                            <div className="absolute left-full top-1/2 w-10 h-1 bg-gray-300 -translate-y-1/2 z-0">
+                               
+                                    <div  className={`w-6 h-1 ${
+                                    isNotSelected ? 'bg-gray-300'
+                                    : stageOptions.indexOf(currentStage) > idx ? 'bg-blue-500'
+                                    : 'bg-gray-300'
+                                }`} />
+                               
+                            </div>
+                            
                         )}
-                    </React.Fragment>
+                    </div>
                 );
             })}
             </div>
@@ -91,7 +101,7 @@ const AdminJobDetails = () => {
     }
 
     const exportToCSV = (applicantsData) => {
-        const FiltteredApplicantsData = selectedStage === "All-stages" ? applicantsData : applicantsData.filter(c=>c.stage === selectedStage);
+        const FiltteredApplicantsData = selectedStage === "All Stages" ? applicantsData : applicantsData.filter(c=>c.stage === selectedStage);
 
         const exportData = FiltteredApplicantsData.map(app=>({
             Name: app.personalDetails?.fullName || '',
@@ -106,7 +116,7 @@ const AdminJobDetails = () => {
         const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
 
         const blob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
-        saveAs(blob, `${jobTitle} candidates_${new Date().toISOString().slice(0, 10)}.csv`);
+        saveAs(blob, `${jobTitle} page_${page} candidates_${new Date().toISOString().slice(0, 10)}.csv`);
     }
 
    const candidateDetails = (userId) => {
@@ -210,7 +220,26 @@ const AdminJobDetails = () => {
                     </tr>
                     ))}
                 </tbody>
-                </table>
+            </table>
+            <div className="flex justify-center items-center mt-6 gap-2">
+                <button 
+                    onClick={() => setPage(p => Math.max(p - 1, 1))}
+                    disabled={page === 1}
+                    className={`px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 ${page === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    Prev
+                </button>
+
+                <span>Page {page} of {totalPages}</span>
+
+                <button 
+                    onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                    disabled={page === totalPages}
+                     className={`px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 ${page === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    Next
+                </button>
+            </div>
 
         </div>
     )

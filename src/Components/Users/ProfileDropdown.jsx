@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronDown, LogOut, User, Settings, LayoutDashboard, Briefcase } from "lucide-react";
+import { useAuth } from "../../Context/AuthContext";
+
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -25,8 +28,7 @@ export default function ProfileDropdown() {
   }, [location.pathname]);
 
   const handleLogout = () => {
-    // TODO: Replace with actual auth logic
-    localStorage.removeItem("userToken");
+    logout();
     navigate("/login");
   };
 
