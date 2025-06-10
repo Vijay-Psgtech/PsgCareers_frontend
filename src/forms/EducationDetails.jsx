@@ -142,7 +142,8 @@ export default function EducationDetails({ updateFormData, jobCategory }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-xl p-8 space-y-10 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold text-blue-800">Education Details</h2>
       {jobCategory === "Teaching" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../utils/axiosInstance';
+import { useAuth } from "../Context/AuthContext";
+import { toast } from 'react-toastify';
 
-export default function OtherDetails({ userId, jobId, data, updateFormData }) {
+export default function OtherDetails({ data, updateFormData }) {
   const nextSectionRef = useRef(null);
+  const { auth } = useAuth();
+  const userId = auth.userId;
 
   const [form, setForm] = useState({
     reference1: { name: '', address: '', designation: '', mobile: '', email: '' },
@@ -21,9 +25,9 @@ export default function OtherDetails({ userId, jobId, data, updateFormData }) {
   // Fetch existing data from backend when userId/jobId changes
   useEffect(() => {
     async function fetchData() {
-      if (!userId || !jobId) return;
+      if (!userId) return;
       try {
-        const res = await axiosInstance.get(`/api/otherDetails/${userId}/${jobId}`);
+        const res = await axiosInstance.get(`/api/otherDetails/${userId}`);
         if (res.data) {
           const { reference1, reference2, resumeUrl, ...rest } = res.data;
           setForm({
@@ -33,7 +37,6 @@ export default function OtherDetails({ userId, jobId, data, updateFormData }) {
             resume: null,
             resumeUrl: resumeUrl || '',
           });
-          updateFormData(res.data); // sync with parent if needed
         }
       } catch (err) {
         // Handle fetch error silently or show a message
@@ -69,7 +72,7 @@ export default function OtherDetails({ userId, jobId, data, updateFormData }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!userId || !jobId) {
+    if (!userId) {
       alert('Missing user ID or job ID.');
       return;
     }
@@ -77,7 +80,7 @@ export default function OtherDetails({ userId, jobId, data, updateFormData }) {
     try {
       const formData = new FormData();
       formData.append('userId', userId);
-      formData.append('jobId', jobId);
+      // formData.append('jobId', jobId);
       formData.append('reference1', JSON.stringify(form.reference1));
       formData.append('reference2', JSON.stringify(form.reference2));
       formData.append('lastPay', form.lastPay);
@@ -96,13 +99,13 @@ export default function OtherDetails({ userId, jobId, data, updateFormData }) {
       });
 
       if (res.data) {
-        updateFormData(res.data); // update parent with saved data (including resumeUrl)
+        updateFormData && updateFormData(res.data); // update parent with saved data (including resumeUrl)
         setForm((prev) => ({
           ...prev,
           resumeUrl: res.data.resumeUrl || prev.resumeUrl,
           resume: null, // reset file input
         }));
-
+        toast.success('Other Details updated Successfully');
         // Scroll to Declaration section after save
         setTimeout(() => {
           nextSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -110,7 +113,7 @@ export default function OtherDetails({ userId, jobId, data, updateFormData }) {
       }
     } catch (err) {
       console.error('Failed to save other details:', err);
-      alert('Failed to save other details. Please try again.');
+      toast.error('Failed to save other details. Please try again.');
     }
   };
 
@@ -141,8 +144,8 @@ export default function OtherDetails({ userId, jobId, data, updateFormData }) {
   );
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-xl p-10 space-y-10">
-      <h2 className="text-2xl font-bold text-gray-800 border-b pb-4">4. Other Details</h2>
+    <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-xl p-10 space-y-10 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold text-blue-900 border-b pb-4">Other Details</h2>
 
       {renderReferenceFields('reference1', 'Reference 1')}
       {renderReferenceFields('reference2', 'Reference 2')}

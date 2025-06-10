@@ -5,17 +5,17 @@ import { toast } from "react-toastify";
 import { useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 
-export default function WorkExperience({ data, updateFormData, jobCategory }) {
+export default function WorkExperience({ data={}, updateFormData, jobCategory }) {
   const { auth } = useAuth();
   const userId = auth.userId;
   const {jobId} = useParams();
   const [form, setForm] = useState({
-    teaching: data.teaching || [{
-      designation: '', institution: '', specialization:'',address: '',
+    teaching: data?.teaching?.length > 0 ? data.teaching : [{
+      designation: '', institution: '', specialization: '', address: '',
       certificate: '', from: '', to: ''
     }],
-    industry: data.industry || [{
-      designation: '', institution: '', specialization : '', address: '',
+    industry: data?.industry?.length > 0 ? data.industry : [{
+      designation: '', institution: '', specialization: '', address: '',
       certificate: '', from: '', to: ''
     }]
   });
@@ -51,7 +51,7 @@ export default function WorkExperience({ data, updateFormData, jobCategory }) {
       }
     }
     if (userId) fetchWorkExperienceData();
-  },[userId,jobId])
+  },[userId])
 
   const handleChange = (type, index, field, value) => {
     const updated = [...form[type]];
@@ -267,7 +267,7 @@ export default function WorkExperience({ data, updateFormData, jobCategory }) {
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-10">
+    <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-xl p-8 space-y-10 max-w-5xl mx-auto">
       <h3 className="text-2xl font-bold text-blue-900 border-b pb-2">Work Experience</h3>
 
       {jobCategory === 'Teaching' && (
