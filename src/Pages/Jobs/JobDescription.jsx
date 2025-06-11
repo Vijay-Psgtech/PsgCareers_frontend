@@ -80,7 +80,7 @@ export default function JobDescription() {
         {/* Left: Description */}
         <div className="md:col-span-2 space-y-10">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-8">
-             <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">Job Summary</h2>
+             <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">Job Description</h2>
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{__html: job.jobDescription}}/>
           </div>
 

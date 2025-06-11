@@ -135,7 +135,7 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-white py-12 px-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-serif font-bold text-center text-blue-600 mb-6">
           Hello, {userName}
         </h1>
@@ -145,7 +145,7 @@ export default function UserDashboard() {
             : "No applications submitted yet."}
         </p>
 
-        <div className="space-y-8">
+        <div className="grid sm:grid-cols-2 grid-cols-1 space-x-6 space-y-12">
           {applications.map((app, index) => {
 
 
