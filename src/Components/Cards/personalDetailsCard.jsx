@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDate } from '../../utils/dateFormat';
 
 export default function PersonalDetailsCard({ data }) {
   if (!data) return null;
@@ -39,7 +40,7 @@ export default function PersonalDetailsCard({ data }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Detail label="Full Name" value={fullName} />
         <Detail label="Gender" value={gender} />
-        <Detail label="Date of Birth" value={new Date(dob).toLocaleDateString()} />
+        <Detail label="Date of Birth" value={formatDate(dob)} />
         <Detail label="Mobile" value={mobile} />
         <Detail label="Email" value={email} />
         <Detail label="Community" value={community} />

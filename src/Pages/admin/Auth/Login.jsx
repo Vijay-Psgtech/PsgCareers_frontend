@@ -27,8 +27,8 @@ const Login = () => {
         e.preventDefault();
         try{
             const res = await axiosInstance.post('/api/auth/login',form);
-             if(res.data.token){
-                login(res.data.token,res.data.role,res.data.name,res.data.userId);
+            if(res.data.token){
+                login(res.data.token,res.data.role,res.data.name,res.data.userId,res.data.jobCategory);
                 if(res.data.role ==='user'){
                     navigate('/dashboard');
                 }else{

@@ -86,7 +86,16 @@ function CareerPage() {
 
   const fetchActiveJobs = async () => {
     try {
-      const res = await axiosInstance.get('/api/jobPost/getJobs?status=Active');
+      let jobCategory = auth?.jobCategory;
+      if (!jobCategory || jobCategory === 'undefined') {
+        jobCategory = '';
+      }
+
+      let url = `/api/jobPost/getJobs?status=Active`;
+      if (jobCategory) {
+        url += `&jobCategory=${jobCategory}`;
+      }
+      const res = await axiosInstance.get(url);
       setJobs(res.data);
     } catch (err) {
       console.error("Failed to fetch jobs", err);

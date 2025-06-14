@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import {Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,IconButton,TablePagination, } from "@mui/material"
+import {Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,IconButton,TablePagination, Box, TextField, Typography, } from "@mui/material"
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileCopyRoundedIcon from '@mui/icons-material/FileCopyRounded';
@@ -9,6 +9,13 @@ import { CheckCircle, Cancel } from "@mui/icons-material";
 const DataTable = ({columns,rows,onEdit,onDelete,onStatusChange,onCopy,rowsPerPageOptions=[10,15,25]}) => {
     const [page,setPage] = useState(0);
     const [rowsPerPage,setRowsPerPage] = useState(rowsPerPageOptions[0]);
+    const [search, setSearch] = useState('');
+    const filteredRows = (rows || []).filter((row) =>
+        Object.values(row).some((value) =>
+            value?.toString().toLowerCase().includes(search.toLowerCase())
+        )
+    );
+
     const handleChangePage = (event,newPage) =>{
         setPage(newPage);
     };
@@ -17,20 +24,36 @@ const DataTable = ({columns,rows,onEdit,onDelete,onStatusChange,onCopy,rowsPerPa
         setPage(0);
     };
     return (
-        <div>
-            <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Box sx={{ p: 2,  minHeight: '100vh' }}>
+             
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, }}>
+                <TextField
+                    placeholder="Search..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                    maxWidth: 300,
+                    backgroundColor: 'white',
+                    borderRadius: 2,
+                    boxShadow: 1,
+                    }}
+                />
+            </Box>
+            <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
                 <Table stickyHeader>
                     <TableHead>
-                        <TableRow>
+                        <TableRow sx={{ bgcolor: '#f0f4f8' }}>
                             {columns.map((col)=>(
-                                <TableCell key={col.field}><strong>{col.headerName}</strong></TableCell>
+                                <TableCell key={col.field} sx={{ fontWeight: 'bold' }}>{col.headerName}</TableCell>
                             ))}
-                            {(onEdit || onDelete) && <TableCell align="center"><strong>Actions</strong></TableCell>}
+                            {(onEdit || onDelete) && <TableCell align="center" sx={{ fontWeight: 'bold' }}>Actions</TableCell>}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.length > 0 ? (
-                            rows.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((row,rowIndex)=>(
+                        {filteredRows.length > 0 ? (
+                            filteredRows.slice(page*rowsPerPage,page*rowsPerPage+rowsPerPage).map((row,rowIndex)=>(
                                 <TableRow key={row.id || row._id || rowIndex}>
                                     {columns.map((col)=>(
                                         <TableCell key={col.field}>
@@ -89,14 +112,14 @@ const DataTable = ({columns,rows,onEdit,onDelete,onStatusChange,onCopy,rowsPerPa
             </TableContainer>
             <TablePagination
                 component="div"
-                count={rows.length}
+                count={filteredRows.length}
                 page={page}
                 onPageChange={handleChangePage}
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={rowsPerPageOptions}
             />
-        </div>
+        </Box>
     )
 }
 

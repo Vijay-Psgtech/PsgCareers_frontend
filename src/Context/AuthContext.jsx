@@ -6,19 +6,21 @@ export const AuthProvider = ({children})=>{
         role:localStorage.getItem('role'),
         name:localStorage.getItem('name'),
         userId:localStorage.getItem('userId'),
+        jobCategory:localStorage.getItem('jobCategory'),
     });
 
-    const login = (token,role,name,userId) =>{
+    const login = (token,role,name,userId,jobCategory) =>{
         localStorage.setItem('token',token);
         localStorage.setItem('role',role);
         localStorage.setItem('name',name);
         localStorage.setItem('userId',userId);
-        setAuth({token,role,name,userId});
+        localStorage.setItem('jobCategory',jobCategory);
+        setAuth({token,role,name,userId,jobCategory});
     };
 
-    const logout = (token,role,name,userId) =>{
+    const logout = (token,role,name,userId,jobCategory) =>{
         localStorage.clear();
-        setAuth({token:null,role:null,name:null,userId:null});
+        setAuth({token:null,role:null,name:null,userId:null,jobCategory:null});
     };
 
     return(

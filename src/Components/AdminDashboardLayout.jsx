@@ -4,6 +4,7 @@ import { useAuth } from "../Context/AuthContext";
 import { useNavigate,Link,useLocation} from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { FiLogOut,FiMenu,FiX } from "react-icons/fi";
+import useAutoLogout from "../hooks/useAutoLogout";
 
 export default function AdminDashboardLayout({children}) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -22,6 +23,9 @@ export default function AdminDashboardLayout({children}) {
             navigate('/careers');
         }
     },[navigate])
+    if (auth?.token) {
+        useAutoLogout(15 * 60 * 1000); // 15 mins
+    }
     return(
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
