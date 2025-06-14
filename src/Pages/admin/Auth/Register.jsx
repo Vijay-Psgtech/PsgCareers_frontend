@@ -5,13 +5,14 @@ import { toast } from 'react-toastify';
 import logo from '../../../assets/images/logo.png'
 
 const Register = () => {
-    const [form,setForm] = useState({first_name:'', last_name:'', mobile:'', email:''});
+    const [form,setForm] = useState({first_name:'', last_name:'', mobile:'', email:'', jobCategory:''});
     const [errors,setErrors] = useState({});
     const initialForm = {
         first_name: "",
         last_name: "",
         mobile: "",
         email: "",
+        jobCategory: "",
     };
     /*-- Api Calls function s--*/
     const UserRegister = async(form) =>{
@@ -41,7 +42,6 @@ const Register = () => {
     };
     const handleSubmit = (e) => {
         e.preventDefault();
-        
         //Empty field Validations
         const newErrors = {};
         Object.entries(form).forEach(([key, value]) => {
@@ -127,6 +127,33 @@ const Register = () => {
                             />
                         </div>
 
+                        <div className="flex items-center justify-center gap-12">
+                            <label className="block font-semibold mb-2">Job Category</label>
+                            <div className="flex items-center space-x-12">
+                                <label className="inline-flex items-center">
+                                <input
+                                    type="radio"
+                                    name="jobCategory"
+                                    value="Teaching"
+                                    checked={form.jobCategory === "Teaching"}
+                                    onChange={handleChange}
+                                    className="form-radio text-blue-600"
+                                />
+                                <span className="ml-2">Teaching</span>
+                                </label>
+                                <label className="inline-flex items-center">
+                                <input
+                                    type="radio"
+                                    name="jobCategory"
+                                    value="Non Teaching"
+                                    checked={form.jobCategory === "Non Teaching"}
+                                    onChange={handleChange}
+                                    className="form-radio text-blue-600"
+                                />
+                                <span className="ml-2">Non Teaching</span>
+                                </label>
+                            </div>
+                        </div>
                        
                     </div>
 
