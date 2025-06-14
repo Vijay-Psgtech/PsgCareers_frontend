@@ -6,6 +6,8 @@ import { FaFilePdf  } from "react-icons/fa";
 import { FiDownload } from "react-icons/fi";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver'
+import { toast } from "react-toastify";
+import { formatDate } from '../../../utils/dateFormat';
 
 
 
@@ -15,6 +17,7 @@ const AdminJobDetails = () => {
     const [applicants, setApplicants] = useState([]);
     const location = useLocation();
     const jobTitle = location.state?.jobTitle;
+    const jobCategory = location.state?.jobCategory;
     const [selectedStage, setSelectedStage] = useState("All Stages");
     const [selectedApplicantStatus, setSelectedApplicantStatus] = useState("All Applicants");
     const [page, setPage] = useState(1);
@@ -51,6 +54,7 @@ const AdminJobDetails = () => {
                 stage: newStage
             });
             // Optionally: refresh list
+            toast.success('Candidate Stage updated');
             fetchApplicants();
         } catch (err) {
             toast.error("Failed to update stage");
@@ -62,66 +66,129 @@ const AdminJobDetails = () => {
     },[page, jobId])
 
 
-    function StageProgress({ currentStage }) {
+    function StageProgress({ currentStage, rejectedAtStage }) {
+        const isRejected = currentStage === 'Not Selected';
+        const rejectionIndex = stageOptions.indexOf(rejectedAtStage);
+        const currentStageIndex = stageOptions.indexOf(currentStage);
+
+        // Decide stages to show
+        const stagesToShow = isRejected
+            ? stageOptions.slice(0, rejectionIndex + 1)
+            : stageOptions;
+
         return (
             <div className="relative w-full flex items-center mt-4 gap-2">
-            {stageOptions.map((stage, idx) => {
-                const isCurrent = stage === currentStage;
-                const isNotSelected = currentStage === 'Not Selected';
-                const isSelected = currentStage === 'Selected';
-                return (
-                    <div key={idx} className="flex flex-col items-center relative group">
-                        <div
-                            className={`w-6 h-6 rounded-full text-xs flex items-center justify-center
-                            ${isNotSelected && isCurrent ? 'bg-red-500 text-white'
-                                : isSelected && isCurrent ? 'bg-green-500 text-white'
-                                : stageOptions.indexOf(currentStage) >= idx ? 'bg-blue-500 text-white'
-                                : 'bg-gray-300 text-gray-600'}`}
-                            title={stage}
-                        >
-                            {idx + 1}
-                        </div>
-                        {idx !== stageOptions.length - 1 && (
-                            <div className="absolute left-full top-1/2 w-10 h-1 bg-gray-300 -translate-y-1/2 z-0">
-                               
-                                    <div  className={`w-6 h-1 ${
-                                    isNotSelected ? 'bg-gray-300'
-                                    : stageOptions.indexOf(currentStage) > idx ? 'bg-blue-500'
-                                    : 'bg-gray-300'
-                                }`} />
-                               
+                {stagesToShow.map((stage, idx) => {
+                    const isCurrent = stage === currentStage;
+                    const isSelected = currentStage === 'Selected';
+                    const isRejectionPoint = isRejected && stage === rejectedAtStage;
+
+                    return (
+                        <div key={idx} className="flex flex-col items-center relative group">
+                            <div
+                                className={`w-5 h-5 rounded-full text-xs flex items-center justify-center
+                                ${isRejectionPoint ? 'bg-red-500 text-white'
+                                    : isSelected && isCurrent ? 'bg-green-500 text-white'
+                                    : currentStageIndex >= idx ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-300 text-gray-600'}`}
+                                title={stage}
+                            >
+                                {idx + 1}
                             </div>
-                            
-                        )}
-                    </div>
-                );
-            })}
+
+                            {/* Connector */}
+                            {idx !== stagesToShow.length - 1 && (
+                                <div className="absolute left-full top-1/2 w-10 h-1 bg-gray-300 -translate-y-1/2 z-0">
+                                    <div
+                                        className={`w-6 h-1 ${
+                                            currentStageIndex > idx ? 'bg-blue-500'
+                                            : 'bg-gray-300'
+                                        }`}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         );
     }
 
-    const exportToCSV = (applicantsData) => {
-        const FiltteredApplicantsData = selectedStage === "All Stages" ? applicantsData : applicantsData.filter(c=>c.stage === selectedStage);
 
-        const exportData = FiltteredApplicantsData.map(app=>({
-            Name: app.personalDetails?.fullName || '',
-            Email: app.personalDetails?.email || '',
-            Mobile: app.personalDetails?.mobile || '',
-            stage: app.stage || '',
-            AppliedAt: new Date(app.createdAt).toLocaleDateString(),
-            ResumeLink: `${import.meta.env.VITE_API_BASE_URL}/Uploads/${app.personalDetails?.resumeUrl || ''}`
-        }));
 
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+const exportToExcel = (applicantsData) => {
+  const FiltteredApplicantsData = selectedStage === "All Stages"
+    ? applicantsData
+    : applicantsData.filter(c => c.stage === selectedStage);
 
-        const blob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
-        saveAs(blob, `${jobTitle} page_${page} candidates_${new Date().toISOString().slice(0, 10)}.csv`);
+    const exportData = FiltteredApplicantsData.map((app, index) => {
+        const personal = app.personalDetails || {};
+        const education = app.educationDetails?.[0]?.educationList || [];
+        const work = app.workExperienceDetails?.[0]?.industry?.[0] || {};
+        const achievements = app.educationDetails?.[0]?.achievements || '';
+        const other = app.otherDetails?.[0] || {};
+
+        const edu10 = education.find(e => e.qualification === "10th") || {};
+        const edu12 = education.find(e => e.qualification === "12th") || {};
+        const ug = education.find(e => e.qualification === "UG") || {};
+        const pg = education.find(e => e.qualification === "PG") || {};
+        const additional = education.find(e => ["B.Ed", "M.Ed"].includes(e.degree)) || {};
+
+        return {
+        "S. No": index + 1,
+        "Position Name": jobTitle || '',
+        "Name of the candidate": personal.fullName || '',
+        "Contact Number": personal.mobile || '',
+        "Mail Id": personal.email || '',
+        "10th - School Name, Board, Mark": `${edu10.school || ''}, ${edu10.specialization || ''}, ${edu10.percentage || ''}`,
+        "12th - School Name, Board, Mark": `${edu12.school || ''}, ${edu12.specialization || ''}, ${edu12.percentage || ''}`,
+        "UG - Degree, College Name, Marks / CGPA": `${ug.degree || ''}, ${ug.university || ''}, ${ug.percentage || ''}`,
+        "PG - Degree, College Name, Marks / CGPA": `${pg.degree || ''}, ${pg.university || ''}, ${pg.percentage || ''}`,
+        "Additional Qualification - B.Ed / M.Ed": `${additional.degree || ''}`,
+        "Additional Certifications / Extra Curricular / CoCurricular Activities": achievements,
+        "Current Location": personal.communicationCity || '',
+        "Orga Name & Designation": `${work.institution || ''}, ${work.designation || ''}`,
+        "From": formatDate(work.from) || '',
+        "To": formatDate(work.to) || '',
+        "Years of experience": work.experience || '',
+        "Notice period": other.joiningTime || '',
+        "Last Drawn Salary": other.lastPay || work.lastSalary || '',
+        };
+    });
+
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+    // Bold header row
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell = worksheet[XLSX.utils.encode_cell({ r: 0, c: C })];
+        if (cell && cell.s === undefined) {
+        cell.s = {};
+        }
+        if (cell) {
+        cell.s = {
+            font: { bold: true }
+        };
+        }
     }
 
-   const candidateDetails = (userId) => {
-        navigate(`/admin/candidateDetails/${userId}/${jobId}`);
-   }
+    // Add styles with workbook and export as .xlsx
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'applicants');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+    saveAs(blob, `${jobTitle}_page_${page}_candidates_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    };
+
+
+
+
+    const candidateDetails = (userId) => {
+        navigate(`/admin/candidateDetails/${userId}/${jobId}`,{state:{jobCategory}});
+    }
 
 
     return (
@@ -159,17 +226,17 @@ const AdminJobDetails = () => {
                 <div>
                     <button
                         className="flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition"
-                        onClick={() => exportToCSV(filteredCandidates)} 
+                        onClick={() => exportToExcel(filteredCandidates)} 
                     >
-                        <FiDownload className="text-lg" />
-                        Export  CSV
+                        <FiDownload className="text-xl" />
+                        Export
                     </button>
                 </div>
             </div>
 
             <table className="w-full border-collapse">
                 <thead>
-                    <tr className="border-b bg-teal-500 text-white font-semibold py-2 px-4 rounded text-lg">
+                    <tr className="border-b bg-blue-500 text-white font-semibold py-2 px-4 rounded text-lg">
                         <th className="text-left p-2 ">Candidate Name</th>
                         <th className="text-left p-2 ">Mail</th>
                         <th className="text-left p-2 ">Mobile</th>
@@ -196,7 +263,7 @@ const AdminJobDetails = () => {
                                     <option key={stage} value={stage}>{stage}</option>
                                 ))}
                             </select>
-                            <StageProgress currentStage={app.stage} />
+                            <StageProgress currentStage={app.stage} rejectedAtStage={app.rejectedAtStage} />
                         </td>
                         <td className="p-2">
                         {app.personalDetails?.resumeUrl ? (

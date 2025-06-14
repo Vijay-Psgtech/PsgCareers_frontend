@@ -4,7 +4,7 @@ import { useAuth } from "../../Context/AuthContext";
 import { motion } from "framer-motion";
 
 
-const StageBar = ({ currentStage }) => {
+const StageBar = ({ currentStage, rejectedAtStage }) => {
   const stageSteps = [
     "Applied",
     "Profile Screening",
@@ -15,14 +15,20 @@ const StageBar = ({ currentStage }) => {
     "Not Selected"
   ];
 
+  const isRejected = currentStage === 'Not Selected';
   const currentIndex = stageSteps.indexOf(currentStage);
-  const progressPercent = ((currentIndex + 1) / stageSteps.length) * 100;
+  const rejectedIndex = rejectedAtStage ? stageSteps.indexOf(rejectedAtStage) : -1;
 
-  // Color logic
-  const getColor = () => {
-    if (currentStage === "Selected") return "bg-green-500";
-    if (currentStage === "Not Selected") return "bg-red-500";
-    return "bg-blue-500";
+  const stagesToShow = isRejected ? stageSteps.slice(0, rejectedIndex + 1) : stageSteps;
+
+  const getDotColor = (index) => {
+    if (currentStage === "Selected") return index <= currentIndex ? "bg-green-500" : "bg-gray-300";
+    if (currentStage === "Not Selected") {
+      if (index < rejectedIndex) return "bg-blue-500";
+      if (index === rejectedIndex) return "bg-red-500";
+      return "bg-gray-300";
+    }
+    return index <= currentIndex ? "bg-blue-500" : "bg-gray-300";
   };
 
   const getTextColor = () => {
@@ -31,6 +37,13 @@ const StageBar = ({ currentStage }) => {
     return "text-blue-600";
   };
 
+  const progressPercent = (() => {
+    if (currentStage === "Not Selected" && rejectedIndex !== -1) {
+      return ((rejectedIndex + 1) / stageSteps.length) * 100;
+    }
+    return ((currentIndex + 1) / stageSteps.length) * 100;
+  })();
+
   return (
     <div className="w-full px-2">
       <div className="text-sm font-medium mb-2">
@@ -38,25 +51,28 @@ const StageBar = ({ currentStage }) => {
       </div>
 
       <div className="relative w-full flex items-center gap-2">
-        {/* Step Dots with Tooltip */}
-        {stageSteps.map((stage, index) => (
+        {stagesToShow.map((stage, index) => (
           <div key={stage} className="flex flex-col items-center relative group">
             <div
-              className={`w-6 h-6 rounded-full text-xs flex items-center justify-center ${
-                index <= currentIndex ? getColor() : "bg-gray-300"
-              } text-white transition-all duration-300`}
+              className={`w-6 h-6 rounded-full text-xs flex items-center justify-center text-white transition-all duration-300 ${getDotColor(index)}`}
             >
               {index + 1}
             </div>
             <div className="absolute top-8 w-max text-sm text-gray-900 whitespace-nowrap opacity-0 group-hover:opacity-100 transition">
               {stage}
             </div>
-            {/* Connecting line */}
-            {index < stageSteps.length - 1 && (
+            {index !== stagesToShow.length - 1 && (
               <div className="absolute left-full top-1/2 w-10 h-1 bg-gray-300 -translate-y-1/2 z-0">
-                {index < currentIndex && (
-                  <div className={`h-full ${getColor()} transition-all duration-300`} />
-                )}
+                {(() => {
+                  const shouldFillLine =
+                    (currentStage === "Selected" && index < currentIndex) ||
+                    (currentStage === "Not Selected" && index < rejectedIndex) ||
+                    (currentStage !== "Selected" && currentStage !== "Not Selected" && index < currentIndex);
+
+                  return shouldFillLine && (
+                    <div className={`${getDotColor(index)} h-full w-full`} />
+                  );
+                })()}
               </div>
             )}
           </div>
@@ -66,13 +82,20 @@ const StageBar = ({ currentStage }) => {
       {/* Progress Bar */}
       <div className="w-full mt-4 bg-gray-200 rounded-full h-2">
         <div
-          className={`h-2 rounded-full transition-all duration-500 ${getColor()}`}
+          className={`h-2 rounded-full transition-all duration-500 ${
+            currentStage === "Selected"
+              ? "bg-green-500"
+              : currentStage === "Not Selected"
+              ? "bg-red-500"
+              : "bg-blue-500"
+          }`}
           style={{ width: `${progressPercent}%` }}
         ></div>
       </div>
     </div>
   );
 };
+
 
 
 
@@ -145,7 +168,7 @@ export default function UserDashboard() {
             : "No applications submitted yet."}
         </p>
 
-        <div className="grid sm:grid-cols-2 grid-cols-1 space-x-6 space-y-12">
+        <div className="grid md:grid-cols-2 grid-cols-1 space-x-6 space-y-8">
           {applications.map((app, index) => {
 
 
@@ -176,7 +199,7 @@ export default function UserDashboard() {
 
                 {/* Progress Bar */}
                 <div className="px-6 py-5">
-                  <StageBar currentStage={app.stage} />
+                  <StageBar currentStage={app.stage} rejectedAtStage={app.rejectedAtStage} />
                 </div>
 
                 {/* Footer */}
