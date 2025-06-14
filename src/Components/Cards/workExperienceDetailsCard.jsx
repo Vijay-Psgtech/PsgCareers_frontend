@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDate } from '../../utils/dateFormat';
 
 export default function WorkExperienceDetails({ work }) {
   const { industry = [], teaching = [] } = work || {};
@@ -12,10 +13,10 @@ export default function WorkExperienceDetails({ work }) {
           <div className="grid md:grid-cols-2 gap-4">
             {industry.map((item, index) => (
               <div key={index} className="bg-white shadow-md p-4 rounded-2xl border border-gray-200">
-                <p><span className="font-medium text-gray-600">Organization:</span> {item.organization}</p>
+                <p><span className="font-medium text-gray-600">Organization:</span> {item.institution}</p>
                 <p><span className="font-medium text-gray-600">Designation:</span> {item.designation}</p>
-                <p><span className="font-medium text-gray-600">From:</span> {new Date(item.from).toLocaleDateString()}</p>
-                <p><span className="font-medium text-gray-600">To:</span> {new Date(item.to).toLocaleDateString()}</p>
+                <p><span className="font-medium text-gray-600">From:</span> {formatDate(item.from)}</p>
+                <p><span className="font-medium text-gray-600">To:</span> {formatDate(item.to)}</p>
               </div>
             ))}
           </div>
