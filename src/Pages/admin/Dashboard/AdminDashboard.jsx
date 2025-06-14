@@ -20,7 +20,7 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
 
     const [page,setPage] = useState(1);
-    const jobsPerPage = 9;
+    const jobsPerPage = 12;
     const {auth} = useAuth();
 
     const jobCategoryOptions = ["Teaching", "Non Teaching"].map((jobCat)=>({
@@ -84,8 +84,8 @@ const AdminDashboard = () => {
       setSelectedJob(null);
     };
 
-    const handlejobAppliedDetails = (jobId,jobTitle,candidateCount) => {
-      if(candidateCount!==0) navigate(`/admin/jobDetails/${jobId}`,{state:{jobTitle}});
+    const handlejobAppliedDetails = (jobId,jobTitle,jobCategory,candidateCount) => {
+      if(candidateCount!==0) navigate(`/admin/jobDetails/${jobId}`,{state:{jobTitle, jobCategory}});
     };
 
     useEffect(()=>{
@@ -158,45 +158,72 @@ const AdminDashboard = () => {
          
         </div>
 
-        <div className="py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {paginatedJobs.map((job, idx) => (
-            <div key={idx} className="relative rounded-xl p-4 shadow-2xl bg-white">
+            <div
+              key={idx}
+              className="relative bg-white shadow-xl rounded-xl p-5 hover:shadow-blue-300 transition-shadow duration-300 border border-gray-100"
+            >
+              {/* New Candidates Badge */}
+              <span className="absolute top-3 right-3 bg-red-500 text-white text-xs font-semibold w-6 h-6 rounded-full flex items-center justify-center">
+                {job.newCandidateCount}
+              </span>
 
-              <div className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                {job.newCandidateCount} 
-              </div>
+              {/* Header Info */}
+              <p className="text-sm text-gray-500 mb-1">
+                <strong className="text-gray-700">{job.institution}</strong> – {job.jobCategory}
+              </p>
 
-              <div className="text-sm text-gray-500 mb-2">
-                {job.institution} - {job.jobCategory}
-              </div>
-              <h3 className="font-semibold text-lg truncate">{job.jobTitle}</h3>
+              {/* Job Title */}
+              <h3 className="text-lg font-semibold text-gray-800 leading-snug truncate">{job.jobTitle}</h3>
 
-              <div className="w-30 h-35 mx-auto my-4 cursor-pointer transition-transform duration-300 hover:scale-105" onClick={()=>handlejobAppliedDetails(job.jobId,job.jobTitle,job.candidateCount)}>
+              {/* Progress Bar */}
+              <div
+                className="w-24 h-24 mx-auto my-5 hover:scale-105 transition-transform duration-300 cursor-pointer"
+                onClick={() => handlejobAppliedDetails(job.jobId, job.jobTitle, job.jobCategory, job.candidateCount)}
+              >
                 <CircularProgressbar
-                 value={job.candidateCount}
-                 maxValue={50}
-                 text={`${job.candidateCount}`}
-                 styles={buildStyles({
-                  textColor: "#1D4ED8",
-                  pathColor: "#3B82F6",
-                  trailColor: "#E5E7EB",
-                  textSize: "25px",
-                })}
+                  value={job.candidateCount}
+                  maxValue={50}
+                  text={`${job.candidateCount}`}
+                  styles={buildStyles({
+                    textColor: "#1D4ED8",
+                    pathColor: "#1D4ED8",
+                    trailColor: "#E0E7FF",
+                    textSize: "22px",
+                    pathTransitionDuration: 0.5,
+                  })}
                 />
-                <div className="text-sm text-center mt-1 text-gray-500">Candidates</div>
+                <p className="text-xs text-center text-gray-500 mt-2">Candidates</p>
               </div>
 
-              <div className="text-gray-500 text-sm">
-                <span>{job.location}</span> | <span>{job.jobType}</span>
+              {/* Location & Job Type */}
+              <div className="text-sm text-gray-600 flex justify-between mt-2">
+                <span>{job.location}</span>
+                <span>{job.jobType}</span>
               </div>
 
+              {/* Footer */}
               <div className="flex justify-between items-center mt-4 text-sm">
-                <span className="text-green-600">Published</span>
-                <button className="text-blue-600 hover:underline" onClick={() => handleDetailsClick(job)}>Details</button>
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    job.status === "closed" ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+                  }`}
+                >
+                  {job.status === "closed" ? "Closed" : "Published"}
+                </span>
+                <button
+                  className="text-blue-600 hover:underline font-medium"
+                  onClick={() => handleDetailsClick(job)}
+                >
+                  Details
+                </button>
               </div>
             </div>
           ))}
         </div>
+
+
         {/* Pagination */}
         <div className="flex justify-center gap-2 mt-6">
           {Array.from({ length: totalPages }, (_, i) => (
