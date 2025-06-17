@@ -96,31 +96,33 @@ const AdminDashboard = () => {
     
     return (
       <div className="p-6">
-        <div className="flex flex-wrap gap-4 justify-between mb-6">
-          <div className='inline-flex gap-6 flex-col md:flex-row'>
-            <button 
-              onClick={()=>setStatusType('active')} 
-              className={`${statusType === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-black' } px-4 py-2 rounded`}
-            >
-              Active Jobs
-            </button>
-            <button 
-              onClick={()=>setStatusType('closed')} 
-              className={`${statusType === 'closed' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-black'} px-4 py-2 rounded`}
-            >
-              Closed Jobs
-            </button>
-          </div>
+         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className='flex gap-2'>
+              <button 
+                onClick={()=>setStatusType('active')} 
+                className={`${statusType === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-black' } px-4 py-2 rounded shadow`}
+              >
+                Active Jobs
+              </button>
+              <button 
+                onClick={()=>setStatusType('closed')} 
+                className={`${statusType === 'closed' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-black'} px-4 py-2 rounded shadow`}
+              >
+                Closed Jobs
+              </button>
+            </div>
           
-          
-          {auth.role === 'superadmin' && (
-            <button onClick={()=>navigate('/admin/careers')} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              Add Job Posting
-            </button>
-          )}
+            <div>
+              {auth.role === 'superadmin' && (
+                <button onClick={()=>navigate('/admin/careers')} className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700">
+                  Add Job Posting
+                </button>
+              )}
+            </div>
+            
         </div>
 
-        <div className="flex flex-wrap  gap-4 justify-between mb-4">
+        <div className="flex flex-wrap  gap-4 justify-between mt-4">
           <div className="inline-flex gap-6 flex-col md:flex-row">
               {auth.role === 'superadmin' && (
               <Select
@@ -129,7 +131,7 @@ const AdminDashboard = () => {
                 value={selectedInstitutions}
                 onChange={setSelectedInstitutions}
                 placeholder="All Institutions"
-                className="min-h-[40px] rounded"
+                className="min-h-[40px] rounded-lg"
                 isClearable
               />
             )}
@@ -139,7 +141,7 @@ const AdminDashboard = () => {
               value={selectedCategory}
               onChange={setSelectedCategory}
               placeholder="All Categories"
-              className="min-h-[40px]  rounded" 
+              className="min-h-[40px]  rounded-lg" 
               isClearable
             />
           </div>
@@ -148,7 +150,7 @@ const AdminDashboard = () => {
             <input
               type="text"
               placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border  focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 rounded-lg shadow-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={searchTerm}
               onChange={(e)=>setSearchTerm(e.target.value)}
             />

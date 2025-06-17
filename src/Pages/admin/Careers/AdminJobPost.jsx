@@ -306,326 +306,326 @@ export default function JobPostingForm() {
   
   return auth.role !=='superadmin' ? (  <h2 className="p-4 font-bold text-lg">Admin Job Post - Restricted Access</h2> ) : (
     <div className="p-6">
-        <div className="flex justify-between mb-4">
-          <div className='inline-flex gap-4'>
+        <div className="flex flex-col mb-4 lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className='flex gap-2'>
             <h2 className="text-2xl font-semibold">Jobs</h2>
             <p className="text-xl italic mt-1">{(jobId!==undefined && jobId!==null && jobId!=='') ? 'Edit jobs' : 'Add jobs'}</p>
           </div>
-          <button onClick={()=>navigate('/admin/jobs-list')} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <button onClick={()=>navigate('/admin/jobs-list')} className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">
             Job posted lists
           </button>
         </div>
       <div className="min-h-screen flex items-center justify-center ">
-      <form onSubmit={handleSubmit} className="p-12 max-w-full bg-white rounded-lg shadow-md grid justify-center grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+        <form onSubmit={handleSubmit} className="p-12 max-w-full bg-white rounded-lg shadow-md grid justify-center grid-cols-1 md:grid-cols-2 gap-6 text-sm">
 
-      {/* Basic Information */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Job Posting</h2>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-lg font-semibold">Job title</label>
-              <input 
-                type="text" 
-                name="jobTitle" 
-                value={jobTitle}
-                onChange={(e) => {
-                  setJobTitle(e.target.value);
-                  validateForm()
-                }}
-                placeholder="Enter title" 
-                className="border p-2 rounded w-full mt-1" 
-              />
-            </div>
-            <div>
-              <label className="text-lg font-semibold">Job ID</label>
-              <input 
-                placeholder="Job ID" 
-                disabled 
-                className="border p-2 rounded w-full bg-gray-100 mt-1" 
-                value={jobId}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-lg font-semibold">Location</label>
-              <Select 
-                name="location" 
-                options={locationOptions} 
-                value={selectedLocation} 
-                onChange={setSelectedLocation}
-                placeholder="Select location" 
-                className="min-h-[40px] border rounded w-full mt-1" 
-                isClearable 
-              />
-            </div>
-            <div> 
-              <label className="text-lg font-semibold">Gender <span className="text-gray-500">(Optional)</span></label>
-              <Select 
-                name="gender"
-                options={genderOptions}
-                value={selectedGender}
-                onChange={setSelectedGender}
-                placeholder="Select Gender"
-                className="min-h-[40px] border rounded w-full mt-1" 
-                isClearable
-              />
+          {/* Basic Information */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Job Posting</h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-lg font-semibold">Job title</label>
+                  <input 
+                    type="text" 
+                    name="jobTitle" 
+                    value={jobTitle}
+                    onChange={(e) => {
+                      setJobTitle(e.target.value);
+                      validateForm()
+                    }}
+                    placeholder="Enter title" 
+                    className="border p-2 rounded w-full mt-1" 
+                  />
+                </div>
+                <div>
+                  <label className="text-lg font-semibold">Job ID</label>
+                  <input 
+                    placeholder="Job ID" 
+                    disabled 
+                    className="border p-2 rounded w-full bg-gray-100 mt-1" 
+                    value={jobId}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-lg font-semibold">Location</label>
+                  <Select 
+                    name="location" 
+                    options={locationOptions} 
+                    value={selectedLocation} 
+                    onChange={setSelectedLocation}
+                    placeholder="Select location" 
+                    className="min-h-[40px] border rounded w-full mt-1" 
+                    isClearable 
+                  />
+                </div>
+                <div> 
+                  <label className="text-lg font-semibold">Gender <span className="text-gray-500">(Optional)</span></label>
+                  <Select 
+                    name="gender"
+                    options={genderOptions}
+                    value={selectedGender}
+                    onChange={setSelectedGender}
+                    placeholder="Select Gender"
+                    className="min-h-[40px] border rounded w-full mt-1" 
+                    isClearable
+                  />
+                    
+                </div>
                 
-            </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-lg font-semibold">Institutions</label>
+                  <Select
+                    name="institution"
+                    options={institutionOptions}
+                    value={selectedInstitutions}
+                    onChange={setSelectedInstitutions}
+                    placeholder="Select Institution"
+                    className="min-h-[40px] border rounded w-full mt-1"
+                    isClearable
+                  />
+                </div>
+                <div>
+                  <label className="text-lg font-semibold">Department</label>
+                  <input 
+                    type="text" 
+                    placeholder="Department" 
+                    name="department" 
+                    className="border p-2 rounded w-full mt-1"
+                    value={department}
+                    onChange={(e)=>setDepartment(e.target.value)}
+                  />
+                </div>
+                
+              </div>
+              <div>
+                <label className="text-lg font-semibold">Job Category</label>
+                <div className="flex space-x-4 text-lg mt-1">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="jobCategory"
+                      value="Teaching"
+                      checked={jobCategory === "Teaching"}
+                      onChange={(e) => {
+                        setJobCategory(e.target.value),
+                        validateForm()
+                      }}
+                      className="accent-blue-600"
+                    />
+                    <span>Teaching</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="jobCategory"
+                      value="Non Teaching"
+                      checked={jobCategory === "Non Teaching"}
+                      onChange={(e) => {
+                        setJobCategory(e.target.value),
+                        validateForm()
+                      }}
+                      className="accent-blue-600"
+                    />
+                    <span>Non Teaching</span>
+                  </label>
+                </div>
+              </div>
             
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-lg font-semibold">Institutions</label>
-              <Select
-                name="institution"
-                options={institutionOptions}
-                value={selectedInstitutions}
-                onChange={setSelectedInstitutions}
-                placeholder="Select Institution"
-                className="min-h-[40px] border rounded w-full mt-1"
-                isClearable
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-lg font-semibold">Designation <span className="text-gray-500">(Optional)</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="Designation" 
+                    name="designation" 
+                    className="border p-2 rounded w-full mt-1"
+                    value={designation}
+                    onChange={(e)=>setDesignation(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-lg font-semibold">Grade <span className="text-gray-500">(Optional)</span></label>
+                  <input 
+                    type="text" 
+                    placeholder="Grade" 
+                    name="grade" 
+                    className="border p-2 rounded w-full mt-1"
+                    value={grade}
+                    onChange={(e)=>setGrade(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-lg font-semibold">Job Type</label>
+                  <Select 
+                    name="jobType"
+                    options={jobTypeOptions}
+                    value={selectedJobType}
+                    onChange={setSelectedJobType}
+                    placeholder="Select Job type"
+                    className="min-h-[40px] border rounded w-full mt-1" 
+                    isClearable
+                  />
+                </div>
+                <div>
+                  <label className="text-lg font-semibold">Hire Type</label>
+                  <Select 
+                    name="hiringType"
+                    options={hiringTypeOptions}
+                    value={selectedHiringType}
+                    onChange={setSelectedHiringType}
+                    placeholder="Select Hiring type"
+                    className="min-h-[40px] border rounded w-full mt-1" 
+                    isClearable
+                  />
+                </div>
+              
+              </div>
+              <div>
+                <label className="text-lg font-semibold">No. of Openings <span className="text-gray-500">(For internal use)</span></label>
+                <input 
+                  name="numberOfOpenings" 
+                  type="number"  
+                  className="border p-2 rounded w-full mt-1" 
+                  value={numberOfOpenings}
+                  onChange={(e)=>setNumberOfOpenings(e.target.value)}
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-lg font-semibold">Department</label>
-              <input 
-                type="text" 
-                placeholder="Department" 
-                name="department" 
-                className="border p-2 rounded w-full mt-1"
-                value={department}
-                onChange={(e)=>setDepartment(e.target.value)}
-              />
-            </div>
-             
           </div>
+
+          {/* Job Description and Skills */}
           <div>
-            <label className="text-lg font-semibold">Job Category</label>
-            <div className="flex space-x-4 text-lg mt-1">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name="jobCategory"
-                  value="Teaching"
-                  checked={jobCategory === "Teaching"}
-                  onChange={(e) => {
-                    setJobCategory(e.target.value),
+            <h2 className="text-lg font-semibold mb-4">Job Description</h2>
+            <div
+              ref={quillRef}
+              className="bg-white border rounded h-[300px] p-2"
+            />
+
+            <div className="mt-4">
+              <label className="text-lg font-semibold">CTC Details <span className="text-gray-500">(Optional: For internal use)</span></label>
+              <div className="flex gap-4 mt-2">
+                <Select 
+                  name="ctcCurrency" 
+                  options={ctcOptions} 
+                  value={selectedCtcOptions} 
+                  onChange={setSelectedCtcOptions}
+                  placeholder="Select Currency" 
+                  className="min-h-[40px] border rounded w-full mt-1" 
+                  isClearable
+                />
+                <Select 
+                  name="ctcMin" 
+                  options={ctcMinOptions} 
+                  value={selectedCtcMin} 
+                  onChange={(option) => setSelectedCtcMin(option)}
+                  placeholder="Min" 
+                  className="min-h-[40px] border rounded w-full mt-1" 
+                  isClearable
+                />
+                <Select 
+                  name="ctcMax" 
+                  options={ctcMaxOptions} 
+                  value={selectedCtcMax}
+                  onChange={(option) => setSelectedCtcMax(option)}
+                  placeholder="Max" 
+                  className="min-h-[40px] border rounded w-full mt-1" 
+                  isClearable
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <h2 className="text-lg font-semibold">Experience & Skills</h2>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <input 
+                  type="number" 
+                  name="experienceMin" 
+                  placeholder="Min" 
+                  className="border p-2 rounded w-full" 
+                  value={experienceMin}
+                  onChange={(e)=>{
+                    setExperienceMin(e.target.value),
+                    validateForm()  
+                  }}
+                />
+                <input 
+                  type="number" 
+                  name="experienceMax" 
+                  placeholder="Max" 
+                  className="border p-2 rounded w-full" 
+                  value={experienceMax}
+                  onChange={(e)=>{
+                    setExperienceMax(e.target.value),
                     validateForm()
                   }}
-                  className="accent-blue-600"
                 />
-                <span>Teaching</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name="jobCategory"
-                  value="Non Teaching"
-                  checked={jobCategory === "Non Teaching"}
-                  onChange={(e) => {
-                    setJobCategory(e.target.value),
-                    validateForm()
-                  }}
-                  className="accent-blue-600"
-                />
-                <span>Non Teaching</span>
-              </label>
+              </div>
+              <div className="text-sm text-gray-600 mt-2">in Years</div>
+              <div className="mt-4">
+                <h2 className="text-lg font-semibold">Important Skills</h2>
+                <div className="border rounded p-2 flex flex-wrap gap-2 min-h-[44px]">
+                  {skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs flex items-center gap-1"
+                    >
+                      {skill}
+                      <button
+                        type="button"
+                        className="ml-1 text-red-500 hover:text-red-700"
+                        onClick={() => removeSkill(skill)}
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    className="flex-1 p-1 outline-none text-sm"
+                    placeholder="Type a skill and press Enter"
+                    value={skillInput}
+                    onChange={(e) => setSkillInput(e.target.value)}
+                    onKeyDown={handleSkillKeyDown}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Please Note: These skills will be weighted more while evaluating stack-ranking.
+                </p>
+              </div>
+              {suggestedSkills.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {suggestedSkills.map((skill, idx) => (
+                    <button
+                      type="button"
+                      key={idx}
+                      className="bg-gray-200 hover:bg-blue-100 text-sm px-2 py-1 rounded-full"
+                      onClick={() => handleAddSkill(skill)}
+                    >
+                      + {skill}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-         
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-lg font-semibold">Designation <span className="text-gray-500">(Optional)</span></label>
-              <input 
-                type="text" 
-                placeholder="Designation" 
-                name="designation" 
-                className="border p-2 rounded w-full mt-1"
-                value={designation}
-                onChange={(e)=>setDesignation(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-lg font-semibold">Grade <span className="text-gray-500">(Optional)</span></label>
-              <input 
-                type="text" 
-                placeholder="Grade" 
-                name="grade" 
-                className="border p-2 rounded w-full mt-1"
-                value={grade}
-                onChange={(e)=>setGrade(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-lg font-semibold">Job Type</label>
-              <Select 
-                name="jobType"
-                options={jobTypeOptions}
-                value={selectedJobType}
-                onChange={setSelectedJobType}
-                placeholder="Select Job type"
-                className="min-h-[40px] border rounded w-full mt-1" 
-                isClearable
-              />
-            </div>
-            <div>
-              <label className="text-lg font-semibold">Hire Type</label>
-              <Select 
-                name="hiringType"
-                options={hiringTypeOptions}
-                value={selectedHiringType}
-                onChange={setSelectedHiringType}
-                placeholder="Select Hiring type"
-                className="min-h-[40px] border rounded w-full mt-1" 
-                isClearable
-              />
-            </div>
-           
-          </div>
-          <div>
-            <label className="text-lg font-semibold">No. of Openings <span className="text-gray-500">(For internal use)</span></label>
-            <input 
-              name="numberOfOpenings" 
-              type="number"  
-              className="border p-2 rounded w-full mt-1" 
-              value={numberOfOpenings}
-              onChange={(e)=>setNumberOfOpenings(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
 
-      {/* Job Description and Skills */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Job Description</h2>
-        <div
-          ref={quillRef}
-          className="bg-white border rounded h-[300px] p-2"
-        />
-
-        <div className="mt-4">
-          <label className="text-lg font-semibold">CTC Details <span className="text-gray-500">(Optional: For internal use)</span></label>
-          <div className="flex gap-4 mt-2">
-            <Select 
-              name="ctcCurrency" 
-              options={ctcOptions} 
-              value={selectedCtcOptions} 
-              onChange={setSelectedCtcOptions}
-              placeholder="Select Currency" 
-              className="min-h-[40px] border rounded w-full mt-1" 
-              isClearable
-            />
-            <Select 
-              name="ctcMin" 
-              options={ctcMinOptions} 
-              value={selectedCtcMin} 
-              onChange={(option) => setSelectedCtcMin(option)}
-              placeholder="Min" 
-              className="min-h-[40px] border rounded w-full mt-1" 
-              isClearable
-            />
-            <Select 
-              name="ctcMax" 
-              options={ctcMaxOptions} 
-              value={selectedCtcMax}
-              onChange={(option) => setSelectedCtcMax(option)}
-              placeholder="Max" 
-              className="min-h-[40px] border rounded w-full mt-1" 
-              isClearable
-            />
+          {/* Save and Proceed Button */}
+          <div className="md:col-span-2 flex justify-end mt-12">
+            <button 
+              type="submit" 
+              className={`px-4 py-4 rounded text-white ${isformVaild ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+              disabled={!isformVaild}
+            >
+              Save and Proceed
+            </button>
           </div>
-        </div>
-
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold">Experience & Skills</h2>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <input 
-              type="number" 
-              name="experienceMin" 
-              placeholder="Min" 
-              className="border p-2 rounded w-full" 
-              value={experienceMin}
-              onChange={(e)=>{
-                setExperienceMin(e.target.value),
-                validateForm()  
-              }}
-            />
-            <input 
-              type="number" 
-              name="experienceMax" 
-              placeholder="Max" 
-              className="border p-2 rounded w-full" 
-              value={experienceMax}
-              onChange={(e)=>{
-                setExperienceMax(e.target.value),
-                validateForm()
-              }}
-            />
-          </div>
-          <div className="text-sm text-gray-600 mt-2">in Years</div>
-          <div className="mt-4">
-            <h2 className="text-lg font-semibold">Important Skills</h2>
-            <div className="border rounded p-2 flex flex-wrap gap-2 min-h-[44px]">
-              {skills.map((skill, idx) => (
-                <span
-                  key={idx}
-                  className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs flex items-center gap-1"
-                >
-                  {skill}
-                  <button
-                    type="button"
-                    className="ml-1 text-red-500 hover:text-red-700"
-                    onClick={() => removeSkill(skill)}
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
-              <input
-                type="text"
-                className="flex-1 p-1 outline-none text-sm"
-                placeholder="Type a skill and press Enter"
-                value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={handleSkillKeyDown}
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Please Note: These skills will be weighted more while evaluating stack-ranking.
-            </p>
-          </div>
-          {suggestedSkills.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {suggestedSkills.map((skill, idx) => (
-                <button
-                  type="button"
-                  key={idx}
-                  className="bg-gray-200 hover:bg-blue-100 text-sm px-2 py-1 rounded-full"
-                  onClick={() => handleAddSkill(skill)}
-                >
-                  + {skill}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Save and Proceed Button */}
-      <div className="md:col-span-2 flex justify-end mt-12">
-        <button 
-          type="submit" 
-          className={`px-4 py-4 rounded text-white ${isformVaild ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
-          disabled={!isformVaild}
-        >
-          Save and Proceed
-        </button>
-      </div>
-      </form>
+        </form>
       </div>
     </div>
     
