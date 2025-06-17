@@ -5,6 +5,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import { useAuth } from "../../Context/AuthContext";
 import Header from "../../Components/common/MainHeader";
 import { WarehouseRounded } from "@mui/icons-material";
+import Footer from "../../Components/Footer"; // Add this at the top
 
 const Fonts = () => (
   <style>
@@ -254,6 +255,7 @@ function CareerPage() {
 
         <Carousel />
       </main>
+      <Footer />
     </>
   );
 }
