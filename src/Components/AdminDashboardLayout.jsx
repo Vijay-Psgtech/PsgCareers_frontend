@@ -13,9 +13,12 @@ export default function AdminDashboardLayout({children}) {
     const allMenus = [
         { name: 'Dashboard', path: '/admin/dashboard' },
         { name: 'Jobs Lists', path: '/admin/jobs-list' },
-        { name: 'Add Job posting', path: '/admin/careers' }
+        { name: 'Add Job posting', path: '/admin/careers' },
+        { name: 'Profile', path: '/admin/profile'}
     ];
-    const menus = auth.role === 'superadmin' ? allMenus : allMenus.filter(menu=>menu.name === 'Dashboard');
+    const menus = auth.role === 'superadmin' ? allMenus : allMenus.filter(menu=>
+       ['Dashboard', 'Profile'].includes(menu.name)
+    );
     useEffect(()=>{
         if(auth.role === 'user')
         {
@@ -27,7 +30,7 @@ export default function AdminDashboardLayout({children}) {
         useAutoLogout(15 * 60 * 1000); // 15 mins
     }
     return(
-        <div className="flex min-h-screen bg-gray-100">
+        <div className="flex min-h-screen bg-gray-50">
             {/* Sidebar */}
             <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gray-600 text-white transition-all duration-300`}>
                 <div className="flex items-center justify-between p-4 border-b">
