@@ -190,7 +190,7 @@ export default function CandidateDetails() {
             ind.designation,
             formatDate(ind.from),
             formatDate(ind.to),
-            ind.certificate
+            ind.certificate !== 'No' ? 'Yes' : ind.certificate
           ]),
           theme: 'grid',
           headStyles: { fillColor: [41, 128, 185] },
@@ -211,7 +211,7 @@ export default function CandidateDetails() {
             teach.designation,
             formatDate(teach.from),
             formatDate(teach.to),
-            teach.certificate
+            teach.certificate !== 'No' ? 'Yes' : teach.certificate
           ]),
           theme: 'grid',
           headStyles: { fillColor: [41, 128, 185] },
@@ -227,11 +227,11 @@ export default function CandidateDetails() {
 
         const identifiers = [
           ['Scopus ID', research.scopusId],
-          ['ORCID ID', research.orcidId],
-          ['h-Index', research.hIndex],
-          ['i10-Index', research.i10Index],
-          ['Citations', research.citations],
-          ['Research Areas', research.researchAreas]
+          ['Sci', research.sci],
+          ['Ugc', research.ugc],
+          ['hGoogle', research.hGoogle],
+          ['hScopus', research.hScopus],
+          ['Other', research.other]
         ];
 
         identifiers.forEach(([label, val]) => {
@@ -261,15 +261,17 @@ export default function CandidateDetails() {
         };
 
         // Add each subsection table
+        addSubSection('Books Published', research.books, ['title', 'publication', 'author', 'isbn', 'edition', 'year']);
+        addSubSection('Chapters', research.chapters, ['title', 'publication', 'author', 'isbn', 'edition', 'year']);
         addSubSection('Journals Published', research.journals, ['title', 'publication', 'author', 'isbn', 'year']);
-        addSubSection('Books Published', research.books, ['title', 'publication', 'author', 'isbn', 'year']);
-        addSubSection('Chapters', research.chapters, ['title', 'publication', 'author', 'isbn', 'year']);
-        addSubSection('Conferences', research.conferences, ['title', 'conference', 'type', 'institution', 'conferenceDate']);
-        addSubSection('Patents', research.patents, ['authors', 'title', 'status']);
-        addSubSection('Consultancy Work', research.consultancy, ['title', 'organization', 'scope', 'duration', 'amount']);
-        addSubSection('Others', research.others, ['title', 'description']);
-        addSubSection('Pdfs', research.pdfs, ['type', 'institute']);
         addSubSection('Projects', research.projects, ['title', 'agency', 'pi', 'duration']);
+        addSubSection('Patents', research.patents, ['authors', 'title', 'status']);
+        addSubSection('Post Doctoral Fellowship (PDF)', research.pdfs, ['type', 'institute']);
+        addSubSection('Consultancy Work', research.consultancy, ['title', 'organization', 'scope', 'duration', 'amount']);
+        addSubSection('Paper Presentation & Conferences', research.conferences, ['title', 'conference', 'type', 'institution', 'conferenceDate']);
+        addSubSection('Vists', research.others, ['country', 'purpose', 'funded']);
+        
+        
       }
 
       // Other
