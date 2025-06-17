@@ -70,7 +70,7 @@ export default function PersonalDetails({updateFormData}) {
   // Fetch saved personal details
   useEffect(() => {
     const fetchData = async () => {
-      if (!userId) return;
+      if (!userId ) return;
       try {
         const res = await axiosInstance.get(
           `/api/personalDetails/${userId}`
@@ -101,7 +101,7 @@ export default function PersonalDetails({updateFormData}) {
       }
     };
     fetchData();
-  }, [userId,jobId]);
+  }, [userId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -161,61 +161,114 @@ export default function PersonalDetails({updateFormData}) {
     setForm((prev) => ({ ...prev, languagesKnown: updated }));
   };
 
+  const validateForm = (form) => {
+  const errors = {};
+
+  if (form.physicallyChallenged === "Yes" && !form.natureOfChallenge?.trim()) {
+    errors.natureOfChallenge = "Nature of Challenge is required";
+  }
+
+  if (!form.aadhar?.match(/^\d{12}$/)) {
+    errors.aadhar = "Aadhar must be a 12-digit number";
+  }
+
+  if (!form.pan?.match(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)) {
+    errors.pan = "Invalid PAN format (e.g., ABCDE1234F)";
+  }
+
+  if (!form.mobile?.match(/^[6-9]\d{9}$/)) {
+    errors.mobile = "Mobile number must be a 10-digit Indian number";
+  }
+
+  if (!form.email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    errors.email = "Invalid email format";
+  }
+
+  return errors;
+};
+
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!form.dob) {
-      alert("Please select your Date of Birth.");
-      return;
-    }
+  // === VALIDATIONS ===
+  const errors = {};
 
+  if (!form.dob) {
+    errors.dob = "Please select your Date of Birth.";
+  } else {
     const dobDate = dayjs(form.dob);
     const today = dayjs();
     const ageYears = today.diff(dobDate, "year");
-
     if (ageYears < 18) {
-      alert("You must be at least 18 years old.");
-      return;
+      errors.dob = "You must be at least 18 years old.";
+    }
+  }
+
+  if (form.physicallyChallenged === "Yes" && !form.natureOfChallenge?.trim()) {
+    errors.natureOfChallenge = "Nature of Challenge is required.";
+  }
+
+  if (!form.aadhar?.match(/^\d{12}$/)) {
+    errors.aadhar = "Aadhar must be a 12-digit number.";
+  }
+
+  if (!form.pan?.match(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)) {
+    errors.pan = "PAN must be in format: ABCDE1234F.";
+  }
+
+  if (!form.mobile?.match(/^[6-9]\d{9}$/)) {
+    errors.mobile = "Enter a valid 10-digit mobile number.";
+  }
+
+  if (!form.email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    errors.email = "Enter a valid email address.";
+  }
+
+  // If any errors exist, show the first one
+  if (Object.keys(errors).length > 0) {
+    const firstError = Object.values(errors)[0];
+    alert(firstError);
+    return;
+  }
+
+  try {
+    const submission = { ...form, userId, jobId };
+    const formData = new FormData();
+
+    for (const key in submission) {
+      if (key === "languagesKnown") {
+        formData.append(key, JSON.stringify(submission[key]));
+      } else if (submission[key] instanceof File) {
+        formData.append(key, submission[key]);
+      } else {
+        formData.append(key, submission[key] ?? "");
+      }
     }
 
-    try {
-      const submission = { ...form, userId};
-      const formData = new FormData();
-
-      for (const key in submission) {
-        if (key === "languagesKnown") {
-          formData.append(key, JSON.stringify(submission[key]));
-        } else if (submission[key] instanceof File) {
-          formData.append(key, submission[key]);
-        } else {
-          formData.append(key, submission[key] ?? "");
-        }
+    const response = await axiosInstance.post(
+      "/api/personalDetails/save",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
       }
+    );
 
-      const response = await axiosInstance.post(
-        "/api/personalDetails/save",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-
-      if (response.status === 200 || response.status === 201) {
-        toast.success('PersonDetails updated Successfully');
-        updateFormData(form);
-      } else {
-        alert("Failed to save personal details.");
-      }
-    } catch (err) {
-      console.error("Submission error:", err);
-      if (err.response) {
-        alert(`Error: ${err.response.data.message || "Submission failed"}`);
-      } else {
-        alert("Submission failed. Please try again.");
-      }
+    if (response.status === 200 || response.status === 201) {
+      toast.success("Personal Details updated successfully");
+      updateFormData(form);
+    } else {
+      alert("Failed to save personal details.");
     }
-  };
-
+  } catch (err) {
+    console.error("Submission error:", err);
+    if (err.response) {
+      alert(`Error: ${err.response.data.message || "Submission failed"}`);
+    } else {
+      alert("Submission failed. Please try again.");
+    }
+  }
+};
   const renderLabeledInput = (label, name, type = "text", required = false) => (
     <div>
       <label htmlFor={name} className="block text-sm font-medium mb-1">
@@ -241,6 +294,7 @@ export default function PersonalDetails({updateFormData}) {
       <select
         id={name}
         name={name}
+        
         value={form[name] || ""}
         onChange={handleChange}
         required={required}
@@ -270,16 +324,10 @@ export default function PersonalDetails({updateFormData}) {
         {renderLabeledInput("Date of Birth", "dob", "date", true)}
         <div>
           <label className="block text-sm font-medium mb-1">
-            Age (Years / Months / Days)
+            Age (  Months / Days /  Years)
           </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={age.years}
-              readOnly
-              placeholder="Years"
-              className="w-1/3 border px-2 py-1 rounded bg-gray-100"
-            />
+          <div className="flex gap-2"> 
+
             <input
               type="text"
               value={age.months}
@@ -294,6 +342,15 @@ export default function PersonalDetails({updateFormData}) {
               placeholder="Days"
               className="w-1/3 border px-2 py-1 rounded bg-gray-100"
             />
+            <input
+              type="text"
+              value={age.years}
+              readOnly
+              placeholder="Years"
+              className="w-1/3 border px-2 py-1 rounded bg-gray-100"
+            />
+            
+          
           </div>
         </div>
         {renderSelect(
@@ -429,40 +486,52 @@ export default function PersonalDetails({updateFormData}) {
       </div>
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="photo">
-            Photo (Max 20MB)
-          </label>
-          <input
-            id="photo"
-            type="file"
-            name="photo"
-            accept="image/*"
-            onChange={handleChange}
-          />
-          {form.photo && (
-            <img
-              src={URL.createObjectURL(form.photo)}
-              alt="Preview"
-              className="mt-2 max-w-xs max-h-48 rounded"
-            />
-          )}
-        </div>
+  {/* Photo Upload */}
+  <div>
+    <label htmlFor="photo" className="block text-sm font-medium mb-2">
+      Photo (Max 2MB)
+    </label>
+    <input
+      id="photo"
+      type="file"
+      name="photo"
+      accept="image/*"
+      onChange={handleChange}
+      className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                 file:rounded file:border-0 file:text-sm file:font-semibold
+                 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+    />
+    {form.photo && (
+      <img
+        src={URL.createObjectURL(form.photo)}
+        alt="Preview"
+        className="mt-2 max-w-xs max-h-48 rounded border border-gray-300"
+      />
+    )}
+  </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="resume">
-            Resume (Max 20MB)
-          </label>
-          <input
-            id="resume"
-            type="file"
-            name="resume"
-            accept=".pdf,.doc,.docx"
-            onChange={handleChange}
-          />
-          {form.resume && <p className="mt-2 text-sm">{form.resume.name}</p>}
-        </div>
-      </div>
+  {/* Resume Upload */}
+  <div>
+    <label htmlFor="resume" className="block text-sm font-medium mb-2">
+      Resume (Max 2MB)
+    </label>
+    <input
+      id="resume"
+      type="file"
+      name="resume"
+      accept=".pdf,.doc,.docx"
+      onChange={handleChange}
+      className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                 file:rounded file:border-0 file:text-sm file:font-semibold
+                 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+    />
+    {form.resume && (
+      <p className="mt-2 text-sm text-gray-700 font-medium">
+        {form.resume.name}
+      </p>
+    )}
+  </div>
+</div>
 
       <div className="mt-10">
         <button
