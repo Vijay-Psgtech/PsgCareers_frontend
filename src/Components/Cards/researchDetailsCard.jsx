@@ -2,7 +2,7 @@ import React from 'react';
 
 const SectionCard = ({ title, children }) => (
   <div className="bg-white shadow-md rounded-2xl p-4 mb-4 border border-gray-200">
-    <h2 className="text-lg font-semibold mb-2">{title}</h2>
+    <h2 className="text-lg text-blue-700 font-semibold mb-2">{title}</h2>
     {children}
   </div>
 );
@@ -45,6 +45,10 @@ const ResearchDetails = ({ data }) => {
         {renderList(data.books || [], ['title', 'publication', 'author', 'isbn', 'edition', 'year'])}
       </SectionCard>
 
+      <SectionCard title="Chapters">
+        {renderList(data.chapters || [], ['title', 'publication', 'author', 'isbn', 'edition', 'year'])}
+      </SectionCard>
+
       <SectionCard title="Journals">
         {renderList(data.journals || [], ['title', 'publication', 'author', 'isbn', 'edition', 'year'])}
       </SectionCard>
@@ -71,6 +75,14 @@ const ResearchDetails = ({ data }) => {
 
       <SectionCard title="Others">
         {renderList(data.others || [], ['title', 'description'])}
+      </SectionCard>
+
+       <SectionCard title="Pdf's">
+        {renderList(data.pdfs || [], ['type', 'institute'])}
+      </SectionCard>
+
+      <SectionCard title="Projects">
+         {renderList(data.projects || [], ['title', 'agency', 'pi', 'duration'])}
       </SectionCard>
     </div>
   );

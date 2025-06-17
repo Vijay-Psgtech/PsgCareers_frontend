@@ -263,10 +263,13 @@ export default function CandidateDetails() {
         // Add each subsection table
         addSubSection('Journals Published', research.journals, ['title', 'publication', 'author', 'isbn', 'year']);
         addSubSection('Books Published', research.books, ['title', 'publication', 'author', 'isbn', 'year']);
+        addSubSection('Chapters', research.chapters, ['title', 'publication', 'author', 'isbn', 'year']);
         addSubSection('Conferences', research.conferences, ['title', 'conference', 'type', 'institution', 'conferenceDate']);
         addSubSection('Patents', research.patents, ['authors', 'title', 'status']);
         addSubSection('Consultancy Work', research.consultancy, ['title', 'organization', 'scope', 'duration', 'amount']);
         addSubSection('Others', research.others, ['title', 'description']);
+        addSubSection('Pdfs', research.pdfs, ['type', 'institute']);
+        addSubSection('Projects', research.projects, ['title', 'agency', 'pi', 'duration']);
       }
 
       // Other
