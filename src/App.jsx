@@ -11,6 +11,7 @@ import VerifyEmailPage from "./Pages/verifyEmailPage";
 import PrivateRoute from "./Components/PrivateRoute";
 import AdminJobDetails from "./Pages/admin/Careers/AdminJobDetails";
 import AdminCandidateDetails from "./Pages/admin/Careers/AdminCandidateDetails";
+import AdminProfile from "./Pages/admin/Profile/AdminProfile";
 
 import MainLayout from "./Components/Layout/MainLayout";
 import UserDashboard from "./Components/Users/Dashboard";
@@ -85,6 +86,15 @@ function App() {
           </PrivateRoute>
         }/>
 
+        <Route path="/admin/Profile" element={
+          <PrivateRoute>
+            <AdminDashboardLayout>
+              <AdminProfile />
+            </AdminDashboardLayout>
+          </PrivateRoute>
+        }
+        />
+
         <Route path="/careers" element={<CareerPage/>}/>
         <Route path="/job/:id" element={<JobDescription />} />
         <Route path="/application-form/:jobId" element={<ApplicationForm />} />
@@ -92,6 +102,7 @@ function App() {
          <Route path="/" element={<MainLayout />}>
             <Route path="dashboard" element={<UserDashboard />} />
             <Route path="my-account" element={<MyAccount />} />
+            <Route path="account" element={<MyAccount />} />
             <Route path="profile" element={<ViewAndUpdateProfile />} />
          </Route>
 
