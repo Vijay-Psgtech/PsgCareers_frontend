@@ -104,7 +104,7 @@ export default function JobPostingForm() {
   {/*--DropDown options--*/}
 
   const validateForm = () =>{
-    const hasRequiredFields = jobTitle && jobCategory && experienceMin && experienceMax;
+    const hasRequiredFields = jobTitle && jobCategory && parseInt(experienceMin);
     setIsFormValid(hasRequiredFields);
   }
 
