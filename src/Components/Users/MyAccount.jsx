@@ -143,7 +143,7 @@ export default function MyAccount() {
   const extractBrowser = (ua) => ua?.split(" ")?.[0] || "Unknown Browser";
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-4">
+    <div className="max-w-2xl mx-auto py-10 px-4">
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex gap-4 justify-center border-b border-blue-300 pb-2 mb-6">
           <TabsTrigger value="profile">👤 Profile</TabsTrigger>
