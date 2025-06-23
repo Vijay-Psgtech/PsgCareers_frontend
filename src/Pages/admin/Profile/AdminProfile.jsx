@@ -8,9 +8,12 @@ const AdminProfile = () => {
     const {auth} = useAuth();
     const userId = auth?.userId;
     const [activeTab, setActiveTab] = useState('profile');
+    const [editMode, setEditMode] = useState(false);
     const [preview, setPreview] = useState(null);
     
     const [form, setForm] = useState({
+      first_name: '',
+      last_name: '',
       institution: '',
       email: '',
       mobile: '',
@@ -62,6 +65,7 @@ const AdminProfile = () => {
       toast.success("Profile updated successfully.");
       setPreview(null);
       fetchProfile();
+      setEditMode(false);
     } catch(err) {
       console.log('Error',err);
       toast.error("Failed to update profile.");
@@ -88,56 +92,82 @@ const AdminProfile = () => {
     "/default-avatar.png";
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow max-w-4xl mx-auto mt-8">
+    <div className="max-w-5xl mx-auto mt-10 bg-white rounded-lg shadow p-6">
       {/* Tabs */}
-      <div className="flex border-b mb-6">
-        {['profile', 'password'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`mr-6 pb-2 font-medium ${
-              activeTab === tab
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-500'
-            }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
+      <div className="border-b flex gap-4 mb-6">
+        <button
+          className={`pb-2 px-4 font-medium ${activeTab === 'profile' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          Profile
+        </button>
+        <button
+          className={`pb-2 px-4 font-medium ${activeTab === 'password' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
+          onClick={() => setActiveTab('password')}
+        >
+          Password
+        </button>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'profile' && (
         <form onSubmit={(e) => e.preventDefault()}>
-          <div className="flex flex-col md:flex-row gap-8 mb-6 items-start">
+          <div className="space-y-6">
             {/* Profile Image */}
-            <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-blue-300 shadow-md">
-              <img
-                src={resolvedPhoto}
-                alt="Institution Logo"
-                className="w-full h-full object-cover"
-              />
-              <label
-                htmlFor="photo-upload"
-                className="absolute bottom-2 right-2 bg-white p-1 rounded-full shadow cursor-pointer"
-              >
-                <FiEdit2 size={16} />
-                <input
-                  type="file"
-                  id="photo-upload"
-                  name="photo"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleChange}
+            <div className="flex justify-between items-center">
+              <div className="relative flex items-center gap-4">
+                <img
+                  src={resolvedPhoto}
+                  alt="Logo"
+                  className="w-28 h-28 rounded-full border object-cover"
                 />
-              </label>
-              
+                <label
+                  htmlFor="photo-upload"
+                  className="absolute bottom-2 right-2 bg-slate-200 p-1 rounded-full shadow cursor-pointer"
+                >
+                  <FiEdit2 size={16} />
+                  <input
+                    type="file"
+                    id="photo-upload"
+                    name="photo"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleChange}
+                  />
+                </label>
+              </div>
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+                onClick={() => setEditMode(!editMode)}
+              >
+                {editMode ? 'Cancel' : 'Edit'}
+              </button>
             </div>
 
             {/* Input Fields */}
-            <div className="flex-1 space-y-5 max-w-xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold mb-1">Institution Name</label>
+                <label className="block text-sm font-medium text-gray-700">First Name</label>
+                <input
+                  name="first_name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                  disabled={!editMode}
+                  className={`w-full mt-1 p-2 border rounded  ${!editMode && 'border-gray-200 bg-gray-100'}`}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                <input
+                  name="last_name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                  disabled={!editMode}
+                  className={`w-full mt-1 p-2 border rounded  ${!editMode && 'border-gray-200 bg-gray-100'}`}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Institution Name</label>
                 <input
                   type="text"
                   name="institution"
@@ -148,7 +178,7 @@ const AdminProfile = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-1">Email / User Name</label>
+                <label className="block text-sm font-medium text-gray-700">Email / User Name</label>
                 <input
                   type="email"
                   name="email"
@@ -158,39 +188,43 @@ const AdminProfile = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold mb-1">Primary Contact No.</label>
+              <div className="md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700">Primary Contact No.</label>
                 <input
                   type="text"
                   name="mobile"
                   value={form.mobile}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                  disabled={!editMode}
+                  className={`w-full mt-1 p-2 border rounded  ${!editMode && 'border-gray-200 bg-gray-100'}`}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold mb-1">About</label>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">About</label>
                 <textarea
                   name="about"
                   value={form.about}
                   onChange={handleChange}
-                  rows={4}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                  disabled={!editMode}
+                  rows={3}
+                  className={`w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 ${!editMode && 'border-gray-200 bg-gray-100 '}`}
                 />
               </div>
             </div>
           </div>
 
           {/* Button */}
-          <div className="text-right">
-            <button
-              onClick={handleSubmit}
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
-            >
-              Update Profile
-            </button>
-          </div>
+          {editMode && (
+            <div className="flex justify-end">
+              <button
+                onClick={handleSubmit}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
+              >
+                Update Profile
+              </button>
+            </div>
+          )}
         </form>
       )}
 
@@ -207,7 +241,7 @@ const AdminProfile = () => {
           </div>
 
           <button className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition" onClick={handlePassword}>
-            Send Verification Code
+            Send Reset Link
           </button>
         </div>
       )}

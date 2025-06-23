@@ -104,7 +104,7 @@ export default function JobPostingForm() {
   {/*--DropDown options--*/}
 
   const validateForm = () =>{
-    const hasRequiredFields = jobTitle && jobCategory && experienceMin && experienceMax;
+    const hasRequiredFields = jobTitle && jobCategory && parseInt(experienceMin);
     setIsFormValid(hasRequiredFields);
   }
 
@@ -561,7 +561,7 @@ export default function JobPostingForm() {
                   className="border p-2 rounded w-full" 
                   value={experienceMax}
                   onChange={(e)=>{
-                    setExperienceMax(e.target.value),
+                    setExperienceMax(e.target.value)
                     validateForm()
                   }}
                 />

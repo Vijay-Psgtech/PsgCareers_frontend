@@ -38,6 +38,9 @@ const StageBar = ({ currentStage, rejectedAtStage }) => {
   };
 
   const progressPercent = (() => {
+    if (currentStage === "Selected") {
+      return 100;
+    }
     if (currentStage === "Not Selected" && rejectedIndex !== -1) {
       return ((rejectedIndex + 1) / stageSteps.length) * 100;
     }
@@ -46,7 +49,7 @@ const StageBar = ({ currentStage, rejectedAtStage }) => {
 
   return (
     <div className="w-full px-2">
-      <div className="text-sm font-medium mb-2">
+      <div className="text-sm font-medium mb-4">
         Current Stage: <span className={getTextColor()}>{currentStage}</span>
       </div>
 
@@ -80,7 +83,7 @@ const StageBar = ({ currentStage, rejectedAtStage }) => {
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full mt-4 bg-gray-200 rounded-full h-2">
+      <div className="w-full mt-8 bg-gray-200 rounded-full h-2">
         <div
           className={`h-2 rounded-full transition-all duration-500 ${
             currentStage === "Selected"

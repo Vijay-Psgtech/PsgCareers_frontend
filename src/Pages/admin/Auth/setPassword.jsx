@@ -43,10 +43,10 @@ const SetPasswordPage = () =>{
                     navigate('/login');
                 },2000)
             } else {
-                toast.error(res.data.message || 'Registration Failed');
+                toast.error(res.data.message || 'Failed to set password');
             }
         }catch(err){
-            const errorMsg = err.response?.data?.message || 'Registration Failed';
+            const errorMsg = err.response?.data?.message || 'Failed to set password';
             toast.error(errorMsg);
         }
     };
@@ -100,7 +100,7 @@ const SetPasswordPage = () =>{
                     <div className="mt-12 flex flex-col md:flex-row justify-center gap-6">
                         <button type="submit"
                         className="w-full md:w-auto bg-blue-700 hover:bg-blue-900 cursor-pointer text-white py-3 px-8 rounded font-semibold transition duration-300">
-                           Register
+                           Update Password
                         </button>
                         <button type="button"
                             className="w-full md:w-auto bg-gray-300 hover:bg-gray-400 cursor-pointer text-black py-3 px-8 rounded font-semibold transition duration-300"

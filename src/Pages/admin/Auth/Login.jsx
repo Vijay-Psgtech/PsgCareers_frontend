@@ -49,7 +49,7 @@ const Login = () => {
             <div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
                 <div className="lg:w-1/2 xl:w-5/12">
                     <div className="text-center p-8">
-                        <img src={logo  } alt="PSG Logo" className="mx-auto w-12 h-12 mb-2" />
+                        <img src={logo  } alt="PSG Logo" className="mx-auto w-16 h-16 mb-2" />
                         <h2 className="text-2xl md:text-3xl font-bold text-blue-900">PSG Careers</h2>
                         <p className="text-lg font-bold py-2 md:text-base text-gray-600">Start your career on the right Path</p>
                     </div>
@@ -59,12 +59,14 @@ const Login = () => {
                                 <input 
                                     name="email"
                                     placeholder='Email'
+                                    value={form.email}
                                     onChange={handleChange}
                                     className="w-full px-8 py-4 rounded-md font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-md focus:outline-none focus:border-gray-400 focus:bg-white"
                                 />
                                 <div className="relative">
                                     <input 
                                         name="password" 
+                                        value={form.password}
                                         type={showPassword? "text" :"password"} 
                                         placeholder='password' 
                                         onChange={handleChange} 
@@ -99,15 +101,13 @@ const Login = () => {
                                     </button>
                                 </div>
                                 
-                                <p className="mt-6 text-xs text-gray-600 text-center">
-                                    I agree to abide by PSG Institutions <span className='border-b cursor-pointer border-dotted'>Terms of Service</span> and its <span className='border-b cursor-pointer border-dotted'>Privacy Policy</span>
-                                </p>
+                               
                             </form>
                         </div>
                          <div className="my-12 border-b text-center">
                             <div
                                 className="leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform translate-y-1/2">
-                                No account ? <a href="/register" className='text-bold text-lg border-b border-blue-800 hover:text-blue-900'>Create One</a>
+                                No account ? <a href="/register" className='text-blue-700 text-lg font-semibold hover:underline'>Create One</a>
                             </div>
                         </div>
                     </div>

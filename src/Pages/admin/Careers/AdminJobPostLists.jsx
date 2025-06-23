@@ -24,11 +24,7 @@ const AdminJobPostLists = () => {
     ]
     const fetchJobs = async() =>{
         try{
-            const res = await axiosInstance.get('/api/jobPost/getJobs',{
-                headers:{
-                    Authorization: `Bearer ${auth.token}`,
-                }
-            });
+            const res = await axiosInstance.get('/api/jobPost/getJobs');
             setJobs(res.data);
         }catch(err){
                 console.error("Failed to fetch jobs", err);
@@ -77,7 +73,7 @@ const AdminJobPostLists = () => {
         <div className='p-6'>
             <div className='flex justify-between items-center mb-4'>
                 <h1 className="text-3xl font-bold mb-6">Job Lists </h1>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={()=>navigate('/admin/careers')}>Add job posting</button>
+                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={()=>navigate('/admin/create-jobs')}>Add job posting</button>
             </div>
             <Container maxWidth={false} 
                 disableGutters 

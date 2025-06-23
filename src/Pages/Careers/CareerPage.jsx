@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import axiosInstance from '../../utils/axiosInstance';
 import { useAuth } from "../../Context/AuthContext";
 import Header from "../../Components/common/MainHeader";
-import { WarehouseRounded } from "@mui/icons-material";
 import Footer from "../../Components/Footer"; // Add this at the top
+import { FaChalkboardTeacher, FaUserTie, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const Fonts = () => (
   <style>
@@ -87,15 +87,7 @@ function CareerPage() {
 
   const fetchActiveJobs = async () => {
     try {
-      let jobCategory = auth?.jobCategory;
-      if (!jobCategory || jobCategory === 'undefined') {
-        jobCategory = '';
-      }
-
       let url = `/api/jobPost/getJobs?status=Active`;
-      if (jobCategory) {
-        url += `&jobCategory=${jobCategory}`;
-      }
       const res = await axiosInstance.get(url);
       setJobs(res.data);
     } catch (err) {
@@ -130,50 +122,94 @@ function CareerPage() {
     });
   };
 
+  const [openSections, setOpenSections] = useState({});
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!initialized && auth?.jobCategory) {
+      setOpenSections({
+        Teaching: auth.jobCategory === 'Teaching',
+        'Non Teaching': auth.jobCategory === 'Non Teaching'
+      });
+      setInitialized(true);
+    }
+  }, [auth?.jobCategory, initialized]);
+
+  const toggleSection = (category) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  const getCategoryIcon = (category) => {
+    return category === "Teaching" ? <FaChalkboardTeacher className="text-indigo-700 mr-2" />
+          : <FaUserTie className="text-indigo-700 mr-2" />;
+  };
+
   const renderJobSection = (category) => {
+    const isOpen = openSections[category];
+
     const { pagedJobs, totalPages } = paginateJobs(category);
     return (
       <section className="mb-20">
-        <h2 className="text-4xl font-playfair text-indigo-900 mb-8 border-b-2 border-indigo-700 inline-block pb-1">
-          {category} Jobs
-        </h2>
-        <div className="grid gap-8 md:grid-cols-2">
-          {pagedJobs.map((job) => (
-            <motion.div
-              key={job._id}
-              className="bg-white p-6 rounded-3xl shadow-lg border border-indigo-200 hover:shadow-xl transition cursor-pointer"
-              whileHover={{ scale: 1.02 }}
-            >
-              <h3 className="text-2xl font-semibold text-indigo-900 font-playfair mb-2">{job.jobTitle}</h3>
-              <p className="text-indigo-700 font-medium mb-3">{job.institution}</p>
-              <p className="text-gray-700 line-clamp-4 mb-4">{`${job.location} | ${job.jobType}`}</p>
-              <Link
-                to={`/job/${job.jobId}`}
-                className="inline-block bg-indigo-600 text-white px-4 py-1.5 text-sm rounded-md hover:bg-indigo-700 transition"
-              >
-                More Details
-              </Link>
-            </motion.div>
-          ))}
+        {/* Toggle Header */}
+        <div onClick={() => toggleSection(category)} className="flex items-center justify-between cursor-pointer mb-4">
+          <h2 className="flex items-center text-2xl font-semibold text-indigo-900">
+            {getCategoryIcon(category)}
+            {category} Jobs
+          </h2>
+           <span className="text-indigo-700 text-xl">
+              {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+            </span>
         </div>
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center mt-8 space-x-6">
-            <button
-              onClick={() => handlePageChange(category, 'prev')}
-              disabled={page === 1}
-              className="px-6 py-3 rounded-full bg-indigo-900 text-white font-semibold hover:bg-indigo-700 disabled:bg-indigo-300 transition"
-            >
-              Prev
-            </button>
-            <span className="text-indigo-900 font-medium">Page {page} of {totalPages}</span>
-            <button
-              onClick={() => handlePageChange(category, 'next')}
-              disabled={page === totalPages}
-              className="px-6 py-3 rounded-full bg-indigo-900 text-white font-semibold hover:bg-indigo-700 disabled:bg-indigo-300 transition"
-            >
-              Next
-            </button>
-          </div>
+        
+         {/* Collapsible Content */}
+        {isOpen && (
+          <>
+            <div className="grid gap-6 md:grid-cols-2">
+              {pagedJobs.map((job) => (
+                <motion.div
+                  key={job._id}
+                  className="bg-white p-6 rounded-2xl shadow-md border border-indigo-100 hover:shadow-lg transition"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <h3 className="text-xl font-semibold text-indigo-900 mb-1">{job.jobTitle}</h3>
+                  <p className="text-indigo-700 mb-1">{job.institution}</p>
+                  <p className="text-gray-600 text-sm mb-3">{`${job.location} | ${job.jobType}`}</p>
+                  {auth.jobCategory === category && (
+                    <Link
+                      to={`/job/${job.jobId}`}
+                      className="inline-block bg-indigo-600 text-white px-4 py-1.5 text-sm rounded hover:bg-indigo-700 transition"
+                    >
+                      More Details
+                    </Link>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center mt-6 space-x-6">
+                <button
+                  onClick={() => handlePageChange(category, 'prev')}
+                  disabled={page === 1}
+                  className="px-4 py-2 rounded bg-indigo-700 text-white hover:bg-indigo-600 disabled:bg-indigo-300"
+                >
+                  Prev
+                </button>
+                <span className="text-indigo-900">Page {page} of {totalPages}</span>
+                <button
+                  onClick={() => handlePageChange(category, 'next')}
+                  disabled={page === totalPages}
+                  className="px-4 py-2 rounded bg-indigo-700 text-white hover:bg-indigo-600 disabled:bg-indigo-300"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
     );
