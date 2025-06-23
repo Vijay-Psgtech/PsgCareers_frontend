@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../../utils/axiosInstance'
 import {CircularProgressbar,buildStyles} from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch,FaBriefcase } from 'react-icons/fa';
 import { useAuth } from "../../../Context/AuthContext";
 import Select from "react-select"
 
@@ -114,7 +114,7 @@ const AdminDashboard = () => {
           
             <div>
               {auth.role === 'superadmin' && (
-                <button onClick={()=>navigate('/admin/careers')} className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700">
+                <button onClick={()=>navigate('/admin/create-jobs')} className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700">
                   Add Job Posting
                 </button>
               )}
@@ -159,6 +159,25 @@ const AdminDashboard = () => {
           </div>
          
         </div>
+
+        {jobs.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center text-gray-600">
+            <FaBriefcase 
+              className="w-48 h-48 mb-6 opacity-70"
+            />
+            <h2 className="text-2xl font-semibold mb-2 text-gray-800">No Jobs Found</h2>
+            <p className="text-md mb-4">There are currently no jobs posted in this category.</p>
+            
+            {auth.role === 'superadmin' && (
+              <button
+                onClick={() => navigate('/admin/careers')}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                + Post a New Job
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {paginatedJobs.map((job, idx) => (
@@ -260,7 +279,14 @@ const AdminDashboard = () => {
                     <div><strong>Location:</strong> {selectedJob.location}</div>
                     <div><strong>Category:</strong> {selectedJob.jobCategory}</div>
                     <div><strong>Job Type:</strong> {selectedJob.jobType}</div>
+                     <div><strong>Skills Required: </strong>
+                      {selectedJob.importantSkills.map((skills)=>(
+                        <div key={skills} className=''>{skills}</div>
+                      ))
+                      }
+                    </div>
                     <div><strong>Job Description:</strong><div dangerouslySetInnerHTML={{ __html: selectedJob.jobDescription }}/></div>
+                   
                     <div>
                       <strong>Posted On:</strong>{" "}
                       {new Date(selectedJob.createdAt).toLocaleString('en-US', {

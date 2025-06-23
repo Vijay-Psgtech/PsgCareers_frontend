@@ -13,8 +13,10 @@ export default function AdminDashboardLayout({children}) {
     const allMenus = [
         { name: 'Dashboard', path: '/admin/dashboard' },
         { name: 'Jobs Lists', path: '/admin/jobs-list' },
-        { name: 'Add Job posting', path: '/admin/careers' },
-        { name: 'Profile', path: '/admin/profile'}
+        { name: 'Add Job posting', path: '/admin/create-jobs' },
+        { name: 'Admin Users Lists', path: '/admin/userLists'},
+        { name: 'Profile', path: '/admin/profile'},
+        
     ];
     const menus = auth.role === 'superadmin' ? allMenus : allMenus.filter(menu=>
        ['Dashboard', 'Profile'].includes(menu.name)
@@ -63,7 +65,7 @@ export default function AdminDashboardLayout({children}) {
                         <p className="text-lg font-semibold text-blue-900 mt-2">PSG Careers</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <FaUser className="text-gray-600" />
+                        <FaUser className="text-gray-600 cursor-pointer" onClick={()=>navigate('/admin/profile')}/>
                         <span className='text-blue-700'>{auth.name}</span>
                         <button onClick={()=>{logout();navigate('/login');}} className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600">
                             <FiLogOut size={18} />

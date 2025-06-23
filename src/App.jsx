@@ -12,6 +12,8 @@ import PrivateRoute from "./Components/PrivateRoute";
 import AdminJobDetails from "./Pages/admin/Careers/AdminJobDetails";
 import AdminCandidateDetails from "./Pages/admin/Careers/AdminCandidateDetails";
 import AdminProfile from "./Pages/admin/Profile/AdminProfile";
+import AdminCreateForm from "./Pages/admin/Profile/AdminCreateForm";
+import AdminList from "./Pages/admin/Profile/AdminList";
 
 import MainLayout from "./Components/Layout/MainLayout";
 import UserDashboard from "./Components/Users/Dashboard";
@@ -46,7 +48,7 @@ function App() {
           </PrivateRoute>
         }/>
 
-        <Route path="/admin/careers" element={
+        <Route path="/admin/create-jobs" element={
           <PrivateRoute>
             <AdminDashboardLayout>
               <AdminJobPost/>
@@ -92,8 +94,23 @@ function App() {
               <AdminProfile />
             </AdminDashboardLayout>
           </PrivateRoute>
-        }
-        />
+        }/>
+
+        <Route path="/admin-management/create" element={
+          <PrivateRoute>
+            <AdminDashboardLayout>
+              <AdminCreateForm />
+            </AdminDashboardLayout>
+          </PrivateRoute>
+        }/>
+
+         <Route path="/admin/userLists" element={
+          <PrivateRoute>
+            <AdminDashboardLayout>
+              <AdminList />
+            </AdminDashboardLayout>
+          </PrivateRoute>
+        }/>
 
         <Route path="/careers" element={<CareerPage/>}/>
         <Route path="/job/:id" element={<JobDescription />} />

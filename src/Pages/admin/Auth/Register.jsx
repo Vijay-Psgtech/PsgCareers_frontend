@@ -67,116 +67,139 @@ const Register = () => {
     }
     return (
         <div className="min-h-screen flex items-center justify-center bg-blue-100 px-4">
-            <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 w-full max-w-5xl">
+            <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 w-full max-w-4xl">
                 <div className="text-center mb-8">
-                    <img src={logo  } alt="PSG Logo" className="mx-auto w-12 h-12 mb-2" />
-                    <h2 className="text-2xl md:text-3xl font-bold text-blue-900">PSG Careers</h2>
-                    <p className="text-lg font-bold py-2 md:text-base text-gray-600">Start your career on the right Path</p>
+                    <img src={logo} alt="PSG Logo" className="mx-auto w-16 h-16 mb-2" />
+                    <h2 className="text-3xl font-bold text-blue-900">PSG Careers</h2>
+                    <p className="text-gray-600 text-sm md:text-base mt-2">Start your career on the right Path</p>
                 </div>
 
-                <form  onSubmit={handleSubmit} className='mt-12'>
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-12">
-                        <div className="flex items-center justify-center gap-12">
-                            <label className="w-50 text-right font-semibold text-gray-800">First Name</label>
-                            <input 
-                                type="text" 
-                                name="first_name" 
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* First Name */}
+                        <div>
+                            <label className="block text-gray-800 font-semibold mb-1">First Name</label>
+                            <input
+                                type="text"
+                                name="first_name"
                                 value={form.first_name}
+                                onChange={handleNameChange}
                                 placeholder="First Name"
-                                onChange={handleNameChange}
                                 title="Only alphabets and spaces are allowed"
-                                className={`w-100 p-4 rounded font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white ${errors.first_name ? 'border-red-500' : 'border-gray-300'}`} 
+                                className={`w-full p-3 rounded bg-gray-100 border placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white ${errors.first_name ? 'border-red-500' : 'border-gray-300'}`}
                             />
                         </div>
 
-                        <div className="flex items-center justify-center gap-12">
-                            <label className="w-50 text-right font-semibold text-gray-800">Last Name</label>
-                            <input 
-                                type="text" 
-                                name="last_name" 
+                        {/* Last Name */}
+                        <div>
+                            <label className="block text-gray-800 font-semibold mb-1">Last Name</label>
+                            <input
+                                type="text"
+                                name="last_name"
                                 value={form.last_name}
-                                placeholder="Last Name"
                                 onChange={handleNameChange}
+                                placeholder="Last Name"
                                 title="Only alphabets and spaces are allowed"
-                                className={`w-100 p-4 rounded font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white ${errors.first_name ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full p-3 rounded bg-gray-100 border placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white ${errors.last_name ? 'border-red-500' : 'border-gray-300'}`}
                             />
                         </div>
 
-                        <div className="flex items-center justify-center gap-12">
-                            <label className="w-50 text-right font-semibold text-gray-800">Mobile</label>
-                            <input 
-                                type="number" 
-                                name="mobile" 
+                        {/* Mobile */}
+                        <div>
+                            <label className="block text-gray-800 font-semibold mb-1">Mobile</label>
+                            <input
+                                type="number"
+                                name="mobile"
                                 value={form.mobile}
+                                onChange={handleChange}
                                 placeholder="Mobile Number"
-                                onChange={handleChange}
                                 maxLength={10}
-                                className={`no-spinner w-100 p-4 rounded font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white ${errors.mobile ? 'border-red-500' : 'border-gray-300'}`} 
+                                className={`w-full p-3 rounded bg-gray-100 border placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white ${errors.mobile ? 'border-red-500' : 'border-gray-300'}`}
                             />
                         </div>
 
-                        <div className="flex items-center justify-center gap-12">
-                            <label className="w-50 text-right font-semibold text-gray-800">User Name [Email ID]</label>
-                            <input 
-                                type="email" 
-                                name="email" 
+                        {/* Email */}
+                        <div>
+                            <label className="block text-gray-800 font-semibold mb-1">User Name [Email ID]</label>
+                            <input
+                                type="email"
+                                name="email"
                                 value={form.email}
-                                placeholder="User Name (EMAIL ID)"
                                 onChange={handleChange}
-                                className={`w-100 p-4 rounded font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white ${errors.email ? 'border-red-500' : 'border-gray-300'}`} 
+                                placeholder="User Name (EMAIL ID)"
+                                className={`w-full p-3 rounded bg-gray-100 border placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                             />
                         </div>
-
-                        <div className="flex items-center justify-center gap-12">
-                            <label className="block font-semibold mb-2">Job Category</label>
-                            <div className="flex items-center space-x-12">
-                                <label className="inline-flex items-center">
-                                <input
-                                    type="radio"
-                                    name="jobCategory"
-                                    value="Teaching"
-                                    checked={form.jobCategory === "Teaching"}
-                                    onChange={handleChange}
-                                    className="form-radio text-blue-600"
-                                />
-                                <span className="ml-2">Teaching</span>
-                                </label>
-                                <label className="inline-flex items-center">
-                                <input
-                                    type="radio"
-                                    name="jobCategory"
-                                    value="Non Teaching"
-                                    checked={form.jobCategory === "Non Teaching"}
-                                    onChange={handleChange}
-                                    className="form-radio text-blue-600"
-                                />
-                                <span className="ml-2">Non Teaching</span>
-                                </label>
-                            </div>
-                        </div>
-                       
                     </div>
 
-                    <div className="mt-12 flex flex-col md:flex-row justify-center gap-6">
-                        <button type="submit"
-                        className="w-full md:w-auto bg-blue-700 hover:bg-blue-900 cursor-pointer text-white py-3 px-8 rounded font-semibold transition duration-300">
-                            Send Verification link
+                    {/* Job Category */}
+                    <div>
+                        <label className="block text-gray-800 font-semibold mb-2">Job Category</label>
+                        <div className="flex items-center gap-10">
+                            <label className="inline-flex items-center">
+                                <input
+                                type="radio"
+                                name="jobCategory"
+                                value="Teaching"
+                                checked={form.jobCategory === "Teaching"}
+                                onChange={handleChange}
+                                className="form-radio text-blue-600"
+                                />
+                                <span className="ml-2">Teaching</span>
+                            </label>
+                            <label className="inline-flex items-center">
+                                <input
+                                type="radio"
+                                name="jobCategory"
+                                value="Non Teaching"
+                                checked={form.jobCategory === "Non Teaching"}
+                                onChange={handleChange}
+                                className="form-radio text-blue-600"
+                                />
+                                <span className="ml-2">Non Teaching</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Terms & Privacy Checkbox */}
+                    <div className="flex items-start gap-3">
+                        <input type="checkbox" id="terms" required className="mt-1" />
+                        <label htmlFor="terms" className="text-sm text-gray-600">
+                            I agree to abide by PSG Institutions’{" "}
+                            <a href="/terms" target="_blank" className="text-blue-700 underline">Terms of Service</a> and its{" "}
+                            <a href="/privacy" target="_blank" className="text-blue-700 underline">Privacy Policy</a>.
+                        </label>
+                    </div>
+
+                    {/* Submit Buttons */}
+                    <div className="flex flex-col md:flex-row justify-center gap-6 pt-4">
+                        <button
+                            type="submit"
+                            className="w-full md:w-auto bg-blue-700 hover:bg-blue-900 text-white py-3 px-8 rounded font-semibold transition duration-300"
+                        >
+                            Send Verification Link
                         </button>
-                        <button type="button"
-                            className="w-full md:w-auto bg-gray-300 hover:bg-gray-400 cursor-pointer text-black py-3 px-8 rounded font-semibold transition duration-300"
-                            onClick={ResetFields}>
+                        <button
+                            type="button"
+                            onClick={ResetFields}
+                            className="w-full md:w-auto bg-gray-300 hover:bg-gray-400 text-black py-3 px-8 rounded font-semibold transition duration-300"
+                        >
                             Cancel
                         </button>
                     </div>
-                    <div className='my-8 text-center'>
-                        <p className="leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform translate-y-1/2">
-                            Already have an account? <a href="/" className="text-bold text-lg border-b border-blue-800 hover:text-blue-900">Login here</a>
+
+                    {/* Login Redirect */}
+                    <div className="text-center pt-6">
+                        <p className="text-sm text-gray-600">
+                        Already have an account?{" "}
+                        <a href="/login" className="text-blue-700 text-lg font-semibold hover:underline">Login here</a>
                         </p>
                     </div>
-                    
                 </form>
             </div>
         </div>
+
+
     )
 }
 
