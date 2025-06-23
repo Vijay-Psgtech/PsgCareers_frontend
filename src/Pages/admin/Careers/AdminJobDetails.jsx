@@ -367,7 +367,7 @@ const AdminJobDetails = () => {
                             month: 'long',
                             day: 'numeric',
                         })}</td>
-                        <td className="p-2">
+                        <td className="p-2 align-top w-72">
                             {auth.role === 'admin' ? (
                                 <div className="flex flex-col gap-1">
                                     <textarea
@@ -389,7 +389,7 @@ const AdminJobDetails = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="text-sm text-gray-700">
+                                <div className="max-h-24 overflow-y-auto whitespace-pre-line break-words text-sm border rounded p-2 bg-gray-50">
                                     {app.remarks || '—'}
                                 </div>
                             )}
