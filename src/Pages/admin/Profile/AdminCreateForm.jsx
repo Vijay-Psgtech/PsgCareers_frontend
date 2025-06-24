@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '../../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import Select from 'react-select'
-import { useAuth } from '../../../Context/AuthContext'
+import { useAuth } from '../../../Context/AuthContext';
+import { FaPlus } from 'react-icons/fa';
+import InstitutionModal from '../../../Components/institutionsModal';
 
 const AdminCreateForm = () => {
     const {auth} = useAuth();
@@ -14,7 +16,7 @@ const AdminCreateForm = () => {
     });
     const [institutionOptions, setInstitutionOptions] = useState('');
     const [selectedInstitutions, setSelectedInstitutions] = useState(null);
-
+    const [showInstitutionModal, setShowInstitutionModal] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
@@ -57,11 +59,17 @@ const AdminCreateForm = () => {
             console.error("failed to fetch institutions",err);
         }
     }
+
+    const handleInstitutionAdded = async () => {
+        fetchInstitutions();
+    };
+
     useEffect(()=>{
         fetchInstitutions();
     },[])
 
   return auth.role !=='superadmin' ? (  <h2 className="p-4 font-bold text-lg"> Restricted Access</h2> ) : (
+    <>
     <div className="max-w-2xl mx-auto mt-10 bg-white rounded-2xl shadow-xl px-8 py-10">
       <h2 className="text-2xl font-semibold mb-6 text-center text-gray-700">Create Admin User</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -120,7 +128,12 @@ const AdminCreateForm = () => {
 
             {/* Institution Dropdown */}
             <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700">Select Institution</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">Select Institution 
+                    <FaPlus
+                        onClick={() => setShowInstitutionModal(true)}
+                        className="text-blue-600 cursor-pointer hover:scale-110 transition"
+                    />
+                </label>
                 <Select
                     name="institution"
                     options={institutionOptions}
@@ -143,6 +156,12 @@ const AdminCreateForm = () => {
             </div>
         </form>
     </div>
+    <InstitutionModal
+        isOpen={showInstitutionModal}
+        onClose={() => setShowInstitutionModal(false)}
+        onSuccess={handleInstitutionAdded}
+    />
+    </>
   );
 };
 

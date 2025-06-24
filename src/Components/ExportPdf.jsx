@@ -230,7 +230,7 @@ export const exportCandidateDetailsToPDF = async (personal, education, work, res
   for(const edu of educationDet) {
     if(edu?.certificate?.endsWith('.pdf')) {
       try {
-        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/Uploads/${edu.certificate}`;
+        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/Uploads/educationCertificates/${edu.certificate}`;
         const certBytes = await fetch(certUrl).then(res => res.arrayBuffer());
         const certDoc = await PDFDocument.load(certBytes);
         const certPages = await mergedPdf.copyPages(certDoc, certDoc.getPageIndices());
