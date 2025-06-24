@@ -19,6 +19,7 @@ import MainLayout from "./Components/Layout/MainLayout";
 import UserDashboard from "./Components/Users/Dashboard";
 import MyAccount from "./Components/Users/MyAccount";
 import ViewAndUpdateProfile from "./Components/Users/ViewAndUpdateProfile";
+import LandingPage from "./Pages/LandingPage";
 
 import PersonalDetails from "./forms/PersonalDetails";
 import EducationDetails from "./forms/EducationDetails";
@@ -32,7 +33,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="" element={<Login/>}/>
+        <Route path="" element={<LandingPage/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/register" element={<Register/>}/>
         <Route path="/verify/:token" element={<VerifyEmailPage />} />
