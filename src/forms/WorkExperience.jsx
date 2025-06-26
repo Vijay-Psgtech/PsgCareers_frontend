@@ -103,17 +103,17 @@
       formData.append('userId', userId);
       formData.append('jobId', jobId);
 
-      const teachingArray = form.teaching.map((item) => {
+      const teachingArray = form.teaching.map((item, idx) => {
         if (item.certificate === 'Yes' && item.certificateFile instanceof File) {
-          formData.append('teachingCertificates', item.certificateFile);
+          formData.append(`teachingCertificates_${idx}`, item.certificateFile);
           return { ...item, certificate: item.certificateFile.name };
         }
         return { ...item, certificateFile: undefined };
       });
 
-      const industryArray = form.industry.map((item) => {
+      const industryArray = form.industry.map((item, idx) => {
         if (item.certificate === 'Yes' && item.certificateFile instanceof File) {
-          formData.append('industryCertificates', item.certificateFile);
+          formData.append(`industryCertificates_${idx}`, item.certificateFile);
           return { ...item, certificate: item.certificateFile.name };
         }
         return { ...item, certificateFile: undefined };

@@ -25,7 +25,7 @@ export const exportCandidateDetailsToPDF = async (personal, education, work, res
   // Profile Image at top right
   if (personal.photoUrl) {
     try {
-      const imgUrl = `${import.meta.env.VITE_API_BASE_URL}/Uploads/${personal.photoUrl}`;
+      const imgUrl = `${import.meta.env.VITE_API_BASE_URL}/${personal.photoUrl}`;
       const imgBlob = await fetch(imgUrl).then(res => res.blob());
       const reader = new FileReader();
       const base64 = await new Promise((resolve, reject) => {
@@ -215,7 +215,7 @@ export const exportCandidateDetailsToPDF = async (personal, education, work, res
   // Step 2: Append Resume PDF if available
   if (personal.resumeUrl?.endsWith('.pdf')) {
     try {
-      const resumeUrl = `${import.meta.env.VITE_API_BASE_URL}/Uploads/${personal.resumeUrl}`;
+      const resumeUrl = `${import.meta.env.VITE_API_BASE_URL}/${personal.resumeUrl}`;
       const resumePdfBytes = await fetch(resumeUrl).then(res => res.arrayBuffer());
       const resumeDoc = await PDFDocument.load(resumePdfBytes);
       const resumePages = await mergedPdf.copyPages(resumeDoc, resumeDoc.getPageIndices());
@@ -230,7 +230,7 @@ export const exportCandidateDetailsToPDF = async (personal, education, work, res
   for(const edu of educationDet) {
     if(edu?.certificate?.endsWith('.pdf')) {
       try {
-        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/Uploads/educationCertificates/${edu.certificate}`;
+        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${edu.certificate}`;
         const certBytes = await fetch(certUrl).then(res => res.arrayBuffer());
         const certDoc = await PDFDocument.load(certBytes);
         const certPages = await mergedPdf.copyPages(certDoc, certDoc.getPageIndices());
@@ -246,7 +246,7 @@ export const exportCandidateDetailsToPDF = async (personal, education, work, res
   for (const job of industryJobs) {
     if (job?.certificate?.endsWith('.pdf')) {
       try {
-        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/Uploads/${job.certificate}`;
+        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${job.certificate}`;
         const certBytes = await fetch(certUrl).then(res => res.arrayBuffer());
         const certDoc = await PDFDocument.load(certBytes);
         const certPages = await mergedPdf.copyPages(certDoc, certDoc.getPageIndices());
@@ -261,7 +261,7 @@ export const exportCandidateDetailsToPDF = async (personal, education, work, res
   for (const job of teachingJobs){
     if(job?.certificate?.endsWith('.pdf')) {
       try{
-        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/Uploads/${job.certificate}`;
+        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${job.certificate}`;
         const certBytes = await fetch(certUrl).then(res => res.arrayBuffer());
         const certDoc = await PDFDocument.load(certBytes);
         const certPages = await mergedPdf.copyPages(certDoc, certDoc.getPageIndices());
