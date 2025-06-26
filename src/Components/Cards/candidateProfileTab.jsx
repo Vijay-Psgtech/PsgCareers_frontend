@@ -28,7 +28,7 @@ export default function CandidateProfileTabs({ personal, education, experience, 
   return (
     <div className="w-full px-4 py-6">
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
-        <Tab.List className="flex space-x-2 rounded-xl bg-blue-50 p-1 mb-4">
+        <Tab.List className="flex flex-wrap space-x-2 sm:flex-nowrap gap-2 rounded-xl bg-blue-50 p-1 mb-4 overflow-x-auto">
           {tabs.map((tab, idx) => (
             <Tab as={Fragment} key={idx} 
               className={({ selected }) =>

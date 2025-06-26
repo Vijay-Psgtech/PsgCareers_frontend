@@ -272,51 +272,53 @@ const AdminJobDetails = () => {
             </h2>
 
             {/* Filter Section */}
-            <div className="flex justify-between items-center my-8">
-                <div className="flex gap-4">
-                    <Select 
+            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 my-6">
+                {/* Filters Section */}
+                <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+                    <Select
                         name="applicantStatus"
                         options={applicantStatusOptions}
                         value={selectedApplicantStatus}
                         onChange={setSelectedApplicantStatus}
                         placeholder="All Applicants"
-                        className="min-h-[40px]  rounded-lg" 
+                        className="min-w-[180px] min-h-[40px] rounded-lg"
                         isClearable
                     />
-                    <Select 
-                        name="applicantSatge"
+                    <Select
+                        name="applicantStage"
                         options={stageOptions}
                         value={selectedStage}
                         onChange={setSelectedStage}
                         placeholder="All Stages"
-                        className="min-h-[40px]  rounded-lg" 
+                        className="min-w-[180px] min-h-[40px] rounded-lg"
                         isClearable
                     />
-                    <div>
-                        <div className='relative max-w-sm'>
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                className="w-full pl-10 pr-4 py-2 rounded-lg shadow-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={searchTerm}
-                                onChange={(e)=>setSearchTerm(e.target.value)}
-                            />
-                            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
-                        </div>
+                    <div className="relative max-w-xs w-full">
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        className="w-full pl-10 pr-4 py-2 rounded-lg shadow-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
                     </div>
                 </div>
-                <div>
+
+                {/* Export Button */}
+                <div className="flex justify-end">
                     <button
-                        className="flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition"
-                        onClick={() => exportToExcel(filteredCandidates)} 
+                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                    onClick={() => exportToExcel(filteredCandidates)}
                     >
-                        <FiDownload className="text-xl" />
-                        Export
+                    <FiDownload className="text-xl" />
+                    <span className="hidden sm:inline">Export</span>
                     </button>
                 </div>
-            </div>
+                </div>
 
-            <table className="w-full border-collapse">
+            <div className="w-full overflow-x-auto">
+                <table className="w-full border-collapse">
                 <thead>
                     <tr className="border-b bg-blue-500 text-white font-semibold py-2 px-4 rounded text-md">
                         <th className="text-left p-2 ">Candidate Name</th>
@@ -398,6 +400,8 @@ const AdminJobDetails = () => {
                     ))}
                 </tbody>
             </table>
+            </div>
+            
             <div className="flex justify-center items-center mt-6 gap-2">
                 <button 
                     onClick={() => setPage(p => Math.max(p - 1, 1))}

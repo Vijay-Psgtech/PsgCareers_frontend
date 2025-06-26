@@ -58,17 +58,18 @@ export default function CandidateDetails() {
   return (
     <div className="max-w-5xl mx-auto p-6">
       
-      <div className='flex justify-between items-center'>
-        <h1 className="text-2xl font-bold  mb-4">Candidate Details</h1>
-        <div className='flex-end'>
-          <button 
-            onClick={()=>exportCandidateDetailsToPDF(personal, education, work, research, otherData, jobCategory )} 
-            className="flex items-center gap-2 bg-red-500 text-white px-3 py-2 rounded-md hover:bg-red-700 transition"
-          >
-            <FaFilePdf className='text-md'/>Export PDF
-          </button>
-        </div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold">Candidate Details</h1>
+
+        <button 
+          onClick={() => exportCandidateDetailsToPDF(personal, education, work, research, otherData, jobCategory)} 
+          className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+        >
+          <FaFilePdf className="text-md" />
+          <span className="hidden xs:inline">Export PDF</span>
+        </button>
       </div>
+
         
 
       <CandidateProfileTabs
