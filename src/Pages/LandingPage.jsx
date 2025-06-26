@@ -1,24 +1,15 @@
-// LandingPage.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "../utils/axiosInstance";
 import Footer from "../Components/Footer";
+import LandingHeader from "../Components/LandingHeader";
 import image1 from "../assets/images/image_1.webp"
 import { useAuth } from "../Context/AuthContext";
 import { FaEye,FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-const carouselImages = ["/About2.jpg", "/About3.jpg", "/bridge.jpg"];
-
-const categories = [
-  { title: "Leadership", route: "/login", image: "/About2.jpg" },
-  { title: "Faculty Recruitment", route: "/login", image: "/About3.jpg" },
-  { title: "Project Recruitment", route: "/login", image: "/bridge.jpg" },
-  { title: "Post-Doctoral Fellowship", route: "/login", image: "/About3.jpg" },
-  { title: "Staff Recruitment", route: "/login", image: "/bridge.jpg" },
-  { title: "Teaching Positions", route: "/login", image: "/About2.jpg" },
-];
+const carouselImages = ["/About2.jpg", "/About3.jpg"];
 
 const staticTestimonials = [
   {
@@ -42,12 +33,45 @@ export default function LandingPage() {
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(1);
   const [filterCat, setFilterCat] = useState("All");
+  const [filterInst, setFilterInst] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const jobsRef = useRef();
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [form,setForm] = useState({email:"",password:""});
-  const [showPassword,setShowPassword] = useState(false);
+  
+const { login } = useAuth();
+const [form,setForm] = useState({email:"",password:""});
+const [showPassword,setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIdx((prev) => (prev + 1) % carouselImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    axiosInstance
+      .get("/api/jobPost/getJobs?status=Active")
+      .then((res) => setJobs(res.data))
+      .catch(console.error);
+  }, []);
+
+  const institutions = ["All", ...new Set(jobs.map((j) => j.institution || "Unknown"))];
+  const categories = ["All", "Teaching", "Non Teaching"];
+
+  const filtered = jobs.filter((j) => {
+    const titleMatch = j.jobTitle.toLowerCase().includes(searchTerm.toLowerCase());
+    const descMatch = j.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const catMatch = filterCat === "All" || j.jobCategory === filterCat;
+    const instMatch = filterInst === "All" || j.institution === filterInst;
+    return catMatch && instMatch && (titleMatch || descMatch);
+  });
+
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleViewDetails = (jobId) => {
+    navigate(`/job/${jobId}`, { state: { fromLanding: true } });
+  };
 
   const resetFields = () =>{
     setForm({email:"", password:""});
@@ -57,7 +81,8 @@ export default function LandingPage() {
     setForm({...form,[e.target.name]:e.target.value});
   }
 
-  const handleSubmit = async(e) =>{
+  
+ const handleSubmit = async(e) =>{
       e.preventDefault();
       try{
           const res = await axiosInstance.post('/api/auth/login',form);
@@ -78,37 +103,14 @@ export default function LandingPage() {
       }
   }
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIdx((prev) => (prev + 1) % carouselImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
-  useEffect(() => {
-    axiosInstance
-      .get("/api/jobPost/getJobs?status=Active")
-      .then((res) => setJobs(res.data))
-      .catch(console.error);
-  }, []);
-
-  const filtered = jobs.filter((j) => {
-    const titleMatch = j.jobTitle.toLowerCase().includes(searchTerm.toLowerCase());
-    const descMatch = j.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
-    const catMatch = filterCat === "All" || j.jobCategory === filterCat;
-    return catMatch && (titleMatch || descMatch);
-  });
-
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const handleViewDetails = (jobId) => {
-    navigate(`/job/${jobId}`, { state: { fromLanding: true } });
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-blue-900 font-sans">
+      <LandingHeader />
+
       {/* Hero Section */}
-      <section className="relative h-[65vh] w-full overflow-hidden">
+      <section className="relative h-[95vh] w-full overflow-hidden">
         <AnimatePresence>
           <motion.img
             key={carouselImages[idx]}
@@ -120,17 +122,17 @@ export default function LandingPage() {
             transition={{ duration: 1.2 }}
           />
         </AnimatePresence>
-        <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-white px-2 z-20">
+        <div className="absolute inset-0 bg-black/60 flex flex-col justify-center items-center text-white px-4 z-20 text-center">
           <motion.img
             src="/Logo2.png"
             alt="Logo"
-            className="h-46 sm:h-40 mb-1"
+            className="h-36 sm:h-40 mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           />
           <motion.h1
-            className="text-4xl sm:text-5xl font-bold font-serif mb-2 text-center"
+            className="text-4xl sm:text-5xl font-bold font-serif mb-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -140,16 +142,29 @@ export default function LandingPage() {
             </span>
           </motion.h1>
           <motion.p
-            className="text-lg sm:text-xl max-w-3xl text-white/90 text-center"
+            className="text-lg sm:text-xl max-w-3xl text-white/90"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
           >
             Explore exciting opportunities in a vibrant academic and research environment.
           </motion.p>
+          {/* ✅ NEW Login Button */}
+          <motion.div
+            className="mt-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+          >
+            {/* <Link
+              to="/login"
+              className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-full shadow-md hover:bg-blue-700 hover:text-white transition duration-300"
+            >
+              Get Started
+            </Link> */}
+          </motion.div>
         </div>
       </section>
-
       {/*About & login section*/}
       <section className="py-10 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col lg:flex-row h-auto lg:h-[550px]">
@@ -235,16 +250,51 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Search + Filters */}
+      <section className="py-10 bg-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search job titles or keywords..."
+              className="flex-1 px-4 py-2 rounded border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="w-full sm:w-1/2">
+              <select
+                value={filterCat}
+                onChange={(e) => setFilterCat(e.target.value)}
+                className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="w-full sm:w-1/2">
+              <select
+                value={filterInst}
+                onChange={(e) => setFilterInst(e.target.value)}
+                className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-400"
+              >
+                {institutions.map((inst) => (
+                  <option key={inst} value={inst}>{inst}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
       {/* Job Listings */}
       <main className="flex-grow bg-white">
         <section ref={jobsRef} className="py-12 max-w-7xl mx-auto px-6">
-           <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search job titles or keywords..."
-            className="w-80 mb-10 p-3 rounded border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
           <h2 className="text-3xl font-serif text-blue-900 mb-6">Open Positions</h2>
           <div className="space-y-6">
             {paginated.map((job) => (
@@ -330,7 +380,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-
-
- 

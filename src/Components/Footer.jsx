@@ -3,24 +3,24 @@ import {
   Facebook,
   Twitter,
   LinkedIn,
-  LocationOn,
 } from "@mui/icons-material";
 import axiosInstance from "../utils/axiosInstance";
 
 const Footer = () => {
-  const [visitors, setVisitors] = useState(0);
-  const userId = "PSG-VISITOR"; // constant ID for general site-level tracking
+  const [visitors, setVisitors] = useState(null);
+  const userId = "PSG-VISITOR";
+  const institution = "PSG";
 
   useEffect(() => {
     const fetchVisitorCount = async () => {
       try {
-        // Include institution in POST request to fix duplicate index error
-        await axiosInstance.post(`/api/visitors/${userId}`, {
-          institution: "PSG"
+        // Track visitor
+        await axiosInstance.post(`/api/visitors/${userId}`, { institution });
+        // Get updated count
+        const res = await axiosInstance.get(`/api/visitors/${userId}`, {
+          params: { institution },
         });
-
-        const res = await axiosInstance.get(`/api/visitors/${userId}`);
-        if (res.data?.count) {
+        if (res.data?.count !== undefined) {
           setVisitors(res.data.count);
         }
       } catch (err) {
@@ -31,14 +31,14 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="bg-gradient-to-b from-white to-blue-50 text-gray-800 font-sans border-t border-blue-100">
+    <footer className="bg-gradient-to-b from-white to-blue-50 text-gray-800 font-sans border-t border-blue-100 w-full">
       {/* Contact Section */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <h2 className="text-5xl font-serif font-extrabold text-center text-blue-900 mb-12 tracking-tight">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 className="text-3xl sm:text-4xl font-serif font-extrabold text-center text-blue-900 mb-12 tracking-tight">
           Contact Us
         </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-start">
           {/* Google Map */}
           <div className="rounded-xl overflow-hidden shadow-md border border-blue-100">
             <iframe
@@ -54,7 +54,7 @@ const Footer = () => {
           </div>
 
           {/* Contact Info */}
-          <div className="text-lg leading-relaxed space-y-6 font-medium text-blue-900">
+          <div className="text-base sm:text-lg leading-relaxed space-y-5 font-medium text-blue-900">
             <p>
               <strong className="font-bold">Address:</strong><br />
               PSG INSTITUTIONS<br />
@@ -64,44 +64,48 @@ const Footer = () => {
 
             <p>
               <strong className="font-bold">Telephone No:</strong><br />
-              0422-4344782 / +91 95009 81372
+              0422-4344782 / +91 95009 81372<br />
+              +91 95009 81376
             </p>
 
-            <p>
-              <strong className="font-bold">Fax:</strong><br />
-              0422-2573833
-            </p>
-
-            {/* Social Media Icons */}
-            <div className="flex space-x-6 pt-4">
+            {/* Social Media */}
+            <div className="flex flex-wrap gap-4 pt-4">
               <a
                 href="#"
-                className="text-blue-600 hover:text-white hover:bg-blue-600 p-2 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
+                className="text-blue-600 hover:text-white hover:bg-blue-600 p-3 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
                 title="Facebook"
               >
-                <Facebook fontSize="large" />
+                <Facebook fontSize="medium" />
               </a>
               <a
                 href="#"
-                className="text-sky-500 hover:text-white hover:bg-sky-500 p-2 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
+                className="text-sky-500 hover:text-white hover:bg-sky-500 p-3 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
                 title="Twitter"
               >
-                <Twitter fontSize="large" />
+                <Twitter fontSize="medium" />
               </a>
               <a
                 href="#"
-                className="text-blue-800 hover:text-white hover:bg-blue-800 p-2 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
+                className="text-blue-800 hover:text-white hover:bg-blue-800 p-3 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
                 title="LinkedIn"
               >
-                <LinkedIn fontSize="large" />
+                <LinkedIn fontSize="medium" />
               </a>
             </div>
 
-            {/* Visitor Count */}
+            {/* Visitor Count - More SEO friendly */}
             <div className="pt-6 text-sm font-light text-gray-600">
-              Visitors:{" "}
-              <span className="font-bold text-blue-700 animate-pulse">
-                {visitors}
+              <span>
+                {visitors !== null ? (
+                  <>
+                   Page Visits:{" "}
+                    <span className="font-bold text-blue-700 animate-pulse">
+                      {visitors}
+                    </span>
+                  </>
+                ) : (
+                  "Loading visitor data..."
+                )}
               </span>
             </div>
           </div>
@@ -110,14 +114,17 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="bg-blue-900 text-white text-center py-4 text-sm font-medium tracking-wide shadow-inner">
-        © {new Date().getFullYear()} PSG College of Technology. All Rights Reserved.<br />
-        <span className="text-sm font-light">Powered By PSG Tech Careers Team.</span>
+        <p>© {new Date().getFullYear()} PSG Institutions. All Rights Reserved.</p>
+        <p className="text-sm font-light">
+          Powered By IT Services Team, PSG Institutions.
+        </p>
       </div>
     </footer>
   );
 };
 
 export default Footer;
+
 
 
 

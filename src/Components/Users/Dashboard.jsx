@@ -48,12 +48,12 @@ const StageBar = ({ currentStage, rejectedAtStage }) => {
   })();
 
   return (
-    <div className="w-full px-2">
-      <div className="text-sm font-medium mb-4">
+    <div className="w-full px-1 sm:px-2">
+      <div className="text-sm font-medium mb-2">
         Current Stage: <span className={getTextColor()}>{currentStage}</span>
       </div>
 
-      <div className="relative w-full flex items-center gap-2">
+      <div className="relative w-full flex flex-wrap gap-4 justify-start items-center">
         {stagesToShow.map((stage, index) => (
           <div key={stage} className="flex flex-col items-center relative group">
             <div
@@ -160,18 +160,18 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white py-12 px-6">
+    <div className="min-h-screen bg-white py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-serif font-bold text-center text-blue-600 mb-6">
+        <h1 className="text-3xl sm:text-4xl font-serif font-bold text-center text-blue-600 mb-4 sm:mb-6">
           Hello, {userName}
         </h1>
-        <p className="text-center text-gray-700 mb-10 text-md">
+        <p className="text-center text-gray-700 mb-8 sm:mb-10 text-sm sm:text-md">
           {applications.length > 0
             ? `You have applied for ${applications.length} ${applications.length === 1 ? "job" : "jobs"}.`
             : "No applications submitted yet."}
         </p>
 
-        <div className="grid md:grid-cols-2 grid-cols-1 space-x-6 space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {applications.map((app, index) => {
 
 
@@ -182,11 +182,11 @@ export default function UserDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
                 whileHover={{ scale: 1.02 }}
-                className="bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-shadow"
+                className="bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all"
               >
                 {/* Card Header */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-700 px-6 py-4 text-white">
-                  <h2 className="text-2xl font-bold">{app.jobTitle}</h2>
+                <div className="bg-gradient-to-r from-blue-500 to-blue-700 px-5 py-4 text-white">
+                  <h2 className="text-xl sm:text-2xl font-bold">{app.jobTitle}</h2>
                   <p className="text-sm mt-1">
                     <strong>Job ID:</strong> {app.jobId} |{" "}
                     <strong>Department:</strong> {app.department}
