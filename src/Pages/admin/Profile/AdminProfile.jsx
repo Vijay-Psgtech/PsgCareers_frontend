@@ -50,12 +50,14 @@ const AdminProfile = () => {
   const handleSubmit = async() => {
     try{
       const formData = new FormData();
+      formData.append("first_name",form.first_name);
+      formData.append("last_name",form.last_name);
       formData.append("institution", form.institution);
       formData.append("mobile", form.mobile);
       formData.append("about", form.about);
 
       if (form.photo instanceof File) {
-        formData.append("photo", form.photo);
+        formData.append("profile", form.photo);
       }
 
       console.log('Updating Profile:', formData);
@@ -88,7 +90,7 @@ const AdminProfile = () => {
       ? URL.createObjectURL(form.photo)
       : form.photo?.startsWith("http")
       ? form.photo
-      : `${BASE_URL}${form.photo}`) ||
+      : `${BASE_URL}/${form.photo}`) ||
     "/default-avatar.png";
 
   return (

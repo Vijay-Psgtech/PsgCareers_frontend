@@ -14,6 +14,7 @@ const Register = () => {
         email: "",
         jobCategory: "",
     };
+    const [open, setOpen] = useState(false);
     /*-- Api Calls function s--*/
     const UserRegister = async(form) =>{
         try{
@@ -166,8 +167,7 @@ const Register = () => {
                         <input type="checkbox" id="terms" required className="mt-1" />
                         <label htmlFor="terms" className="text-sm text-gray-600">
                             I agree to abide by PSG Institutions’{" "}
-                            <a href="/terms" target="_blank" className="text-blue-700 underline">Terms of Service</a> and its{" "}
-                            <a href="/privacy" target="_blank" className="text-blue-700 underline">Privacy Policy</a>.
+                            <button type="button" onClick={() => setOpen(true)} className="text-xs text-blue-600 underline">Terms & Privacy</button>
                         </label>
                     </div>
 
@@ -197,9 +197,82 @@ const Register = () => {
                     </div>
                 </form>
             </div>
+            {open && (
+            <div className="fixed inset-0 z-50 flex">
+                <div className="w-80 bg-white p-6 shadow-lg w-full max-w-xl h-full overflow-y-auto">
+                    <div className="flex justify-between items-center py-6">
+                        <h2 className="text-xl font-semibold">Terms of Service</h2>
+                        <button onClick={()=>setOpen(false)} className="text-gray-500 text-xl">&times;</button>
+                    </div>
+                    <p className="mb-4">
+                        By accessing or using our platform, you agree to be bound by these Terms of Service.
+                        If you disagree with any part, you may not access the service.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">1. Use of Service</h2>
+                    <p className="mb-4">
+                        You agree to use the service only for lawful purposes. You must not misuse or interfere
+                        with the service or try to access it using a method other than the interface provided.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">2. User Accounts</h2>
+                    <p className="mb-4">
+                        You are responsible for maintaining the confidentiality of your account and password.
+                        You agree to accept responsibility for all activities that occur under your account.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">3. Modifications</h2>
+                    <p className="mb-4">
+                        We reserve the right to modify or discontinue the service with or without notice.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">4. Contact</h2>
+                    <p className="mb-6 border-b">
+                        If you have any questions about these Terms, please contact us at
+                        <a href="mailto:careers@psginstitutions.in" className="text-blue-600 underline"> careers@psginstitutions.in</a>.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mb-6">Privacy Policy</h2>
+                    <p className="mb-4">
+                        Your privacy is important to us. This Privacy Policy explains how we collect, use, and
+                        protect your information.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">1. Information We Collect</h2>
+                    <p className="mb-4">
+                        We may collect personal information such as your name, email address, mobile number,
+                        and usage data when you use our platform.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">2. How We Use Information</h2>
+                    <p className="mb-4">
+                        We use your information to provide and improve our services, contact you, and enforce
+                        our policies.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">3. Data Security</h2>
+                    <p className="mb-4">
+                        We take appropriate security measures to protect your information from unauthorized access.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">4. Third-Party Services</h2>
+                    <p className="mb-4">
+                        We do not share your personal data with third parties except as required by law or to
+                        provide the services.
+                    </p>
+
+                    <h2 className="text-xl font-semibold mt-6 mb-2">5. Contact Us</h2>
+                    <p>
+                        If you have questions about this policy, email us at
+                        <a href="mailto:privacy@example.com" className="text-blue-600 underline"> privacy@example.com</a>.
+                    </p>
+                    
+                    <button onClick={() => setOpen(false)} className="mt-4 text-sm text-blue-600 underline">Close</button>
+                </div>
+                <div className="flex-1 bg-black/70 backdrop-blur-sm z-40" onClick={() => setOpen(false)}></div>
+            </div>
+            )}
         </div>
-
-
     )
 }
 

@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import Select from 'react-select'
 import { useAuth } from '../../../Context/AuthContext';
 import { FaPlus } from 'react-icons/fa';
-import InstitutionModal from '../../../Components/institutionsModal';
+import InstitutionModal from '../../../Components/InstitutionModal';
 
 const AdminCreateForm = () => {
     const {auth} = useAuth();

@@ -4,6 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axiosInstance from "../utils/axiosInstance";
 import Footer from "../Components/Footer";
+import image1 from "../assets/images/image_1.webp"
+import { useAuth } from "../Context/AuthContext";
+import { FaEye,FaEyeSlash } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const carouselImages = ["/About2.jpg", "/About3.jpg", "/bridge.jpg"];
 
@@ -41,6 +45,38 @@ export default function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const jobsRef = useRef();
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [form,setForm] = useState({email:"",password:""});
+  const [showPassword,setShowPassword] = useState(false);
+
+  const resetFields = () =>{
+    setForm({email:"", password:""});
+  }
+
+  const handleChange = e =>{
+    setForm({...form,[e.target.name]:e.target.value});
+  }
+
+  const handleSubmit = async(e) =>{
+      e.preventDefault();
+      try{
+          const res = await axiosInstance.post('/api/auth/login',form);
+          if(res.data.token){
+              login(res.data.token,res.data.role,res.data.name,res.data.userId,res.data.jobCategory);
+              if(res.data.role ==='user'){
+                  navigate('/dashboard');
+              }else{
+                  navigate('/admin/dashboard');
+              }
+          } else {
+              toast.error(res.data.message || 'Login failed');
+          }
+      
+      }catch(err){
+          const errorMsg = err.response?.data?.message || 'Login failed. Please try again.';
+          toast.error(errorMsg);
+      }
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -114,39 +150,87 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Categories + Search */}
-      <section className="py-12 bg-blue-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search job titles or keywords..."
-            className="w-80 mb-10 p-3 rounded border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {categories.map((cat, i) => (
-              <div
-                key={i}
-                className="relative bg-white border rounded-xl shadow-md hover:shadow-xl transition overflow-hidden group"
-              >
-                <img
-                  src={cat.image}
-                  alt={cat.title}
-                  className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500"
+      {/*About & login section*/}
+      <section className="py-10 bg-gradient-to-br from-blue-50 to-white">
+        <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col lg:flex-row h-auto lg:h-[550px]">
+
+          {/* Left Illustration + Welcome Text */}
+          <div className="w-full lg:w-3/4 flex flex-col justify-center px-6 py-10 bg-white mb-12">
+            <img
+              src={image1} 
+              alt="PSG Illustration"
+              className="w-full h-full bg-contain mb-6"
+            />
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">
+              PSG & Son's Charities
+            </h2>
+            <p className="text-lg text-gray-700 font-semibold leading-relaxed mb-4">
+              Let there be Charity. So that others can share my family's prosperity
+            </p>
+            <p className="text-md text-gray-700 ">Shri P S Govindaswamy Naidu - Founder</p>
+          </div>
+
+          {/* Right Login Form */}
+          <div className="w-full lg:w-1/4 border-t lg:border-t-0 lg:border-l border-gray-200 px-6 py-10 bg-white flex flex-col justify-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-blue-700 mb-1">PSG Careers</h2>
+            <p className="text-sm text-gray-600 mb-6">Start your career on the right path</p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  className="w-full mt-1 px-4 py-2 bg-gray-100 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
                 />
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition duration-500"></div>
-                <div className="absolute bottom-0 p-6 text-white w-full text-left z-10">
-                  <h3 className="text-2xl font-bold mb-2">{cat.title}</h3>
-                  <Link
-                    to={cat.route}
-                    className="inline-block bg-white text-blue-800 px-4 py-2 text-sm font-bold rounded hover:bg-blue-100 transition"
-                  >
-                    View Jobs
-                  </Link>
-                </div>
               </div>
-            ))}
+
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className="w-full mt-1 px-4 py-2 bg-gray-100 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-[38px] text-gray-600"
+                >
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
+                </button>
+              </div>
+
+              <div className="flex justify-end text-sm">
+                <a href="/forgot-password" className="text-blue-600 hover:underline">Forgot Password?</a>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                >
+                  Login
+                </button>
+                <button
+                  type="button"
+                  onClick={resetFields}
+                  className="w-full bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <p className="text-sm text-center text-gray-600 mt-2">
+                No account? <a href="/register" className="text-blue-600 font-medium hover:underline">Create One</a>
+              </p>
+            </form>
           </div>
         </div>
       </section>
@@ -154,6 +238,13 @@ export default function LandingPage() {
       {/* Job Listings */}
       <main className="flex-grow bg-white">
         <section ref={jobsRef} className="py-12 max-w-7xl mx-auto px-6">
+           <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search job titles or keywords..."
+            className="w-80 mb-10 p-3 rounded border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
           <h2 className="text-3xl font-serif text-blue-900 mb-6">Open Positions</h2>
           <div className="space-y-6">
             {paginated.map((job) => (

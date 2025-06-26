@@ -1,106 +1,125 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import {
   Facebook,
   Twitter,
   LinkedIn,
-  Email,
-  LightMode,
-  DarkMode,
+  LocationOn,
 } from "@mui/icons-material";
+import axiosInstance from "../utils/axiosInstance";
 
-const institutionInfo = {
-  "PSG College of Technology": {
-    about: "A premier institution fostering innovation and technical excellence.",
-    email: "careers@psgtech.edu",
-    phone: "+91 422 257 2477",
-    location: "Peelamedu, Coimbatore",
-  },
-  "PSG Polytechnic College": {
-    about: "Empowering future technicians with quality education.",
-    email: "careers@psgpoly.ac.in",
-    phone: "+91 422 257 2177",
-    location: "Peelamedu, Coimbatore",
-  },
-  "PSG Institute of Management": {
-    about: "A center of excellence in business and leadership studies.",
-    email: "careers@psgim.ac.in",
-    phone: "+91 422 257 7252",
-    location: "Peelamedu, Coimbatore",
-  },
-};
-
-const Footer = ({ institution = "PSG College of Technology" }) => {
-  const [darkMode, setDarkMode] = useState(false);
-  const info = institutionInfo[institution] || institutionInfo["PSG College of Technology"];
+const Footer = () => {
+  const [visitors, setVisitors] = useState(0);
+  const userId = "PSG-VISITOR"; // constant ID for general site-level tracking
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
+    const fetchVisitorCount = async () => {
+      try {
+        // Include institution in POST request to fix duplicate index error
+        await axiosInstance.post(`/api/visitors/${userId}`, {
+          institution: "PSG"
+        });
+
+        const res = await axiosInstance.get(`/api/visitors/${userId}`);
+        if (res.data?.count) {
+          setVisitors(res.data.count);
+        }
+      } catch (err) {
+        console.error("Visitor tracking failed:", err);
+      }
+    };
+    fetchVisitorCount();
+  }, []);
 
   return (
-    <footer className={`mt-20 transition-all duration-500 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"}`}>
-      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
-        {/* About */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4 text-indigo-600 dark:text-indigo-400">PSG Careers</h2>
-          <p className="text-sm leading-relaxed">{info.about}</p>
-        </div>
+    <footer className="bg-gradient-to-b from-white to-blue-50 text-gray-800 font-sans border-t border-blue-100">
+      {/* Contact Section */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <h2 className="text-5xl font-serif font-extrabold text-center text-blue-900 mb-12 tracking-tight">
+          Contact Us
+        </h2>
 
-        {/* Quick Links */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
-          <ul className="space-y-2 text-sm">
-            <li><Link to="/" className="hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link></li>
-            <li><Link to="/jobs" className="hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">Job Listings</Link></li>
-            <li><Link to="/about" className="hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">About PSG</Link></li>
-            <li><Link to="/contact" className="hover:underline hover:text-indigo-600 dark:hover:text-indigo-400">Contact</Link></li>
-          </ul>
-        </div>
-
-        {/* Contact Info */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Contact</h3>
-          <ul className="space-y-2 text-sm">
-            <li><span className="font-medium">Email:</span> <a href={`mailto:${info.email}`} className="hover:underline">{info.email}</a></li>
-            <li><span className="font-medium">Phone:</span> {info.phone}</li>
-            <li><span className="font-medium">Location:</span> {info.location}</li>
-          </ul>
-        </div>
-
-        {/* Social Media & Theme Toggle */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">Stay Connected</h3>
-          <div className="flex space-x-4 mb-6">
-            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-indigo-500">
-              <Facebook />
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-indigo-500">
-              <Twitter />
-            </a>
-            <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-indigo-500">
-              <LinkedIn />
-            </a>
-            <a href={`mailto:${info.email}`} className="hover:text-indigo-500">
-              <Email />
-            </a>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
+          {/* Google Map */}
+          <div className="rounded-xl overflow-hidden shadow-md border border-blue-100">
+            <iframe
+              title="PSG Location"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7832.382858792162!2d77.00024787498151!3d11.024259654573672!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8582f1435fa59%3A0x137d95bfd8909293!2sPSG%20College%20Of%20Technology!5e0!3m2!1sen!2sin!4v1750401673457!5m2!1sen!2sin"
+              width="100%"
+              height="320"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
           </div>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-full shadow hover:bg-indigo-700 transition"
-          >
-            {darkMode ? <LightMode /> : <DarkMode />}
-            <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>
-          </button>
-        </div>
-      </div>
 
-      {/* Footer Bottom */}
-      <div className={`text-center text-sm py-5 border-t ${darkMode ? "border-indigo-700" : "border-gray-300"}`}>
-        © {new Date().getFullYear()} <span className="font-medium">{institution}</span>. All rights reserved.
+          {/* Contact Info */}
+          <div className="text-lg leading-relaxed space-y-6 font-medium text-blue-900">
+            <p>
+              <strong className="font-bold">Address:</strong><br />
+              PSG INSTITUTIONS<br />
+              Peelamedu, Coimbatore - 641004,<br />
+              Tamil Nadu, India.
+            </p>
+
+            <p>
+              <strong className="font-bold">Telephone No:</strong><br />
+              0422-4344782 / +91 95009 81372
+            </p>
+
+            <p>
+              <strong className="font-bold">Fax:</strong><br />
+              0422-2573833
+            </p>
+
+            {/* Social Media Icons */}
+            <div className="flex space-x-6 pt-4">
+              <a
+                href="#"
+                className="text-blue-600 hover:text-white hover:bg-blue-600 p-2 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
+                title="Facebook"
+              >
+                <Facebook fontSize="large" />
+              </a>
+              <a
+                href="#"
+                className="text-sky-500 hover:text-white hover:bg-sky-500 p-2 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
+                title="Twitter"
+              >
+                <Twitter fontSize="large" />
+              </a>
+              <a
+                href="#"
+                className="text-blue-800 hover:text-white hover:bg-blue-800 p-2 rounded-full transition-all duration-300 transform hover:scale-110 shadow-md"
+                title="LinkedIn"
+              >
+                <LinkedIn fontSize="large" />
+              </a>
+            </div>
+
+            {/* Visitor Count */}
+            <div className="pt-6 text-sm font-light text-gray-600">
+              Visitors:{" "}
+              <span className="font-bold text-blue-700 animate-pulse">
+                {visitors}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom Bar */}
+      <div className="bg-blue-900 text-white text-center py-4 text-sm font-medium tracking-wide shadow-inner">
+        © {new Date().getFullYear()} PSG College of Technology. All Rights Reserved.<br />
+        <span className="text-sm font-light">Powered By PSG Tech Careers Team.</span>
       </div>
     </footer>
   );
 };
 
 export default Footer;
+
+
+
+
+

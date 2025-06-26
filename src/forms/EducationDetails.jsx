@@ -156,9 +156,9 @@ export default function EducationDetails({ updateFormData, jobCategory }) {
     const formData = new FormData();
     formData.append("userId", userId);
 
-    const educationArray = educationList.map((item) => {
+    const educationArray = educationList.map((item,idx) => {
       if (item.certificate === "Yes" && item.certificateFile instanceof File) {
-        formData.append("educationCertificates", item.certificateFile);
+        formData.append(`educationCertificates_${idx}`, item.certificateFile);
         return { ...item, certificate: item.certificateFile.name };
       }
       return { ...item, certificateFile: undefined };

@@ -101,7 +101,7 @@ export default function PersonalDetailsCard({ data }) {
       <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
         {resumeUrl && (
           <a
-            href={`${import.meta.env.VITE_API_BASE_URL}/Uploads/${resumeUrl}`}
+            href={`${import.meta.env.VITE_API_BASE_URL}/${resumeUrl}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-red-600 font-medium flex items-center gap-2"
@@ -115,7 +115,7 @@ export default function PersonalDetailsCard({ data }) {
 
         {photoUrl && (
           <img
-            src={`${import.meta.env.VITE_API_BASE_URL}/Uploads/${photoUrl}`}
+            src={`${import.meta.env.VITE_API_BASE_URL}/${photoUrl}`}
             alt="Profile"
             className="w-24 h-24 object-cover rounded border"
           />
