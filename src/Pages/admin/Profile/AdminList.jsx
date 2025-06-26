@@ -54,7 +54,7 @@ const AdminList = () => {
         <div className='p-6'>
             <div className='flex justify-between items-center mb-4'>
                 <h1 className="text-3xl font-bold mb-6">Admin Users Lists </h1>
-                <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition" onClick={()=>navigate('/admin-management/create')}>Add admin users</button>
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition" onClick={()=>navigate('/admin-management/create')}>Add admin users</button>
             </div>
             <Container maxWidth={false} 
                 disableGutters 

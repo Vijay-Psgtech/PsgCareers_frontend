@@ -3,7 +3,7 @@ import axiosInstance from '../../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import Select from 'react-select'
 import { useAuth } from '../../../Context/AuthContext';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
 import InstitutionModal from '../../../Components/InstitutionModal';
 
 const AdminCreateForm = () => {
@@ -12,12 +12,15 @@ const AdminCreateForm = () => {
         first_name: '',
         last_name: '',
         email: '',
-        mobile: ''
+        mobile: '',
+        password: '',
+        confirm_password: ''
     });
     const [institutionOptions, setInstitutionOptions] = useState('');
     const [selectedInstitutions, setSelectedInstitutions] = useState(null);
     const [showInstitutionModal, setShowInstitutionModal] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showPassword,setShowPassword] = useState(false);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,6 +28,10 @@ const AdminCreateForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (form.password && form.confirm_password && form.password !== form.confirm_password) {
+            toast.error("Passwords do not match");
+            return;
+        }
         setLoading(true);
         if(!selectedInstitutions) return toast.error('Select Institution');
         const formData = {
@@ -37,8 +44,8 @@ const AdminCreateForm = () => {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
             });
-            toast.success('Admin created & verification email sent');
-            setForm({ first_name: '', last_name: '', email: '', mobile: '' });
+            toast.success('Admin created');
+            setForm({ first_name: '', last_name: '', email: '', mobile: '', password: '', confirm_password: '' });
             setSelectedInstitutions(null);
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to create admin');
@@ -124,7 +131,51 @@ const AdminCreateForm = () => {
                     className="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
                 </div>
-             </div>
+            </div>
+
+            {/* Row 3 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="relative">
+                    <label className="block mb-1 text-sm font-medium text-gray-700">Password</label>
+                    <input 
+                        type={showPassword? "text" :"password"} 
+                        name="password"
+                        value={form.password}
+                        onChange={handleChange}
+                        placeholder="Password"
+                        required
+                        className="w-full px-4 py-2 border rounded-md"
+                    /> 
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 mt-2"
+                        >
+                        {showPassword ? <FaEye /> : <FaEyeSlash />}
+                    </button> 
+                </div>
+
+                <div className="relative">
+                    <label className="block mb-1 text-sm font-medium text-gray-700">Confirm Password</label>
+                    <input 
+                        type={showPassword? "text" :"password"} 
+                        name="confirm_password"
+                        value={form.confirm_password}
+                        onChange={handleChange}
+                        placeholder="Confirm Password"
+                        required
+                        className="w-full px-4 py-2 border rounded-md"
+                    /> 
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 mt-2"
+                        >
+                        {showPassword ? <FaEye /> : <FaEyeSlash />}
+                    </button> 
+                </div>
+            </div>
+
 
             {/* Institution Dropdown */}
             <div>
