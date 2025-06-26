@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 
 export default function PSGHeader() {
   const [psgScrolled, setPsgScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -12,65 +15,96 @@ export default function PSGHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close menu on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  const navLinks = [
+    { label: "Home", path: "/" },
+    { label: "Careers", path: "/careers" },
+    { label: "Dashboard", path: "/dashboard" },
+    { label: "My Account", path: "/my-account" },
+  ];
+
   return (
     <header
-      className={`psg-header fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out ${
+      className={`psg-header fixed top-0 left-0 w-full z-40 transition-all duration-300 ease-in-out ${
         psgScrolled
           ? "psg-bg-white psg-backdrop-blur psg-shadow"
           : "psg-bg-transparent"
       }`}
     >
-      <div className="psg-container max-w-7xl mx-auto px-8 sm:px-12 py-4 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-1 h-23  flex justify-between items-center">
         {/* Logo + Title */}
-        <Link to="/" className="psg-logo flex items-center space-x-1" style={{ textDecoration: "none" }}>
-          <img        
-            src="/logo.png"
+        <Link to="/" className="flex items-center space-x-2">
+          <img
+            src="/Logo2.png"
             alt="PSG Logo"
-            className={`psg-logo-img w-24 h-13 object-cover transition-transform ${
+            className={`w-30 h-auto object-contain transition-transform ${
               psgScrolled ? "scale-100" : "scale-110"
             }`}
             draggable={false}
           />
           <span
-            className={`psg-title text-2xl font-playfair font-bold transition-colors ${
+            className={`text-3xl font-bold font-playfair transition-colors ${
               psgScrolled ? "text-indigo-900" : "text-blue-700"
             }`}
-            style={{ textDecoration: "none" }}
           >
             PSG Careers
           </span>
         </Link>
 
-        {/* Navigation Links */}
-        <nav className="psg-nav hidden md:flex space-x-12">
-          {["Home", "Careers", "Dashboard", "My Account"].map((label) => {
-            const path =
-              label === "Home"
-                ? "/"
-                : label === "Careers"
-                ? "/careers"
-                : label === "Dashboard"
-                ? "/dashboard"
-                : "/my-account";
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex space-x-12 items-center">
+          {navLinks.map(({ label, path }) => (
+            <Link
+              key={label}
+              to={path}
+              className="text-lg font-medium hover:text-indigo-600 transition duration-300"
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
 
-            return (
-              <Link
-                key={label}
-                to={path}
-                className={`psg-nav-link font-lora text-lg transition duration-300 ease-in-out transform hover:scale-105 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400`}
-                style={{ textDecoration: "none" }}
-              >
-                {label}
-              </Link>
-            );
-          })}
+        {/* Mobile Menu Icon */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="text-blue-800 focus:outline-none"
+            aria-label="Toggle Menu"
+          >
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Dropdown Menu */}
+      <div
+        className={`md:hidden fixed top-16 left-0 w-full bg-white/95 backdrop-blur-md shadow-lg border-t border-gray-200 transition-all duration-300 ease-in-out overflow-hidden ${
+          menuOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
+        }`}
+        style={{ zIndex: 49 }}
+      >
+        <nav className="flex flex-col px-6 py-3 space-y-3 text-blue-900 font-medium">
+          {navLinks.map(({ label, path }) => (
+            <Link
+              key={label}
+              to={path}
+              className="hover:text-indigo-600 transition"
+            >
+              {label}
+            </Link>
+          ))}
         </nav>
       </div>
 
+      {/* Styles scoped to this component */}
       <style>{`
         .psg-header {
           --bg-transparent: transparent;
-          --bg-white: rgba(255 255 255 / 0.9);
+          --bg-white: rgba(255, 255, 255, 0.95);
           --shadow-color: rgba(0, 0, 0, 0.1);
         }
         .psg-bg-transparent {
@@ -80,27 +114,11 @@ export default function PSGHeader() {
           background-color: var(--bg-white);
         }
         .psg-backdrop-blur {
-          backdrop-filter: saturate(180%) blur(15px);
-          -webkit-backdrop-filter: saturate(180%) blur(15px);
+          backdrop-filter: saturate(180%) blur(12px);
+          -webkit-backdrop-filter: saturate(180%) blur(12px);
         }
         .psg-shadow {
           box-shadow: 0 2px 10px var(--shadow-color);
-        }
-        .psg-nav-link {
-          text-decoration: none;
-          color: inherit;
-        }
-        .psg-nav-link:hover {
-          text-decoration: none;
-          color: #4c51bf;
-        }
-        .psg-logo,
-        .psg-title {
-          text-decoration: none;
-        }
-        .psg-logo-img {
-          user-select: none;
-          -webkit-user-drag: none;
         }
       `}</style>
     </header>

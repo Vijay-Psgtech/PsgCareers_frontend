@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axiosInstance from '../../utils/axiosInstance';
 import { useAuth } from "../../Context/AuthContext";
 import Header from "../../Components/common/MainHeader";
-import Footer from "../../Components/Footer"; // Add this at the top
+import Footer from "../../Components/Footer"; 
 import { FaChalkboardTeacher, FaUserTie, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const Fonts = () => (
@@ -46,7 +46,7 @@ function Carousel() {
   }, []);
 
   return (
-    <div className="relative bg-white shadow-lg rounded-3xl p-10 max-w-3xl mx-auto">
+    <div className="relative bg-white shadow-lg rounded-3xl p-6 sm:p-10 w-full max-w-3xl mx-auto">
       <motion.div
         key={index}
         initial={{ opacity: 0, y: 30 }}
@@ -167,20 +167,20 @@ function CareerPage() {
          {/* Collapsible Content */}
         {isOpen && (
           <>
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
               {pagedJobs.map((job) => (
                 <motion.div
                   key={job._id}
                   className="bg-white p-6 rounded-2xl shadow-md border border-indigo-100 hover:shadow-lg transition"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <h3 className="text-xl font-semibold text-indigo-900 mb-1">{job.jobTitle}</h3>
+                  <h3 className="text-xl sm:text-2xl font-semibold text-indigo-900 font-playfair mb-2">{job.jobTitle}</h3>
                   <p className="text-indigo-700 mb-1">{job.institution}</p>
-                  <p className="text-gray-600 text-sm mb-3">{`${job.location} | ${job.jobType}`}</p>
+                  <p className="text-gray-700 line-clamp-4 mb-4">{`${job.location} | ${job.jobType}`}</p>
                   {auth.jobCategory === category && (
                     <Link
                       to={`/job/${job.jobId}`}
-                      className="inline-block bg-indigo-600 text-white px-4 py-1.5 text-sm rounded hover:bg-indigo-700 transition"
+                      className="inline-block mt-3 bg-indigo-600 text-white px-4 py-1.5 text-sm rounded-md hover:bg-indigo-700 transition"
                     >
                       More Details
                     </Link>
@@ -191,7 +191,7 @@ function CareerPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center mt-6 space-x-6">
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
                 <button
                   onClick={() => handlePageChange(category, 'prev')}
                   disabled={page === 1}
@@ -226,7 +226,7 @@ function CareerPage() {
 
       <header className="relative h-[450px] md:h-[550px] w-full overflow-hidden">
         <video
-          className="absolute top-0 left-0 w-full h-full object-cover brightness-75"
+          className="absolute top-0 left-0 w-full h-full object-cover object-center brightness-75"
           autoPlay
           loop
           muted
@@ -235,7 +235,7 @@ function CareerPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-transparent flex flex-col justify-center items-center px-6 text-center text-white">
           <motion.h1
-            className="text-5xl md:text-7xl font-playfair font-extrabold mb-4 drop-shadow-lg"
+            className="text-4xl md:text-6xl font-playfair font-extrabold mb-4 drop-shadow-lg"
             initial={{ y: -70, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1.4, ease: "easeOut" }}
@@ -243,25 +243,24 @@ function CareerPage() {
             Join PSG Institutions
           </motion.h1>
           <motion.p
-            className="max-w-3xl text-xl md:text-2xl font-lora font-light drop-shadow-md"
+            className="max-w-3xl text-lg sm:text-xl md:text-2xl font-lora font-light drop-shadow-md"
             initial={{ y: 70, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 1.4, ease: "easeOut" }}
           >
-            Discover rewarding careers and grow with a community dedicated to
-            excellence and innovation.
+            Discover rewarding careers and grow with a community dedicated to excellence and innovation.
           </motion.p>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-7 sm:px-12 py-13 bg-white rounded-t-3xl -mt-36 relative z-20 shadow-xl">
-        <section className="flex flex-wrap justify-center gap-6 mb-16">
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-8 md:px-12 py-10 bg-white rounded-t-3xl -mt-36 relative z-20 shadow-xl">
+        <section className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mb-12">
           <select
             value={filter.institution}
             onChange={(e) =>
               setFilter((prev) => ({ ...prev, institution: e.target.value }))
             }
-            className="px-5 py-3 rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 font-lora text-lg"
+            className="px-5 py-3 rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 font-lora text-base sm:text-lg"
           >
             <option value="">All Institutions</option>
             {[...new Set(jobs.map((j) => j.institution))].map((inst) => (
@@ -275,7 +274,7 @@ function CareerPage() {
             onChange={(e) =>
               setFilter((prev) => ({ ...prev, jobCategory: e.target.value }))
             }
-            className="px-5 py-3 rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 font-lora text-lg"
+            className="px-5 py-3 rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 font-lora text-base sm:text-lg"
           >
             <option value="">All Categories</option>
             {[...new Set(jobs.map((j) => j.jobCategory))].map((cat) => (

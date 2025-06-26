@@ -59,10 +59,7 @@ const ViewAndUpdateProfile = () => {
       }
 
       try {
-        const res = await axiosInstance.get(
-          `/api/applications/getByUserId/${userId}`
-        );
-
+        const res = await axiosInstance.get(`/api/applications/getByUserId/${userId}`);
         const submittedApp = res.data;
 
         if (submittedApp?.isSubmitted) {
@@ -83,50 +80,38 @@ const ViewAndUpdateProfile = () => {
   }, [userId]);
 
   if (loading) {
-    return (
-      <div className="text-center py-10 text-gray-500">
-        Loading profile…
-      </div>
-    );
+    return <div className="text-center py-10 text-gray-500">Loading profile…</div>;
   }
 
   if (error || !applicationId) {
-    return (
-      <div className="text-center py-10 text-red-500">
-        {error || "No submitted application found to view or edit."}
-      </div>
-    );
+    return <div className="text-center py-10 text-red-500">{error || "No submitted application found."}</div>;
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+    <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-8">
         Manage Your Profile
       </h1>
 
-      <div className="space-y-5">
+      <div className="grid gap-5 sm:grid-cols-1">
         {sectionData
-          .filter(
-            (section) => !section.forTeachingOnly || jobCategory === "Teaching"
-          )
+          .filter((section) => !section.forTeachingOnly || jobCategory === "Teaching")
           .map((section, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition duration-200"
+              className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-5 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition"
             >
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-4">
                 {section.icon}
-                <span className="text-lg font-medium text-gray-800">
+                <span className="text-base sm:text-lg font-medium text-gray-800">
                   {section.title}
                 </span>
               </div>
               <button
                 onClick={() =>
-                  navigate(
-                    `/profile/${section.route}/${userId}/${applicationId}`
-                  )
+                  navigate(`/profile/${section.route}/${userId}/${applicationId}`)
                 }
-                className="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition"
+                className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition self-start sm:self-auto"
               >
                 Edit Details
               </button>

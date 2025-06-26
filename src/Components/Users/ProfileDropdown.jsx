@@ -1,8 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ChevronDown, LogOut, User, Settings, LayoutDashboard, Briefcase } from "lucide-react";
+import {
+  ChevronDown,
+  LogOut,
+  User,
+  Settings,
+  LayoutDashboard,
+  Briefcase,
+} from "lucide-react";
 import { useAuth } from "../../Context/AuthContext";
-
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,11 +19,11 @@ export default function ProfileDropdown() {
 
   // Close dropdown on outside click
   useEffect(() => {
-    function handleClickOutside(event) {
+    const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
-    }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -33,34 +39,50 @@ export default function ProfileDropdown() {
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative z-50" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-800 hover:bg-gray-100 transition"
+        className="flex items-center gap-2 px-3 py-2 sm:px-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm text-sm font-medium text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
       >
         My Profile
-        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-60 bg-white rounded-xl shadow-lg ring-1 ring-gray-200">
-          <div className="py-2 text-sm text-gray-800">
-            <DropdownLink to="/profile" icon={<User className="w-4 h-4 text-indigo-600" />}>
+        <div className="absolute right-0 mt-2 w-64 sm:w-60 bg-white dark:bg-gray-900 rounded-xl shadow-xl ring-1 ring-gray-200 dark:ring-gray-600">
+          <div className="py-2 text-sm text-gray-800 dark:text-white">
+            <DropdownLink
+              to="/profile"
+              icon={<User className="w-4 h-4 text-indigo-600" />}
+            >
               View & Update Profile
             </DropdownLink>
-            <DropdownLink to="/account" icon={<Settings className="w-4 h-4 text-green-600" />}>
+            <DropdownLink
+              to="/account"
+              icon={<Settings className="w-4 h-4 text-green-600" />}
+            >
               My Account
             </DropdownLink>
-            <DropdownLink to="/dashboard" icon={<LayoutDashboard className="w-4 h-4 text-orange-500" />}>
+            <DropdownLink
+              to="/dashboard"
+              icon={<LayoutDashboard className="w-4 h-4 text-orange-500" />}
+            >
               Dashboard
             </DropdownLink>
-            <DropdownLink to="/careers" icon={<Briefcase className="w-4 h-4 text-blue-600" />}>
+            <DropdownLink
+              to="/careers"
+              icon={<Briefcase className="w-4 h-4 text-blue-600" />}
+            >
               Apply Jobs
             </DropdownLink>
-            <div className="border-t border-gray-100 my-2" />
+            <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
             <button
               onClick={handleLogout}
-              className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition"
+              className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-800 transition"
             >
               <LogOut className="w-4 h-4" />
               Log Out
@@ -76,7 +98,7 @@ function DropdownLink({ to, icon, children }) {
   return (
     <Link
       to={to}
-      className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition text-gray-700"
+      className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-gray-700 dark:text-gray-100"
     >
       {icon}
       {children}

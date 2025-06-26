@@ -1,5 +1,3 @@
-// MyAccount.jsx
-
 import React, { useEffect, useState, useCallback } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import { useAuth } from "../../Context/AuthContext";
@@ -8,8 +6,8 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
-} from "../../Components/ui/tabs";
-import { Input } from "../../Components/ui/input";
+} from "../../components/ui/tabs";
+import { Input } from "../../components/ui/input";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -103,7 +101,7 @@ export default function MyAccount() {
       formData.append("location", profile.location);
       formData.append("mobile", profile.mobile);
       if (profile.photo instanceof File) {
-        formData.append("profile", profile.photo);
+        formData.append("photo", profile.photo);
       }
 
       await axiosInstance.put(`/api/user/update/${userId}`, formData);
@@ -136,22 +134,21 @@ export default function MyAccount() {
       ? URL.createObjectURL(profile.photo)
       : profile.photo?.startsWith("http")
       ? profile.photo
-      : `${BASE_URL}/${profile.photo}`) ||
+      : `${BASE_URL}${profile.photo}`) ||
     "/default-avatar.png";
 
   const extractDevice = (ua) => ua?.split("(")?.[1]?.split(")")?.[0] || "Unknown Device";
   const extractBrowser = (ua) => ua?.split(" ")?.[0] || "Unknown Browser";
 
   return (
-    <div className="max-w-2xl mx-auto py-10 px-4">
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex gap-4 justify-center border-b border-blue-300 pb-2 mb-6">
+        <TabsList className="flex flex-wrap gap-2 sm:gap-4 justify-center border-b border-blue-300 pb-2 mb-6">
           <TabsTrigger value="profile">👤 Profile</TabsTrigger>
           <TabsTrigger value="password">🔒 Password</TabsTrigger>
           <TabsTrigger value="login">📜 Login History ({loginHistory.length})</TabsTrigger>
         </TabsList>
 
-        {/* Profile Tab */}
         <AnimatePresence mode="wait" initial={false}>
           {tab === "profile" && (
             <TabsContent value="profile" asChild>
@@ -161,28 +158,25 @@ export default function MyAccount() {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-black shadow-2xl rounded-2xl p-10 space-y-6"
+                className="bg-white dark:bg-black shadow-2xl rounded-2xl p-6 sm:p-10 space-y-6"
               >
-                <div className="flex items-center gap-10">
-                  <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-blue-300 shadow-md">
+                <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-blue-300 shadow-md">
                     <img src={resolvedPhoto} alt="Profile" className="w-full h-full object-cover" />
                     <label className="absolute bottom-2 right-2 bg-white p-1 rounded-full shadow cursor-pointer">
                       ✏️
                       <input type="file" name="photo" onChange={handleInputChange} className="hidden" />
                     </label>
                   </div>
-                  <div>
+                  <div className="text-center sm:text-left">
                     <p className="text-gray-600 dark:text-gray-300 font-semibold">
-                      Last Login:{" "}
-                      {loginHistory?.[0]?.timestamp
-                        ? dayjs(loginHistory[0].timestamp).format("MMM DD YYYY, hh:mm A")
-                        : "—"}
+                      Last Login: {loginHistory?.[0]?.timestamp ? dayjs(loginHistory[0].timestamp).format("MMM DD YYYY, hh:mm A") : "—"}
                     </p>
                     <p className="mt-1 text-gray-600 dark:text-gray-300">
                       Jobs Applied:
                       <span
                         onClick={() => navigate("/dashboard")}
-                        className="inline-block bg-blue-600 text-white px-2 py-1 rounded-full cursor-pointer hover:bg-blue-700 ml-3.5"
+                        className="inline-block bg-blue-600 text-white px-2 py-1 rounded-full cursor-pointer hover:bg-blue-700 ml-3"
                       >
                         {applicationsCount}
                       </span>
@@ -190,7 +184,7 @@ export default function MyAccount() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <LabelWithEdit label="First Name" field="first_name" value={profile.first_name} onChange={handleInputChange} />
                   <LabelWithEdit label="Last Name" field="last_name" value={profile.last_name} onChange={handleInputChange} />
                   <LabelWithEdit label="Location" field="location" value={profile.location} onChange={handleInputChange} />
@@ -198,21 +192,13 @@ export default function MyAccount() {
                     label="Mobile"
                     field="mobile"
                     value={profile.mobile}
-                    onChange={(e) =>
-                      setProfile((prev) => ({
-                        ...prev,
-                        mobile: e.target.value.replace(/\D/g, ""),
-                      }))
-                    }
+                    onChange={(e) => setProfile((prev) => ({ ...prev, mobile: e.target.value.replace(/\D/g, "") }))}
                   />
                   <ReadOnlyField label="Email" value={profile.email} />
-                  <ReadOnlyField
-                    label="Applicant ID"
-                    value={profile.applicantId || `PSG${userId?.slice?.(-4)}`}
-                  />
+                  <ReadOnlyField label="Applicant ID" value={profile.applicantId || `PSG${userId?.slice?.(-4)}`} />
                 </div>
 
-                <div className="text-right">
+                <div className="text-right pt-4">
                   <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md">
                     Save Changes
                   </button>
@@ -221,7 +207,6 @@ export default function MyAccount() {
             </TabsContent>
           )}
 
-          {/* Password Tab */}
           {tab === "password" && (
             <TabsContent value="password" asChild>
               <motion.div
@@ -230,7 +215,7 @@ export default function MyAccount() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 50, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-black shadow-2xl rounded-2xl p-10"
+                className="bg-white dark:bg-black shadow-2xl rounded-2xl p-6 sm:p-10 space-y-4"
               >
                 <LabelWithEdit
                   label="Current Password"
@@ -246,11 +231,8 @@ export default function MyAccount() {
                   value={passwords.newPassword}
                   onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
                 />
-                <div className="text-right mt-4">
-                  <button
-                    onClick={handlePasswordChange}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md"
-                  >
+                <div className="text-right">
+                  <button onClick={handlePasswordChange} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md">
                     Update Password
                   </button>
                   {passwordChangeCount !== null && (
@@ -263,7 +245,6 @@ export default function MyAccount() {
             </TabsContent>
           )}
 
-          {/* Login History Tab */}
           {tab === "login" && (
             <TabsContent value="login" asChild>
               <motion.div
@@ -272,7 +253,7 @@ export default function MyAccount() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 50, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-white dark:bg-black shadow-2xl rounded-2xl p-10"
+                className="bg-white dark:bg-black shadow-2xl rounded-2xl p-6 sm:p-10"
               >
                 <h3 className="text-lg font-semibold mb-4">
                   Login History ({loginHistory.length})
@@ -281,9 +262,9 @@ export default function MyAccount() {
                   <p className="text-gray-500">No login records found.</p>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm text-left">
-                      <thead>
-                        <tr className="text-gray-700 dark:text-gray-300 border-b">
+                    <table className="min-w-full text-sm text-left border border-gray-200 dark:border-gray-600">
+                      <thead className="bg-gray-100 dark:bg-gray-800">
+                        <tr className="text-gray-700 dark:text-gray-300">
                           <th className="px-4 py-2">Date & Time</th>
                           <th className="px-4 py-2">Device Info</th>
                           <th className="px-4 py-2">Browser</th>
@@ -312,7 +293,6 @@ export default function MyAccount() {
   );
 }
 
-// 🔹 Reusable Input Fields
 function LabelWithEdit({ label, field, value = "", type = "text", onChange }) {
   return (
     <div>
@@ -338,4 +318,3 @@ function ReadOnlyField({ label, value }) {
     </div>
   );
 }
-
