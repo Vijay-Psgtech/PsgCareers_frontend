@@ -101,7 +101,7 @@ export default function MyAccount() {
       formData.append("location", profile.location);
       formData.append("mobile", profile.mobile);
       if (profile.photo instanceof File) {
-        formData.append("photo", profile.photo);
+        formData.append("profile", profile.photo);
       }
 
       await axiosInstance.put(`/api/user/update/${userId}`, formData);
@@ -134,7 +134,7 @@ export default function MyAccount() {
       ? URL.createObjectURL(profile.photo)
       : profile.photo?.startsWith("http")
       ? profile.photo
-      : `${BASE_URL}${profile.photo}`) ||
+      : `${BASE_URL}/${profile.photo}`) ||
     "/default-avatar.png";
 
   const extractDevice = (ua) => ua?.split("(")?.[1]?.split(")")?.[0] || "Unknown Device";
