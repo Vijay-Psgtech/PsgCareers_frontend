@@ -14,8 +14,8 @@ const ViewAndUpdateProfile = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
   const userId = auth?.userId;
+  const jobCategory = auth?.jobCategory;
 
-  const [jobCategory, setJobCategory] = useState("Teaching");
   const [applicationId, setApplicationId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -46,7 +46,6 @@ const ViewAndUpdateProfile = () => {
       title: "Others",
       route: "other-details",
       icon: <MoreHorizontal className="h-6 w-6 text-indigo-600" />,
-      forTeachingOnly: true,
     },
   ];
 
@@ -63,7 +62,6 @@ const ViewAndUpdateProfile = () => {
         const submittedApp = res.data;
 
         if (submittedApp?.isSubmitted) {
-          setJobCategory(submittedApp.jobCategory || "Teaching");
           setApplicationId(submittedApp.applicationId);
         } else {
           setError("No submitted application found to view or edit.");
