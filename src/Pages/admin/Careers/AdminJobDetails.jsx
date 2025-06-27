@@ -340,20 +340,28 @@ const AdminJobDetails = () => {
                         <td className="p-2 ">{app.personalDetails?.mobile || "N/A"}</td>
                         <td className="p-2">
                             {auth.role === 'superadmin' && (
-                                <Select
-                                    className="text-md w-[200px]" // Adjust width as needed
-                                    options={filteredOptions}
-                                    value={filteredOptions.find(option => option.value === app.stage) || null}
-                                    onChange={(selectedOption) => updateCandidateStage(app.userId, selectedOption?.value)}
-                                    placeholder="Select Stage"
-                                />
+                                <div className="w-full sm:w-auto min-w-[150px] max-w-[300px]">
+                                    <Select
+                                        className="text-md w-[200px]" // Adjust width as needed
+                                        options={filteredOptions}
+                                        value={filteredOptions.find(option => option.value === app.stage) || null}
+                                        onChange={(selectedOption) => updateCandidateStage(app.userId, selectedOption?.value)}
+                                        placeholder="Select Stage"
+                                        menuPlacement="auto"
+                                        menuPortalTarget={document.body} 
+                                        styles={{
+                                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                                        }}
+                                    />
+                                </div>
+                                
                             )}
                             <StageProgress currentStage={app.stage} rejectedAtStage={app.rejectedAtStage} />
                         </td>
                         <td className="p-2">
                         {app.personalDetails?.resumeUrl ? (
                             <a 
-                                href={`${import.meta.env.VITE_API_BASE_URL}/Uploads/${app.personalDetails.resumeUrl}`} 
+                                href={`${import.meta.env.VITE_API_BASE_URL}/${app.personalDetails.resumeUrl}`} 
                                 download
                                 target="_blank" 
                                 rel="noopener noreferrer"
