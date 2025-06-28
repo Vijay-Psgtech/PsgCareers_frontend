@@ -5,6 +5,10 @@ import { Container,Typography,MenuItem,Select} from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../../Context/AuthContext'
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver'
+import { FiDownload } from "react-icons/fi";
+import { formatDate } from '../../../utils/dateFormat'
 
 
 
@@ -68,12 +72,53 @@ const AdminJobPostLists = () => {
     }
     useEffect(()=>{
         fetchJobs();
-    },[])
+    },[]);
+
+    const exportJobPostToExcel = (jobLists) => {
+        const exportData = jobLists.map((job,idx)=>({
+            'S.No': idx+1,
+            "JobId": job.jobId,
+            "Title": job.jobTitle || '',
+            "Category": job.jobCategory,
+            "Institution": job.institution || '',
+            "Status": job.status || '',
+            "Posted on": formatDate(job.createdAt) || '',
+            "Posted By": job.createdBy!==undefined ? job.createdBy.first_name : 'SuperAdmin'
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+        const range = XLSX.utils.decode_range(worksheet["!ref"]);
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cell = worksheet[XLSX.utils.encode_cell({ r: 0, c: C })];
+            if (cell) {
+            cell.s = { font: { bold: true } };
+            }
+        }
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Jobs");
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array"});
+        const blob = new Blob([excelBuffer], { type: "appliacation/octet-stream"});
+        saveAs(blob, `Job_lists.xlsx`);
+    }
     return auth.role !=='superadmin' ? (  <h2 className="p-4 font-bold text-lg">Admin Job List - Restricted Access</h2> ) : (
-        <div className='p-6'>
-            <div className='flex justify-between items-center mb-4'>
-                <h1 className="text-3xl font-bold mb-6">Job Lists </h1>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={()=>navigate('/admin/create-jobs')}>Add job posting</button>
+        <div className='p-6 sm:p-6'>
+            <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4'>
+                <h1 className="text-2xl sm:text-3xl font-bold">Job Lists </h1>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 px-12">
+                    <button
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                        onClick={() => exportJobPostToExcel(jobs)}
+                    >
+                        <FiDownload className="text-md" />
+                            <span className="sm:inline">Export</span>
+                    </button>
+                    <button 
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={()=>navigate('/admin/create-jobs')}
+                    >
+                        Add job posting
+                    </button>
+                </div>
+                
             </div>
             <Container maxWidth={false} 
                 disableGutters 
