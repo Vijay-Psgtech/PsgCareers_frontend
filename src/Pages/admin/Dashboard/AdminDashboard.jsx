@@ -299,7 +299,7 @@ const AdminDashboard = () => {
                       })}
                     </div>
                     <div><strong>Posted By:</strong> 
-                       { selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'Admin' }
+                      { selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'SuperAdmin' }
                     </div>
                   </div>
                 </div>
