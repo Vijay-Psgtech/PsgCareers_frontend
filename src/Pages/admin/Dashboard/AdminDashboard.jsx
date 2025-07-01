@@ -286,7 +286,11 @@ const AdminDashboard = () => {
                       }
                     </div>
                     <div><strong>Job Description:</strong><div dangerouslySetInnerHTML={{ __html: selectedJob.jobDescription }}/></div>
-                   
+                    {selectedJob.ctcMin && (
+                      <div><strong>CTC:</strong> {`${selectedJob.ctcMin || ''} to ${selectedJob.ctcMax} LPA`}</div>
+                      
+                    )}
+                    <div><strong>Experience:</strong> {`${selectedJob.experienceMin} - ${selectedJob.experienceMax} years`}</div>
                     <div>
                       <strong>Posted On:</strong>{" "}
                       {new Date(selectedJob.createdAt).toLocaleString('en-US', {
@@ -298,8 +302,7 @@ const AdminDashboard = () => {
                         hour12: true,
                       })}
                     </div>
-                    <div><strong>Posted By:</strong> 
-                      { selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'SuperAdmin' }
+                    <div><strong>Posted By:</strong> {selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'SuperAdmin' }
                     </div>
                   </div>
                 </div>

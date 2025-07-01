@@ -151,23 +151,28 @@ export default function JobPostingForm() {
       toast.error("Experience Min cannot be greater than Max");
       return;
     }
+
+    if(!selectedInstitutions){
+      toast.error("Select Institution");
+      return;
+    }
     
     const formData = {
       jobTitle,
       location:selectedLocation.value,
-      gender:selectedGender.value,
+      gender:selectedGender?.value || '',
       institution:selectedInstitutions.value,
       department,
       jobCategory,
       designation,
       grade,
-      jobType:selectedJobType.value,
-      hiringType:selectedHiringType.value,
+      jobType:selectedJobType?.value || '',
+      hiringType:selectedHiringType?.value || '',
       numberOfOpenings: parseInt(numberOfOpenings),
       jobDescription,
-      ctcCurrency:selectedCtcOptions.value,
-      ctcMin: parseFloat(selectedCtcMin.value),
-      ctcMax: parseFloat(selectedCtcMax.value),
+      ctcCurrency:selectedCtcOptions?.value || '',
+      ctcMin: parseFloat(selectedCtcMin?.value || ''),
+      ctcMax: parseFloat(selectedCtcMax?.value || ''),
       experienceMin: parseInt(experienceMin),
       experienceMax: parseInt(experienceMax),
       importantSkills: skills
@@ -508,7 +513,7 @@ export default function JobPostingForm() {
             />
 
             <div className="mt-4">
-              <label className="text-lg font-semibold">CTC Details <span className="text-gray-500">(Optional: For internal use)</span></label>
+              <label className="text-lg font-semibold">CTC Details [LPA] <span className="text-gray-500">(Optional: For internal use)</span></label>
               <div className="flex gap-4 mt-2">
                 <Select 
                   name="ctcCurrency" 
