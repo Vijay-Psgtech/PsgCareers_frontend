@@ -86,14 +86,15 @@ export default function WorkExperience({ data = {}, updateFormData, jobCategory 
       (entry.currentlyWorking || entry.to) &&
       (!entry.to || new Date(entry.from) <= new Date(entry.to));
 
-    newErrors.teaching = form.teaching.map(e => isValidEntry(e) ? null : 'Please complete all fields.');
-    if (newErrors.teaching.some(Boolean)) valid = false;
-
-    if (effectiveJobCategory !== 'Teaching') {
+    if (effectiveJobCategory == 'Teaching')
+    {
+      newErrors.teaching = form.teaching.map(e => isValidEntry(e) ? null : 'Please complete all fields.');
+      if (newErrors.teaching.some(Boolean)) valid = false;
+    } else {
       newErrors.industry = form.industry.map(e => isValidEntry(e) ? null : 'Please complete all fields.');
       if (newErrors.industry.some(Boolean)) valid = false;
     }
-
+    
     setErrors(newErrors);
     return valid;
   };
@@ -106,24 +107,48 @@ export default function WorkExperience({ data = {}, updateFormData, jobCategory 
     formData.append('userId', userId);
     formData.append('jobId', jobId);
 
-    const teachingArray = form.teaching.map((item) => {
+    const teachingArray = form.teaching.map((item,idx) => {
       if (item.certificate === 'Yes' && item.certificateFile instanceof File) {
-        formData.append('teachingCertificates', item.certificateFile);
+        formData.append(`teachingCertificates_${idx}`, item.certificateFile);
         return { ...item, certificate: item.certificateFile.name };
       }
       return { ...item, certificateFile: undefined };
     });
 
-    const industryArray = form.industry.map((item) => {
+    const industryArray = form.industry.map((item,idx) => {
       if (item.certificate === 'Yes' && item.certificateFile instanceof File) {
-        formData.append('industryCertificates', item.certificateFile);
+        formData.append(`industryCertificates_${idx}`, item.certificateFile);
         return { ...item, certificate: item.certificateFile.name };
       }
       return { ...item, certificateFile: undefined };
     });
 
-    formData.append('teaching', JSON.stringify(teachingArray));
-    formData.append('industry', JSON.stringify(industryArray));
+    const cleanedTeaching = teachingArray.filter(item => {
+      return (
+        item.designation?.trim() ||
+        item.institution?.trim() ||
+        item.specialization?.trim() ||
+        item.address?.trim() ||
+        item.certificate?.trim() ||
+        item.from ||
+        item.to
+      )
+    });
+
+    const cleanedIndustry = industryArray.filter(item => {
+      return (
+        item.designation?.trim() ||
+        item.institution?.trim() ||
+        item.specialization?.trim() ||
+        item.address?.trim() ||
+        item.certificate?.trim() ||
+        item.from ||
+        item.to
+      )
+    });
+
+    formData.append('teaching', JSON.stringify(cleanedTeaching));
+    formData.append('industry', JSON.stringify(cleanedIndustry));
 
     try {
       const res = await axiosInstance.post('/api/workExperience/save', formData, {
