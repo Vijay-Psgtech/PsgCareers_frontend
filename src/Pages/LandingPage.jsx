@@ -134,6 +134,7 @@ export default function LandingPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2 }}
+            loading="lazy"
           />
         </AnimatePresence>
         <div className="absolute inset-0 bg-black/60 flex flex-col justify-center items-center text-white px-4 z-20 text-center">
@@ -144,6 +145,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            loading="lazy"
           />
           <motion.h1
             className="text-4xl sm:text-5xl font-bold font-serif mb-2"
@@ -175,6 +177,7 @@ export default function LandingPage() {
               src={image1}
               alt="PSG Illustration"
               className="w-full h-full bg-contain mb-6"
+              loading="lazy"
             />
             <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">
               PSG & Son's Charities
@@ -405,6 +408,7 @@ export default function LandingPage() {
                 src={staticTestimonials[idx % staticTestimonials.length].image}
                 alt="Testimonial"
                 className="inline-block w-24 h-24 rounded-full border-4 border-blue-700 mb-4"
+                loading="lazy"
               />
               <p className="italic text-lg text-blue-900">
                 “{staticTestimonials[idx % staticTestimonials.length].message}”
