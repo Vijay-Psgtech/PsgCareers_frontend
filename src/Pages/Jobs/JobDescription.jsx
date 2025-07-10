@@ -10,11 +10,12 @@ import { toast } from 'react-toastify';
 
 function DetailItem({ icon: Icon, label, value }) {
   return (
-    <div className="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-      <Icon className="w-5 h-5 mt-1 text-purple-600 dark:text-purple-400" />
-      <p>
-        <span className="font-medium text-gray-800 dark:text-gray-200">{label}:</span> {value}
-      </p>
+    <div className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300 break-words">
+      <Icon className="mt-1 shrink-0 text-purple-600 dark:text-purple-400" />
+      <div className="flex flex-col min-w-0">
+        <span className="font-medium">{label}:</span>
+        <span className="whitespace-pre-wrap break-words">{value}</span>
+      </div>
     </div>
   );
 }
@@ -26,7 +27,6 @@ export default function JobDescription() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if user came from LandingPage (via state)
   const fromLanding = location.state?.fromLanding === true;
 
   const handleApplyClick = () => {
@@ -54,7 +54,11 @@ export default function JobDescription() {
   }, [id]);
 
   if (!job) {
-    return <div className="p-10 text-center text-gray-600 dark:text-gray-300 text-lg">Loading job details...</div>;
+    return (
+      <div className="p-10 text-center text-gray-600 dark:text-gray-300 text-lg">
+        Loading job details...
+      </div>
+    );
   }
 
   const badgeColor =
@@ -72,12 +76,14 @@ export default function JobDescription() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-14 grid md:grid-cols-3 gap-10">
-        {/* Main Content */}
+        {/* Main Job Description */}
         <div className="md:col-span-2 space-y-10">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow p-8">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">Job Summary</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
+              Job Description
+            </h2>
             <p
-              className="text-gray-700 dark:text-gray-300 leading-relaxed"
+              className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line"
               dangerouslySetInnerHTML={{ __html: job.jobDescription }}
             />
           </div>
@@ -98,10 +104,12 @@ export default function JobDescription() {
           </div>
         </div>
 
-        {/* Job Details Sidebar */}
-        <aside className="bg-white dark:bg-gray-900 shadow rounded-2xl p-8 border space-y-5 h-[500px]">
+        {/* Sidebar */}
+        <aside className="bg-white dark:bg-gray-900 shadow rounded-2xl p-6 md:p-8 border space-y-5 max-h-[600px] overflow-auto">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-gray-700 dark:text-white">Job Details</h3>
+            <h3 className="text-xl font-bold text-gray-700 dark:text-white">
+              Job Details
+            </h3>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${badgeColor}`}>
               {job.jobCategory}
             </span>
