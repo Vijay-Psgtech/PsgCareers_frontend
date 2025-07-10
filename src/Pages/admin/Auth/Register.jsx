@@ -264,7 +264,7 @@ const Register = () => {
                     <h2 className="text-xl font-semibold mt-6 mb-2">5. Contact Us</h2>
                     <p>
                         If you have questions about this policy, email us at
-                        <a href="mailto:privacy@example.com" className="text-blue-600 underline"> privacy@example.com</a>.
+                        <a href="mailto:careers@psginstitutions.in" className="text-blue-600 underline"> careers@psginstitutions.in</a>.
                     </p>
                     
                     <button onClick={() => setOpen(false)} className="mt-4 text-sm text-blue-600 underline">Close</button>
