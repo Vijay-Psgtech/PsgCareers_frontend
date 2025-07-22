@@ -8,6 +8,7 @@ import image1 from "../assets/images/image_1.webp";
 import { useAuth } from "../Context/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const carouselImages = ["/About2.jpg", "/About3.jpg"];
 
@@ -118,6 +119,25 @@ export default function LandingPage() {
       toast.error(errorMsg);
     }
   };
+
+  useEffect(() => {
+    const trackLandingVisit = async () => {
+      try {
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        const visitorId = result.visitorId;
+
+        await axiosInstance.post('/api/visitors/landing-visit', {
+          fingerprint: visitorId
+        });
+      } catch (err) {
+        console.error('Error tracking landing visit:', err);
+      }
+    };
+
+    trackLandingVisit();
+  }, []);
+
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-blue-900 font-sans">

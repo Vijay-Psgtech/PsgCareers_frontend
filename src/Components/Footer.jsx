@@ -7,26 +7,17 @@ import {
 import axiosInstance from "../utils/axiosInstance";
 
 const Footer = () => {
-  const [visitors, setVisitors] = useState(null);
-  const userId = "PSG-VISITOR";
-  const institution = "PSG";
-
+  const [count, setCount] = useState(0);
   useEffect(() => {
     const fetchVisitorCount = async () => {
       try {
-        // Track visitor
-        await axiosInstance.post(`/api/visitors/${userId}`, { institution });
-        // Get updated count
-        const res = await axiosInstance.get(`/api/visitors/${userId}`, {
-          params: { institution },
-        });
-        if (res.data?.count !== undefined) {
-          setVisitors(res.data.count);
-        }
+        const res = await axiosInstance.get('/api/visitors/landing-visit-count'); // Optional optimization
+        setCount(res.data.uniqueCount);
       } catch (err) {
-        console.error("Visitor tracking failed:", err);
+        console.error('Error fetching visitor count:', err);
       }
     };
+
     fetchVisitorCount();
   }, []);
 
@@ -96,11 +87,11 @@ const Footer = () => {
             {/* Visitor Count - More SEO friendly */}
             <div className="pt-6 text-sm font-light text-gray-600">
               <span>
-                {visitors !== null ? (
+                {count !== null ? (
                   <>
                    Page Visits:{" "}
                     <span className="font-bold text-blue-700 animate-pulse">
-                      {visitors}
+                      {count}
                     </span>
                   </>
                 ) : (
