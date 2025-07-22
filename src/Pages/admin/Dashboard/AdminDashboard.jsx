@@ -5,7 +5,8 @@ import {CircularProgressbar,buildStyles} from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import { FaSearch,FaBriefcase } from 'react-icons/fa';
 import { useAuth } from "../../../Context/AuthContext";
-import Select from "react-select"
+import Select from "react-select";
+import "quill/dist/quill.snow.css";
 
 const AdminDashboard = () => {
     const [jobs,setJobs] = useState([]);
@@ -195,8 +196,15 @@ const AdminDashboard = () => {
                 <strong className="text-gray-700">{job.institution}</strong> – {job.jobCategory}
               </p>
 
-              {/* Job Title */}
-              <h3 className="text-lg font-semibold text-gray-800 leading-snug truncate">{job.jobTitle}</h3>
+              {/* Job Title + Department (if available) */}
+                <div className="flex items-center gap-2 text-sm text-gray-800 font-semibold truncate">
+                  <h3 className="truncate">
+                    {job.jobTitle}
+                  </h3>
+                  {job.department && (
+                    <span className="text-gray-500 truncate hidden sm:inline">– {job.department}</span>
+                  )}
+                </div>
 
               {/* Progress Bar */}
               <div
@@ -276,6 +284,7 @@ const AdminDashboard = () => {
                     <div><strong>Job ID:</strong> {selectedJob.jobId}</div>
                     <div><strong>Job Title:</strong> {selectedJob.jobTitle}</div>
                     <div><strong>Institution:</strong> {selectedJob.institution}</div>
+                    <div><strong>Department:</strong> {selectedJob.department}</div>
                     <div><strong>Location:</strong> {selectedJob.location}</div>
                     <div><strong>Category:</strong> {selectedJob.jobCategory}</div>
                     <div><strong>Job Type:</strong> {selectedJob.jobType}</div>
@@ -285,7 +294,17 @@ const AdminDashboard = () => {
                       ))
                       }
                     </div>
-                    <div><strong>Job Description:</strong><div dangerouslySetInnerHTML={{ __html: selectedJob.jobDescription }}/></div>
+                    <div><strong>Job Description:</strong><div className="text-gray-800 leading-relaxed
+                      prose max-w-none
+                      [&_p]:mb-1
+                      [&_strong]:font-semibold
+                      [&_li[data-list='bullet']]:list-disc
+                      [&_li[data-list='bullet']]:ml-6
+                      [&_li[data-list='ordered']]:list-decimal
+                      [&_li[data-list='ordered']]:ml-6
+                      [&_li]:mb-1
+                      [&_u]:underline" dangerouslySetInnerHTML={{ __html: selectedJob.jobDescription }}/>
+                    </div>
                     {selectedJob.ctcMin && (
                       <div><strong>CTC:</strong> {`${selectedJob.ctcMin || ''} to ${selectedJob.ctcMax} LPA`}</div>
                       

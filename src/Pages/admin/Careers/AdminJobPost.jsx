@@ -103,10 +103,17 @@ export default function JobPostingForm() {
   }
   {/*--DropDown options--*/}
 
-  const validateForm = () =>{
-    const hasRequiredFields = jobTitle && jobCategory && parseInt(experienceMin);
-    setIsFormValid(hasRequiredFields);
-  }
+
+  useEffect(() => {
+    const isValid =
+      jobTitle?.trim() &&
+      jobCategory?.trim() &&
+      experienceMin !== null &&
+      experienceMin !== undefined && experienceMin!== '';
+
+    setIsFormValid(Boolean(isValid));
+  }, [jobTitle, jobCategory, experienceMin]);
+  
 
   const ResetSelectedForms = () =>{
     setJobTitle('');
@@ -139,16 +146,21 @@ export default function JobPostingForm() {
 
     const ctcMin = parseFloat(selectedCtcMin);
     const ctcMax = parseFloat(selectedCtcMax);
-    const minExperience = parseInt(experienceMin);
-    const maxExperience = parseInt(experienceMax);
+    const minExperience = experienceMin !== '' ? parseInt(experienceMin, 10) : null;
+    const maxExperience = experienceMax !== '' ? parseInt(experienceMax, 10) : null;
 
     if (ctcMin && ctcMax && ctcMin > ctcMax) {
       toast.error("CTC Min cannot be greater than Max");
       return;
     }
 
+    if (maxExperience === null || isNaN(maxExperience)) {
+      toast.error("Maximum experience is required");
+      return;
+    }
+
     if (minExperience > maxExperience) {
-      toast.error("Experience Min cannot be greater than Max");
+      toast.error("Minimum experience cannot be greater than maximum experience");
       return;
     }
 
@@ -159,7 +171,7 @@ export default function JobPostingForm() {
     
     const formData = {
       jobTitle,
-      location:selectedLocation.value,
+      location:selectedLocation?.value || '',
       gender:selectedGender?.value || '',
       institution:selectedInstitutions.value,
       department,
@@ -282,8 +294,6 @@ export default function JobPostingForm() {
   useEffect(()=>{
     fetchLocations();
     fetchInstitutions();
-    validateForm();
-
     // react quill text-editor
     if (quillRef.current && !quillRef.current.__quill) {
       const quill = new Quill(quillRef.current, {
@@ -336,7 +346,6 @@ export default function JobPostingForm() {
                     value={jobTitle}
                     onChange={(e) => {
                       setJobTitle(e.target.value);
-                      validateForm()
                     }}
                     placeholder="Enter title" 
                     className="border p-2 rounded w-full mt-1" 
@@ -416,8 +425,7 @@ export default function JobPostingForm() {
                       value="Teaching"
                       checked={jobCategory === "Teaching"}
                       onChange={(e) => {
-                        setJobCategory(e.target.value),
-                        validateForm()
+                        setJobCategory(e.target.value);
                       }}
                       className="accent-blue-600"
                     />
@@ -430,8 +438,7 @@ export default function JobPostingForm() {
                       value="Non Teaching"
                       checked={jobCategory === "Non Teaching"}
                       onChange={(e) => {
-                        setJobCategory(e.target.value),
-                        validateForm()
+                        setJobCategory(e.target.value);
                       }}
                       className="accent-blue-600"
                     />
@@ -555,8 +562,7 @@ export default function JobPostingForm() {
                   className="border p-2 rounded w-full" 
                   value={experienceMin}
                   onChange={(e)=>{
-                    setExperienceMin(e.target.value),
-                    validateForm()  
+                    setExperienceMin(e.target.value);
                   }}
                 />
                 <input 
@@ -567,7 +573,6 @@ export default function JobPostingForm() {
                   value={experienceMax}
                   onChange={(e)=>{
                     setExperienceMax(e.target.value)
-                    validateForm()
                   }}
                 />
               </div>

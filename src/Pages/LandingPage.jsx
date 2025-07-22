@@ -148,10 +148,20 @@ export default function LandingPage() {
             loading="lazy"
           />
           <motion.h1
-            className="text-4xl sm:text-5xl font-bold font-serif mb-2"
+            className="text-4xl sm:text-5xl font-extrabold font-serif mb-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
+          >
+            <span className="bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent animate-pulse">
+             PSG Careers
+            </span>
+          </motion.h1>
+          <motion.h1
+            className="text-2xl sm:text-4xl font-bold font-serif mb-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
           >
             <span className="bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent">
               Build Your Future with Us
@@ -161,7 +171,7 @@ export default function LandingPage() {
             className="text-lg sm:text-xl max-w-3xl text-white/90"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.9 }}
           >
             Explore exciting opportunities in a vibrant academic and research
             environment.
@@ -171,7 +181,7 @@ export default function LandingPage() {
 
       {/* About & Login Section */}
       <section className="py-10 bg-gradient-to-br from-blue-50 to-white">
-        <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg flex flex-col lg:flex-row h-auto lg:h-[550px]">
+        <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg flex flex-col lg:flex-row h-auto lg:h-[600px]">
           <div className="w-full lg:w-3/4 flex flex-col justify-center px-6 py-10 bg-white">
             <img
               src={image1}
@@ -393,7 +403,7 @@ export default function LandingPage() {
         </section>
 
         {/* Testimonials */}
-        <section className="py-16 mx-auto max-w-4xl px-4">
+        {/* <section className="py-16 mx-auto max-w-4xl px-4">
           <h2 className="text-2xl font-semibold text-center mb-8">
             What Our People Say
           </h2>
@@ -421,7 +431,7 @@ export default function LandingPage() {
               </p>
             </motion.div>
           )}
-        </section>
+        </section> */}
       </main>
 
       <Footer />

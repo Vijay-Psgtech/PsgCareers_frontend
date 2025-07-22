@@ -288,7 +288,7 @@ function CareerPage() {
         {renderJobSection("Teaching")}
         {renderJobSection("Non Teaching")}
 
-        <Carousel />
+        {/* <Carousel /> */}
       </main>
       <Footer />
     </>
