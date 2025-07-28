@@ -108,8 +108,8 @@ export default function PersonalDetails({updateFormData}) {
 
     if (type === "file") {
       const file = files[0];
-      if (file && file.size > 20 * 1024 * 1024) {
-        alert(`${name === "photo" ? "Photo" : "Resume"} must be under 20MB`);
+      if (file && file.size > 1 * 1024 * 1024) {
+        toast.error(`${name === "photo" ? "Photo" : "resume"} must be under 1MB`);
         return;
       }
       setForm((prev) => ({ ...prev, [name]: file }));
@@ -258,14 +258,14 @@ export default function PersonalDetails({updateFormData}) {
       toast.success("Personal Details updated successfully");
       updateFormData(form);
     } else {
-      alert("Failed to save personal details.");
+      toast.error("Failed to save personal details.");
     }
   } catch (err) {
     console.error("Submission error:", err);
     if (err.response) {
-      alert(`Error: ${err.response.data.message || "Submission failed"}`);
+      toast.error(`Error: ${err.response.data.message || "Submission failed"}`);
     } else {
-      alert("Submission failed. Please try again.");
+      toast.error("Submission failed. Please try again.");
     }
   }
 };
@@ -489,7 +489,7 @@ export default function PersonalDetails({updateFormData}) {
   {/* Photo Upload */}
   <div>
     <label htmlFor="photo" className="block text-sm font-medium mb-2">
-      Photo (Max 2MB)
+      Photo (Max 1MB)
     </label>
     <input
       id="photo"
@@ -513,7 +513,7 @@ export default function PersonalDetails({updateFormData}) {
   {/* Resume Upload */}
   <div>
     <label htmlFor="resume" className="block text-sm font-medium mb-2">
-      Resume (Max 2MB)
+      Resume (Max 1MB)
     </label>
     <input
       id="resume"

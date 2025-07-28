@@ -4,6 +4,7 @@ import { useAuth } from "../Context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { LayoutDashboard, Briefcase, PlusCircle, Users, UserCircle, BriefcaseBusiness, ChevronUp, ChevronDown, UserPlus, BarChart, FileText, FileWarning } from 'lucide-react';
 import useAutoLogout from "../hooks/useAutoLogout";
 import { toast } from "react-toastify";
 
@@ -12,18 +13,41 @@ export default function AdminDashboardLayout({ children }) {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [openMenus, setOpenMenus] = useState({});
 
   const allMenus = [
-    { name: 'Dashboard', path: '/admin/dashboard' },
-    { name: 'Jobs Lists', path: '/admin/jobs-list' },
-    { name: 'Add Job posting', path: '/admin/create-jobs' },
-    { name: 'Admin Users Lists', path: '/admin/userLists' },
-    { name: 'Profile', path: '/admin/profile' },
+    { name: 'Dashboard', icon:LayoutDashboard, path: '/admin/dashboard' },
+    { 
+      name: 'Jobs', 
+      icon:BriefcaseBusiness, 
+      submenu:[
+        { name: 'Job Lists', icon: Briefcase, path: '/admin/jobs-list' },
+        { name: 'Add Jobs', icon: PlusCircle, path: '/admin/create-jobs' },
+      ]
+      
+    },
+    {
+      name: 'Admin Users', 
+      icon: Users,
+      submenu:[
+        { name: 'Admin Users Lists', icon:Users, path: '/admin/userLists' },
+        { name: 'Add Admin Users', icon:UserPlus, path: '/admin-management/create' },
+      ]
+    },
+    { name: 'Profile', icon:UserCircle, path: '/admin/profile' },
+    { 
+      name: 'Reports', 
+      icon:BarChart, 
+      submenu:[
+        { name: 'Applied Candidates', icon: FileText, path: '/admin/applied-candidates'},
+        { name: 'Profiled Candidates', icon: FileWarning, path: 'admin/unregistered-candidates' }
+      ]
+    },
   ];
 
   const menus = auth.role === 'superadmin'
     ? allMenus
-    : allMenus.filter(menu => ['Dashboard', 'Profile'].includes(menu.name));
+    : allMenus.filter(menu => ['Dashboard', 'Profile', 'Reports'].includes(menu.name));
 
   useEffect(() => {
     if (auth.role === 'user') {
@@ -35,6 +59,13 @@ export default function AdminDashboardLayout({ children }) {
   if (auth?.token) {
     useAutoLogout(15 * 60 * 1000); // 15 minutes
   }
+
+  const toggleMenu = (label) => {
+    setOpenMenus((prev) =>({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
@@ -48,14 +79,50 @@ export default function AdminDashboardLayout({ children }) {
         </div>
         <nav className="flex flex-col p-4 space-y-2">
           {menus.map((menu, idx) => (
-            <Link
-              key={idx}
-              to={menu.path}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center p-2 rounded-md hover:bg-blue-500 ${location.pathname === menu.path ? 'bg-blue-500' : ''}`}
-            >
-              <span className="font-semibold">{menu.name}</span>
-            </Link>
+            <div key={idx}>
+              {menu.submenu ? (
+                <>
+                  <div 
+                    onClick={()=>toggleMenu(menu.name)}
+                    className="flex items-center justify-between cursor-pointer hover::bg-blue-500 px-4 py-2 rounded"
+                  >
+                    <div className="flex items-center gap-3">
+                      <menu.icon className="w-5 h-5"/>
+                      <span className="font-semibold">{menu.name}</span>
+                    </div>
+                    <span className="font-semibold">{openMenus[menu.name] ? <ChevronUp /> : <ChevronDown />}</span>
+                  </div>
+                  {openMenus[menu.name] && (
+                    <div className="pl-6 mt-1 space-y-1">
+                      {menu.submenu.map((sub, subIndex) => (
+                        <Link
+                          key={subIndex}
+                          to={sub.path}
+                          className={`flex items-center gap-3 p-2 border-b-2 rounded-md hover:bg-blue-500 ${location.pathname === sub.path ? 'bg-blue-500' : ''}`}
+                        >
+                           <div className='flex items-center gap-3'>
+                                <sub.icon className='w-5 h-5' />
+                                <span>{sub.name}</span>
+                            </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ): (
+                <Link
+                  key={idx}
+                  to={menu.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-md hover:bg-blue-500 ${location.pathname === menu.path ? 'bg-blue-500' : ''}`}
+                >
+                  <menu.icon className="w-5 h-5"/>
+                  <span className="font-semibold">{menu.name}</span>
+                </Link>
+              )}
+              
+            </div>
+            
           ))}
         </nav>
       </div>

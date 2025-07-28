@@ -196,15 +196,8 @@ const AdminDashboard = () => {
                 <strong className="text-gray-700">{job.institution}</strong> – {job.jobCategory}
               </p>
 
-              {/* Job Title + Department (if available) */}
-                <div className="flex items-center gap-2 text-sm text-gray-800 font-semibold truncate">
-                  <h3 className="truncate">
-                    {job.jobTitle}
-                  </h3>
-                  {job.department && (
-                    <span className="text-gray-500 truncate hidden sm:inline">– {job.department}</span>
-                  )}
-                </div>
+              <h3 className="text-lg font-semibold text-gray-800 leading-snug truncate">{job.jobTitle}</h3>
+              <span className='text-sm text-gray-800 line-clamp-1'>{job.department}</span>
 
               {/* Progress Bar */}
               <div
