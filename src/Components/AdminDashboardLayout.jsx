@@ -40,7 +40,7 @@ export default function AdminDashboardLayout({ children }) {
       icon:BarChart, 
       submenu:[
         { name: 'Applied Candidates', icon: FileText, path: '/admin/applied-candidates'},
-        { name: 'Profiled Candidates', icon: FileWarning, path: 'admin/unregistered-candidates' }
+        { name: 'Profiled Candidates', icon: FileWarning, path: '/admin/registered-not-applied-candidates' }
       ]
     },
   ];
