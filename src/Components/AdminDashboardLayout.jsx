@@ -4,7 +4,7 @@ import { useAuth } from "../Context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
-import { LayoutDashboard, Briefcase, PlusCircle, Users, UserCircle, BriefcaseBusiness, ChevronUp, ChevronDown, UserPlus, BarChart, FileText, FileWarning } from 'lucide-react';
+import { LayoutDashboard, Briefcase, PlusCircle, Users, UserCircle, BriefcaseBusiness, ChevronUp, ChevronDown, UserPlus, BarChart, FileText, FileWarning, FileClock } from 'lucide-react';
 import useAutoLogout from "../hooks/useAutoLogout";
 import { toast } from "react-toastify";
 
@@ -40,7 +40,8 @@ export default function AdminDashboardLayout({ children }) {
       icon:BarChart, 
       submenu:[
         { name: 'Applied Candidates', icon: FileText, path: '/admin/applied-candidates'},
-        { name: 'Profiled Candidates', icon: FileWarning, path: '/admin/registered-not-applied-candidates' }
+        { name: 'Profiled Candidates', icon: FileWarning, path: '/admin/registered-not-applied-candidates' },
+        { name: 'Draft Applications', icon: FileClock,  path: '/admin/quick-applied-candidates'}
       ]
     },
   ];

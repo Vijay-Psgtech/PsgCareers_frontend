@@ -12,24 +12,7 @@ import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const carouselImages = ["/About2.jpg", "/About3.jpg"];
 
-const staticTestimonials = [
-  {
-    name: "Prof. Meenakshi Sundaram",
-    role: "Dean, Academic Affairs",
-    message:
-      "A career at PSG is not just a job—it's a mission to shape the future.",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    name: "Dr. Shruti Nair",
-    role: "Assistant Professor",
-    message:
-      "Supportive community, modern facilities, and a purpose‑driven vision.",
-    image: "https://randomuser.me/api/portraits/women/45.jpg",
-  },
-];
-
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 6;
 
 export default function LandingPage() {
   const [idx, setIdx] = useState(0);
@@ -38,6 +21,14 @@ export default function LandingPage() {
   const [filterCat, setFilterCat] = useState("Categories");
   const [filterInst, setFilterInst] = useState("Institutions");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupForm, setPopupForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    education: "",
+    resume: null,
+  });
   const jobsRef = useRef();
   const navigate = useNavigate();
 
@@ -83,6 +74,7 @@ export default function LandingPage() {
     return catMatch && instMatch && (titleMatch || descMatch);
   });
 
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleViewDetails = (jobId) => {
@@ -137,6 +129,54 @@ export default function LandingPage() {
 
     trackLandingVisit();
   }, []);
+
+  const handlePopupChange = (e) => {
+    const { name, value } = e.target;
+    setPopupForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleResumeUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPopupForm((prev) => ({ ...prev, resume: file }));
+    }
+  };
+
+  const handleResumeDelete = () => {
+    setPopupForm((prev) => ({ ...prev, resume: null }));
+  };
+
+  const handlePopupSubmit = async (e) => {
+    e.preventDefault();
+
+    if (
+      !popupForm.name ||
+      !popupForm.email ||
+      !popupForm.phone ||
+      !popupForm.education
+    ) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", popupForm.name);
+    formData.append("email", popupForm.email);
+    formData.append("phone", popupForm.phone);
+    formData.append("education", popupForm.education);
+    if (popupForm.resume) {
+      formData.append("resume", popupForm.resume);
+    }
+
+    try {
+      await axiosInstance.post("/api/applications/save-draft", formData);
+      toast.success("Draft saved successfully!");
+      setShowPopup(false);
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      toast.error("Failed to save draft.");
+    }
+  };
 
 
   return (
@@ -197,6 +237,106 @@ export default function LandingPage() {
             environment.
           </motion.p>
         </div>
+        {showPopup && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
+            <div className="bg-white/90 border border-blue-200 p-6 rounded-2xl w-full max-w-lg shadow-2xl">
+              <h3 className="text-2xl font-semibold text-blue-800 mb-6 text-center">
+                Easy Apply Form
+              </h3>
+              <form onSubmit={handlePopupSubmit} className="space-y-4">
+                <input
+                  name="name"
+                  value={popupForm.name}
+                  onChange={handlePopupChange}
+                  placeholder="Name"
+                  className="w-full border border-amber-200 px-2 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  name="email"
+                  value={popupForm.email}
+                  onChange={handlePopupChange}
+                  placeholder="Email"
+                  className="w-full border border-amber-200 px-2 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  name="phone"
+                  value={popupForm.phone}
+                  onChange={handlePopupChange}
+                  placeholder="Mobile Number"
+                  className="w-full border border-amber-200 px-2 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  name="education"
+                  value={popupForm.education}
+                  onChange={handlePopupChange}
+                  placeholder="Highest Qualification"
+                  className="w-full border border-amber-200 px-2 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload Resume
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleResumeUpload}
+                    className="w-full text-sm text-gray-700 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                  />
+                  {popupForm.resume && (
+                    <div className="mt-2 flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+                      <span className="text-sm text-gray-700 truncate w-4/5">
+                        {popupForm.resume.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleResumeDelete}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        ✕
+                      </button>
+
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleResumeUpload}
+                        className="w-full text-sm text-gray-700 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                      />
+                      {popupForm.resume && (
+                        <div className="mt-2 flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+                          <span className="text-sm text-gray-700 truncate w-4/5">
+                            {popupForm.resume.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleResumeDelete}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-between pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowPopup(false)}
+                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* About & Login Section */}
@@ -303,6 +443,21 @@ export default function LandingPage() {
                 </a>
               </p>
             </form>
+            {/* Easy Apply Without Registration */}
+            <div className="mt-10 p-6 bg-blue-100 rounded-xl">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                Don’t want to register?
+              </h3>
+              <p className="text-sm text-blue-700 mb-4">
+                Share your basic details and resume – we’ll reach out if there's a suitable match!
+              </p>
+              <button
+                onClick={() => setShowPopup(true)}
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+              >
+                Submit Without Registering
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -421,37 +576,6 @@ export default function LandingPage() {
             </button>
           </div>
         </section>
-
-        {/* Testimonials */}
-        {/* <section className="py-16 mx-auto max-w-4xl px-4">
-          <h2 className="text-2xl font-semibold text-center mb-8">
-            What Our People Say
-          </h2>
-          {staticTestimonials.length > 0 && (
-            <motion.div
-              className="bg-blue-50 p-8 rounded-xl shadow-inner text-center"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-            >
-              <img
-                src={staticTestimonials[idx % staticTestimonials.length].image}
-                alt="Testimonial"
-                className="inline-block w-24 h-24 rounded-full border-4 border-blue-700 mb-4"
-                loading="lazy"
-              />
-              <p className="italic text-lg text-blue-900">
-                “{staticTestimonials[idx % staticTestimonials.length].message}”
-              </p>
-              <h4 className="text-blue-700 font-semibold mt-2">
-                {staticTestimonials[idx % staticTestimonials.length].name}
-              </h4>
-              <p className="text-blue-500">
-                {staticTestimonials[idx % staticTestimonials.length].role}
-              </p>
-            </motion.div>
-          )}
-        </section> */}
       </main>
 
       <Footer />

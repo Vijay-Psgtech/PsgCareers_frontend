@@ -41,6 +41,7 @@ const Declaration = lazy(() => import("./forms/Declaration"));
 
 const AppliedCandidates = lazy(() => import("./Pages/admin/Reports/AppliedCandidates"));
 const RegisteredCandidates = lazy(() => import("./Pages/admin/Reports/RegisteredCandidates"));
+const DraftApplications = lazy(() => import("./Pages/admin/Reports/DraftApplications"));
 
 function App() {
   return (
@@ -129,6 +130,13 @@ function App() {
             <PrivateRoute>
               <AdminDashboardLayout>
                 <RegisteredCandidates />
+              </AdminDashboardLayout>
+            </PrivateRoute>
+          } />
+          <Route path="/admin/quick-applied-candidates" element={
+            <PrivateRoute>
+              <AdminDashboardLayout>
+                <DraftApplications />
               </AdminDashboardLayout>
             </PrivateRoute>
           } />
