@@ -6,6 +6,8 @@ import * as XLSX from 'xlsx';
 import { saveAs } from "file-saver";
 import { FaSearch } from 'react-icons/fa';
 import Select from "react-select";
+import { useNavigate } from 'react-router-dom';
+import { Download, FileText, XCircle } from 'lucide-react';
 
 const AppliedCandidates = () => {
     const [candidates, setCandidates] = useState([]);
@@ -13,6 +15,7 @@ const AppliedCandidates = () => {
     const {auth} = useAuth();
     const [filtered, setFiltered] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
+    const navigate = useNavigate();
 
     const [search, setSearch] = useState('');
     const [institutionOptions,setInstitutionOptions] = useState([]);
@@ -134,9 +137,26 @@ const AppliedCandidates = () => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const paginatedData = filtered.slice((currentPage -1)*itemsPerPage,currentPage*itemsPerPage);
 
+    const candidateDetails = (userId,categoryJob) => {
+        navigate(`/admin/candidateDetails/${userId}/0001`,{state:{categoryJob}});
+    }
+
     return (
         <div className="p-6 bg-white rounded-xl shadow">
-            <h2 className="text-xl font-bold mb-4">Applied Candidates Report</h2>
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                    <h2 className="text-2xl font-bold">Applied Candidates Report</h2>
+                    <span className="bg-blue-100 text-blue-700 text-sm font-medium px-3 py-1 rounded-full">
+                    {candidates.length} candidates
+                    </span>
+                </div>
+                <button
+                    onClick={()=>exportToExcel(filtered)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                >
+                    Export to Excel
+                </button>
+            </div>
 
             {/* Filters */}
             <div className="flex flex-wrap gap-4 mb-4">
@@ -168,24 +188,32 @@ const AppliedCandidates = () => {
                     className="min-h-[40px]  rounded-lg" 
                     isClearable
                 />
-                <input
-                    type="date"
-                    value={fromDate}
-                    onChange={e => setFromDate(e.target.value)}
-                    className="border p-2 rounded"
-                />
-                <input
-                    type="date"
-                    value={toDate}
-                    onChange={e => setToDate(e.target.value)}
-                    className="border p-2 rounded"
-                />
-                <button
-                    onClick={()=>exportToExcel(filtered)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                >
-                Export to Excel
-                </button>
+                <div className="flex items-center gap-2">
+                    <input
+                        type="date"
+                        value={fromDate}
+                        onChange={e => setFromDate(e.target.value)}
+                        className="border p-2 rounded"
+                    />
+                    <input
+                        type="date"
+                        value={toDate}
+                        onChange={e => setToDate(e.target.value)}
+                        className="border p-2 rounded"
+                    />
+                    <button
+                        onClick={() => {
+                            setFromDate('');
+                            setToDate('');
+                        }}
+                        className="text-md text-blue-600 hover:underline flex items-center gap-1"
+                        >
+                        <XCircle className="w-5 h-5" />
+                        Reset Dates
+                    </button>
+                </div>
+                
+                
             </div>
 
             {loading ? (
@@ -208,20 +236,27 @@ const AppliedCandidates = () => {
                             {paginatedData.map((c, index) => (
                                 <tr key={index} className="hover:bg-gray-50">
                                     <td className="px-4 py-2">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                                    <td className="px-4 py-2">{c.name}</td>
+                                    <td className="px-4 py-2 text-blue-600 cursor-pointer hover:underline" onClick={()=>candidateDetails(c._id,c.jobCategory)}>{c.name}</td>
                                     <td className="px-4 py-2">{c.email}</td>
                                     <td className="px-4 py-2">{c.mobile}</td>
-                                    <td className="px-4 py-2">
-                                        <div className="relative group cursor-pointer text-blue-600 underline">
-                                        {c.totalApplications}
-                                        <div className="absolute hidden group-hover:block bg-white border shadow-md p-2 rounded text-sm z-10 w-60">
-                                            <strong>Jobs:</strong>
-                                            <ul className="list-disc ml-4">
-                                            {c.jobTitles.map((title, idx) => (
-                                                <li key={idx}>{title}</li>
-                                            ))}
-                                            </ul>
-                                        </div>
+                                    <td className="px-4 py-2 text-center">
+                                        <div className="relative group inline-block cursor-pointer">
+                                            <span className={`px-3 py-1 text-sm font-semibold rounded-full 
+                                            ${c.totalApplications > 1 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                            {c.totalApplications}
+                                            </span>
+
+                                            {/* Tooltip on hover */}
+                                            {c.jobTitles?.length > 0 && (
+                                            <div className="absolute hidden group-hover:block bg-white border border-gray-200 shadow-lg p-3 rounded-md text-sm z-50 w-64 top-full mt-2 left-1/2 -translate-x-1/2">
+                                                <strong className="block mb-1 text-gray-700">Jobs Applied:</strong>
+                                                <ul className="list-disc list-inside text-gray-600">
+                                                {c.jobTitles.map((title, idx) => (
+                                                    <li key={idx}>{title}</li>
+                                                ))}
+                                                </ul>
+                                            </div>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="px-4 py-2">
@@ -231,24 +266,29 @@ const AppliedCandidates = () => {
                                     </td>
                                     <td className="px-4 py-2">
                                         {c.resume ? (
+                                            <div className="flex items-center gap-2">
+                                            {/* File Icon with label */}
+                                            <div className="flex items-center gap-1 text-gray-700">
+                                                <FileText className="h-4 w-4 text-gray-500" />
+                                                <span className="text-sm">Resume</span>
+                                            </div>
+
+                                            {/* Download icon button */}
                                             <a
-                                            href={`${import.meta.env.VITE_API_BASE_URL}/${c.resume}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                                            download
+                                                href={`${import.meta.env.VITE_API_BASE_URL}/${c.resume}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800"
+                                                title="Download Resume"
+                                                download
                                             >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round"
-                                                d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M7 10l5 5m0 0l5-5m-5 5V4" />
-                                            </svg>
-                                            Download
+                                                <Download className="h-5 w-5" />
                                             </a>
+                                            </div>
                                         ) : (
                                             <span className="text-gray-400 italic">No resume</span>
                                         )}
-                                    </td>
+                                        </td>
                                 </tr>
                             ))}
                         </tbody>

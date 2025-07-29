@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../../utils/axiosInstance';
-import { Download, Search } from 'lucide-react';
+import { Download, Search, XCircle } from 'lucide-react';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
 import Select from "react-select";
@@ -86,7 +86,17 @@ const RegisteredCandidates = () => {
 
   return (
     <div className="p-6 bg-white rounded-xl shadow">
-      <h2 className="text-xl font-bold mb-4">Registered Candidates (Not Applied)</h2>
+        <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold">Registered Candidates (not applied)</h2>
+                <span className="bg-blue-100 text-blue-700 text-sm font-medium px-3 py-1 rounded-full">
+                {data.length} candidates
+                </span>
+            </div>
+            <button onClick={exportToExcel} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Export to Excel
+            </button>
+        </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4 items-center">
@@ -110,11 +120,22 @@ const RegisteredCandidates = () => {
             className="min-h-[40px]  rounded-lg" 
             isClearable
         />
-        <input type="date" className="border p-2 rounded" value={fromDate} onChange={e => setFromDate(e.target.value)} />
-        <input type="date" className="border p-2 rounded" value={toDate} onChange={e => setToDate(e.target.value)} />
-        <button onClick={exportToExcel} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-          Export to Excel
-        </button>
+        <div className="flex items-center gap-2">
+            <input type="date" className="border p-2 rounded" value={fromDate} onChange={e => setFromDate(e.target.value)} />
+            <input type="date" className="border p-2 rounded" value={toDate} onChange={e => setToDate(e.target.value)} />
+            <button
+                onClick={() => {
+                    setFromDate('');
+                    setToDate('');
+                }}
+                className="text-md text-blue-600 hover:underline flex items-center gap-1"
+                >
+                <XCircle className="w-5 h-5" />
+                Reset Dates
+            </button>
+        </div>
+       
+       
       </div>
 
       {/* Table */}
