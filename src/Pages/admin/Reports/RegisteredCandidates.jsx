@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../../utils/axiosInstance';
-import { Download, XCircle } from 'lucide-react';
+import { Download, FileText, XCircle } from 'lucide-react';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
 import Select from "react-select";
@@ -161,13 +161,29 @@ const RegisteredCandidates = () => {
                     <td className="px-4 py-3">{c.mobile}</td>
                     <td className="px-4 py-3">{c.jobCategory}</td>
                     <td className="px-4 py-3">{dayjs(c.createdAt).format('DD MMM YYYY')}</td>
-                    <td className="px-4 py-3">
+                     <td className="px-4 py-2">
                         {c.resume ? (
-                            <a href={c.resume} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1">
-                            <Download size={16} /> Download
+                            <div className="flex items-center gap-2">
+                            {/* File Icon with label */}
+                            <div className="flex items-center gap-1 text-gray-700">
+                                <FileText className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">Resume</span>
+                            </div>
+
+                            {/* Download icon button */}
+                            <a
+                                href={`${import.meta.env.VITE_API_BASE_URL}/${c.resume}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                                title="Download Resume"
+                                download
+                            >
+                                <Download className="h-5 w-5" />
                             </a>
+                            </div>
                         ) : (
-                            'N/A'
+                            <span className="text-gray-400 italic">No resume</span>
                         )}
                     </td>
                 </tr>

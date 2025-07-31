@@ -115,7 +115,7 @@ const AppliedCandidates = () => {
             : "",
             "Total Applications": candidate.totalApplications,
             "Latest Applied Date": candidate.latestAppliedDate
-            ? new Date(candidate.latestAppliedDate).toLocaleString()
+            ? dayjs(candidate.latestAppliedDate).format('DD MMM YYYY')
             : "",
             "Resume": candidate.resume ? `${import.meta.env.VITE_API_BASE_URL}/${candidate.resume}` : "N/A",
         }));
@@ -137,8 +137,8 @@ const AppliedCandidates = () => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const paginatedData = filtered.slice((currentPage -1)*itemsPerPage,currentPage*itemsPerPage);
 
-    const candidateDetails = (userId,categoryJob) => {
-        navigate(`/admin/candidateDetails/${userId}/0001`,{state:{categoryJob}});
+    const candidateDetails = (userId,jobCategory) => {
+        navigate(`/admin/candidateDetails/${userId}/0001`,{state:{jobCategory}});
     }
 
     return (
@@ -170,15 +170,18 @@ const AppliedCandidates = () => {
                     />
                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
                 </div>
-                <Select
-                    name="institution"
-                    options={institutionOptions}
-                    value={institution}
-                    onChange={setInstitution}
-                    placeholder="All Institutions"
-                    className="min-h-[40px] rounded-lg"
-                    isClearable
-                />
+                {auth.role === 'superadmin' && (
+                    <Select
+                        name="institution"
+                        options={institutionOptions}
+                        value={institution}
+                        onChange={setInstitution}
+                        placeholder="All Institutions"
+                        className="min-h-[40px] rounded-lg"
+                        isClearable
+                    />
+                )}
+                
                 <Select 
                     name="jobCategory"
                     options={jobCategoryOptions}

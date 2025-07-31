@@ -11,7 +11,6 @@ import { toast } from "react-toastify";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const carouselImages = ["/About2.jpg", "/About3.jpg"];
-
 const PAGE_SIZE = 6;
 
 export default function LandingPage() {
@@ -507,37 +506,45 @@ export default function LandingPage() {
       </section>
 
       {/* Job Listings */}
-      <main className="flex-grow bg-white">
+      <main className="flex-col bg-white">
         <section ref={jobsRef} className="py-12 max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-serif text-blue-900 mb-6">
             Open Positions
           </h2>
           {paginated.length > 0 ? (
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {paginated.map((job) => (
                 <motion.div
                   key={job._id}
-                  className="bg-blue-50 p-6 rounded-lg shadow hover:shadow-md transition"
+                  className="bg-white border border-blue-100 p-8 rounded-xl shadow hover:shadow-md transition"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                 >
-                  <h3 className="text-xl font-semibold text-blue-800">
+                  <h3 className="text-lg font-semibold text-indigo-900 mb-1">
                     {job.jobTitle}
                   </h3>
-                  <p className="text-blue-600">
+                  <p className="text-sm text-indigo-600 mb-1">
+                    {job.instituteName}
+                  </p>
+                  <p className="text-sm text-gray-600">
                     {job.location} | {job.jobType}
                   </p>
-                  <div className="mt-2 flex gap-4">
+                  {job.institution && (
+                    <p className="text-shadow-xs antialiased text-indigo-900 mt-3 font-mono font-light">
+                      {job.institution}
+                    </p>
+                  )}
+                  <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => handleViewDetails(job.jobId || job._id)}
-                      className="text-blue-700 hover:underline"
+                      className="text-white bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 text-sm"
                     >
-                      View Details
+                      More Details
                     </button>
                     <Link
                       to="/login"
-                      className="text-white bg-blue-700 px-4 py-2 rounded hover:bg-blue-800"
+                      className="text-white bg-purple-600 px-4 py-2 rounded hover:bg-purple-700 text-sm"
                     >
                       Apply
                     </Link>
@@ -550,29 +557,51 @@ export default function LandingPage() {
               No active job listings found.
             </p>
           )}
-
-          {/* Pagination */}
-          <div className="flex justify-center gap-4 mt-8">
+          <div className="flex justify-center items-center gap-2 mt-8">
             <button
-              disabled={page === 1}
               onClick={() => {
-                setPage((p) => p - 1);
-                jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                if (page > 1) {
+                  setPage(page - 1);
+                  jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                }
               }}
-              className="px-4 py-2 bg-blue-700 text-white rounded disabled:bg-gray-300"
+              disabled={page === 1}
+              className="px-3 py-1 rounded text-blue-700 hover:bg-blue-100 disabled:text-gray-400"
             >
-              Prev
+              ←
             </button>
 
+            {[...Array(totalPages)].map((_, index) => {
+              const pageNum = index + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => {
+                    setPage(pageNum);
+                    jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`px-4 py-2 rounded ${
+                    page === pageNum
+                      ? "bg-blue-700 text-white"
+                      : "text-blue-700 hover:bg-blue-100"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
             <button
-              disabled={page * PAGE_SIZE >= filtered.length}
               onClick={() => {
-                setPage((p) => p + 1);
-                jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                if (page < totalPages) {
+                  setPage(page + 1);
+                  jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                }
               }}
-              className="px-4 py-2 bg-blue-700 text-white rounded disabled:bg-gray-300"
+              disabled={page === totalPages}
+              className="px-2 py-2 rounded text-cyan-900 hover:bg-blue-100 disabled:text-gray-400"
             >
-              Next
+              →
             </button>
           </div>
         </section>

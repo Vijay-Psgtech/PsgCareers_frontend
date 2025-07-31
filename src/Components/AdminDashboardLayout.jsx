@@ -4,9 +4,9 @@ import { useAuth } from "../Context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
-import { LayoutDashboard, Briefcase, PlusCircle, Users, UserCircle, BriefcaseBusiness, ChevronUp, ChevronDown, UserPlus, BarChart, FileText, FileWarning, FileClock } from 'lucide-react';
 import useAutoLogout from "../hooks/useAutoLogout";
 import { toast } from "react-toastify";
+import { LayoutDashboard, Briefcase, PlusCircle, Users, UserCircle, BriefcaseBusiness, ChevronUp, ChevronDown, UserPlus, BarChart, FileText, FileWarning, FileClock } from 'lucide-react';
 
 export default function AdminDashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -15,7 +15,7 @@ export default function AdminDashboardLayout({ children }) {
   const location = useLocation();
   const [openMenus, setOpenMenus] = useState({});
 
-  const allMenus = [
+ const allMenus = [
     { name: 'Dashboard', icon:LayoutDashboard, path: '/admin/dashboard' },
     { 
       name: 'Jobs', 
@@ -48,7 +48,18 @@ export default function AdminDashboardLayout({ children }) {
 
   const menus = auth.role === 'superadmin'
     ? allMenus
-    : allMenus.filter(menu => ['Dashboard', 'Profile', 'Reports'].includes(menu.name));
+    : allMenus.map(menu => {
+      if(menu.name === 'Reports'){
+        return{
+          ...menu,
+          submenu: menu.submenu?.filter(sub => sub.name === 'Applied Candidates')
+        };
+      }
+      if (['Dashboard', 'Profile'].includes(menu.name)) {
+        return menu;
+      }
+       return null;
+    }).filter(Boolean);
 
   useEffect(() => {
     if (auth.role === 'user') {
@@ -121,9 +132,7 @@ export default function AdminDashboardLayout({ children }) {
                   <span className="font-semibold">{menu.name}</span>
                 </Link>
               )}
-              
             </div>
-            
           ))}
         </nav>
       </div>

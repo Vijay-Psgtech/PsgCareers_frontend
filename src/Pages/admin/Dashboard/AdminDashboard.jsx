@@ -5,8 +5,7 @@ import {CircularProgressbar,buildStyles} from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import { FaSearch,FaBriefcase } from 'react-icons/fa';
 import { useAuth } from "../../../Context/AuthContext";
-import Select from "react-select";
-import "quill/dist/quill.snow.css";
+import Select from "react-select"
 
 const AdminDashboard = () => {
     const [jobs,setJobs] = useState([]);
@@ -196,6 +195,7 @@ const AdminDashboard = () => {
                 <strong className="text-gray-700">{job.institution}</strong> – {job.jobCategory}
               </p>
 
+              {/* Job Title */}
               <h3 className="text-lg font-semibold text-gray-800 leading-snug truncate">{job.jobTitle}</h3>
               <span className='text-sm text-gray-800 line-clamp-1'>{job.department}</span>
 
@@ -314,7 +314,8 @@ const AdminDashboard = () => {
                         hour12: true,
                       })}
                     </div>
-                    <div><strong>Posted By:</strong> {selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'SuperAdmin' }
+                    <div><strong>Posted By:</strong> 
+                       { selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'Admin' }
                     </div>
                   </div>
                 </div>

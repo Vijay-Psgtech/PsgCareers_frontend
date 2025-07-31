@@ -224,55 +224,187 @@ export const exportCandidateDetailsToPDF = async (personal, education, work, res
       console.warn('Failed to fetch resume PDF:', err);
     }
   }
-
+  
   // Step 3: Append Certificate PDFs
   const educationDet = education?.educationList || [];
-  for(const edu of educationDet) {
-    if(edu?.certificate?.endsWith('.pdf')) {
-      try {
-        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${edu.certificate}`;
-        const certBytes = await fetch(certUrl).then(res => res.arrayBuffer());
-        const certDoc = await PDFDocument.load(certBytes);
+  for (const edu of educationDet) {
+    if (!edu?.certificate) continue;
+
+    const ext = edu.certificate.split('.').pop().toLowerCase();
+    const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${edu.certificate}`;
+
+    try {
+      const fileRes = await fetch(certUrl);
+      const fileBuffer = await fileRes.arrayBuffer();
+
+      if (ext === 'pdf') {
+        const certDoc = await PDFDocument.load(fileBuffer);
         const certPages = await mergedPdf.copyPages(certDoc, certDoc.getPageIndices());
         certPages.forEach(p => mergedPdf.addPage(p));
-      } catch (err) {
-        console.warn('Failed to fetch Education certificate PDF:', err);
+      } else if (['jpg', 'jpeg', 'png'].includes(ext)) {
+        const imgPdf = await PDFDocument.create();
+        const page = imgPdf.addPage();
+        const { width, height } = page.getSize();
+
+        let embeddedImg;
+        if (ext === 'png') {
+          embeddedImg = await imgPdf.embedPng(fileBuffer);
+        } else {
+          embeddedImg = await imgPdf.embedJpg(fileBuffer);
+        }
+
+        const imgDims = embeddedImg.scaleToFit(width - 40, height - 80);
+        page.drawImage(embeddedImg, {
+          x: (width - imgDims.width) / 2,
+          y: (height - imgDims.height) / 2,
+          width: imgDims.width,
+          height: imgDims.height,
+        });
+
+        const imgBytes = await imgPdf.save();
+        const imgDoc = await PDFDocument.load(imgBytes);
+        const imgPages = await mergedPdf.copyPages(imgDoc, imgDoc.getPageIndices());
+        imgPages.forEach(p => mergedPdf.addPage(p));
       }
+    } catch (err) {
+      console.warn(`Failed to fetch Education certificate (${edu.certificate}):`, err);
     }
   }
 
   
   const industryJobs = work?.industry || [];
   for (const job of industryJobs) {
-    if (job?.certificate?.endsWith('.pdf')) {
-      try {
-        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${job.certificate}`;
-        const certBytes = await fetch(certUrl).then(res => res.arrayBuffer());
-        const certDoc = await PDFDocument.load(certBytes);
+    if(!job?.certificate) continue;
+    const ext = job.certificate.split('.').pop().toLowerCase();
+    const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${job.certificate}`;
+    try{
+      const fileRes = await fetch(certUrl);
+      const fileBuffer = await fileRes.arrayBuffer();
+
+       if (ext === 'pdf') {
+        const certDoc = await PDFDocument.load(fileBuffer);
         const certPages = await mergedPdf.copyPages(certDoc, certDoc.getPageIndices());
         certPages.forEach(p => mergedPdf.addPage(p));
-      } catch (err) {
-        console.warn('Failed to fetch Work Experience certificate PDF:', err);
+      } else if (['jpg', 'jpeg', 'png'].includes(ext)) {
+        const imgPdf = await PDFDocument.create();
+        const page = imgPdf.addPage();
+        const { width, height } = page.getSize();
+
+        let embeddedImg;
+        if (ext === 'png') {
+          embeddedImg = await imgPdf.embedPng(fileBuffer);
+        } else {
+          embeddedImg = await imgPdf.embedJpg(fileBuffer);
+        }
+
+        const imgDims = embeddedImg.scaleToFit(width - 40, height - 80);
+        page.drawImage(embeddedImg, {
+          x: (width - imgDims.width) / 2,
+          y: (height - imgDims.height) / 2,
+          width: imgDims.width,
+          height: imgDims.height,
+        });
+
+        const imgBytes = await imgPdf.save();
+        const imgDoc = await PDFDocument.load(imgBytes);
+        const imgPages = await mergedPdf.copyPages(imgDoc, imgDoc.getPageIndices());
+        imgPages.forEach(p => mergedPdf.addPage(p));
       }
+    }catch(err){
+      console.warn(`Failed to fetch Industry Experience certificate (${job.certificate}):`, err);
     }
+    
   }
 
   const teachingJobs = work?.teaching || [];
   for (const job of teachingJobs){
-    if(job?.certificate?.endsWith('.pdf')) {
-      try{
-        const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${job.certificate}`;
-        const certBytes = await fetch(certUrl).then(res => res.arrayBuffer());
-        const certDoc = await PDFDocument.load(certBytes);
+    if(!job?.certificate) continue;
+    const ext = job.certificate.split('.').pop().toLowerCase();
+    const certUrl = `${import.meta.env.VITE_API_BASE_URL}/${job.certificate}`;
+    try{
+      const fileRes = await fetch(certUrl);
+      const fileBuffer = await fileRes.arrayBuffer();
+
+       if (ext === 'pdf') {
+        const certDoc = await PDFDocument.load(fileBuffer);
         const certPages = await mergedPdf.copyPages(certDoc, certDoc.getPageIndices());
         certPages.forEach(p => mergedPdf.addPage(p));
+      } else if (['jpg', 'jpeg', 'png'].includes(ext)) {
+        const imgPdf = await PDFDocument.create();
+        const page = imgPdf.addPage();
+        const { width, height } = page.getSize();
+
+        let embeddedImg;
+        if (ext === 'png') {
+          embeddedImg = await imgPdf.embedPng(fileBuffer);
+        } else {
+          embeddedImg = await imgPdf.embedJpg(fileBuffer);
+        }
+
+        const imgDims = embeddedImg.scaleToFit(width - 40, height - 80);
+        page.drawImage(embeddedImg, {
+          x: (width - imgDims.width) / 2,
+          y: (height - imgDims.height) / 2,
+          width: imgDims.width,
+          height: imgDims.height,
+        });
+
+        const imgBytes = await imgPdf.save();
+        const imgDoc = await PDFDocument.load(imgBytes);
+        const imgPages = await mergedPdf.copyPages(imgDoc, imgDoc.getPageIndices());
+        imgPages.forEach(p => mergedPdf.addPage(p));
+      }
+    }catch(err){
+      console.warn(`Failed to fetch Industry Experience certificate (${job.certificate}):`, err);
+    }
+  }
+
+  // Step 4: Append Other Documents (PDFs + Images)
+  if (otherData?.documents) {
+    for (const [label, path] of Object.entries(otherData.documents)) {
+      const fileUrl = `${import.meta.env.VITE_API_BASE_URL}/${path}`;
+      const fileExt = path.split('.').pop().toLowerCase();
+
+      try {
+        const fileRes = await fetch(fileUrl);
+        const fileBuffer = await fileRes.arrayBuffer();
+
+        if (fileExt === 'pdf') {
+          const fileDoc = await PDFDocument.load(fileBuffer);
+          const filePages = await mergedPdf.copyPages(fileDoc, fileDoc.getPageIndices());
+          filePages.forEach(p => mergedPdf.addPage(p));
+        } else if (fileExt === 'jpg' || fileExt === 'jpeg' || fileExt === 'png') {
+          const imageDoc = await PDFDocument.create();
+          const imagePage = imageDoc.addPage();
+          const { width, height } = imagePage.getSize();
+
+          let embeddedImage;
+          if (fileExt === 'png') {
+            embeddedImage = await imageDoc.embedPng(fileBuffer);
+          } else {
+            embeddedImage = await imageDoc.embedJpg(fileBuffer);
+          }
+
+          const imgDims = embeddedImage.scaleToFit(width - 40, height - 80);
+          imagePage.drawImage(embeddedImage, {
+            x: (width - imgDims.width) / 2,
+            y: (height - imgDims.height) / 2,
+            width: imgDims.width,
+            height: imgDims.height
+          });
+
+          const imgBytes = await imageDoc.save();
+          const imgDoc = await PDFDocument.load(imgBytes);
+          const imgPages = await mergedPdf.copyPages(imgDoc, imgDoc.getPageIndices());
+          imgPages.forEach(p => mergedPdf.addPage(p));
+        }
       } catch (err) {
-        console.warn('Failed to fetch Work Experience certificate PDF:', err);
+        console.warn(`Failed to load or embed document (${label}):`, err);
       }
     }
   }
 
-  // Step 4: Save merged PDF
+  // Step 5: Save merged PDF
   const finalPdfBytes = await mergedPdf.save();
   const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
   const link = document.createElement('a');

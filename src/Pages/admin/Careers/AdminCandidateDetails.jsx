@@ -66,7 +66,7 @@ export default function CandidateDetails() {
           className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
         >
           <FaFilePdf className="text-md" />
-          <span className="hidden xs:inline">Export PDF</span>
+          <span className="hidden md:inline">Export PDF</span>
         </button>
       </div>
 
