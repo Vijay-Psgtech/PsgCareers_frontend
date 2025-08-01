@@ -197,6 +197,7 @@ const AdminDashboard = () => {
 
               {/* Job Title */}
               <h3 className="text-lg font-semibold text-gray-800 leading-snug truncate">{job.jobTitle}</h3>
+              <span className='text-sm text-gray-800 line-clamp-1'>{job.department}</span>
 
               {/* Progress Bar */}
               <div
@@ -276,6 +277,7 @@ const AdminDashboard = () => {
                     <div><strong>Job ID:</strong> {selectedJob.jobId}</div>
                     <div><strong>Job Title:</strong> {selectedJob.jobTitle}</div>
                     <div><strong>Institution:</strong> {selectedJob.institution}</div>
+                    <div><strong>Department:</strong> {selectedJob.department}</div>
                     <div><strong>Location:</strong> {selectedJob.location}</div>
                     <div><strong>Category:</strong> {selectedJob.jobCategory}</div>
                     <div><strong>Job Type:</strong> {selectedJob.jobType}</div>
@@ -285,7 +287,17 @@ const AdminDashboard = () => {
                       ))
                       }
                     </div>
-                    <div><strong>Job Description:</strong><div dangerouslySetInnerHTML={{ __html: selectedJob.jobDescription }}/></div>
+                    <div><strong>Job Description:</strong><div className="text-gray-800 leading-relaxed
+                      prose max-w-none
+                      [&_p]:mb-1
+                      [&_strong]:font-semibold
+                      [&_li[data-list='bullet']]:list-disc
+                      [&_li[data-list='bullet']]:ml-6
+                      [&_li[data-list='ordered']]:list-decimal
+                      [&_li[data-list='ordered']]:ml-6
+                      [&_li]:mb-1
+                      [&_u]:underline" dangerouslySetInnerHTML={{ __html: selectedJob.jobDescription }}/>
+                    </div>
                     {selectedJob.ctcMin && (
                       <div><strong>CTC:</strong> {`${selectedJob.ctcMin || ''} to ${selectedJob.ctcMax} LPA`}</div>
                       
@@ -302,7 +314,8 @@ const AdminDashboard = () => {
                         hour12: true,
                       })}
                     </div>
-                    <div><strong>Posted By:</strong> {selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'SuperAdmin' }
+                    <div><strong>Posted By:</strong> 
+                       { selectedJob.createdBy !== undefined ? selectedJob.createdBy : 'Admin' }
                     </div>
                   </div>
                 </div>

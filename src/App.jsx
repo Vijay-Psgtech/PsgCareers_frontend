@@ -39,6 +39,10 @@ const WorkExperience = lazy(() => import("./forms/WorkExperience"));
 const OtherDetails = lazy(() => import("./forms/OtherDetails"));
 const Declaration = lazy(() => import("./forms/Declaration"));
 
+const AppliedCandidates = lazy(() => import("./Pages/admin/Reports/AppliedCandidates"));
+const RegisteredCandidates = lazy(() => import("./Pages/admin/Reports/RegisteredCandidates"));
+const DraftApplications = lazy(() => import("./Pages/admin/Reports/DraftApplications"));
+
 function App() {
   return (
     <BrowserRouter>
@@ -112,6 +116,27 @@ function App() {
             <PrivateRoute>
               <AdminDashboardLayout>
                 <AdminList />
+              </AdminDashboardLayout>
+            </PrivateRoute>
+          } />
+          <Route path="/admin/applied-candidates" element={
+            <PrivateRoute>
+              <AdminDashboardLayout>
+                <AppliedCandidates />
+              </AdminDashboardLayout>
+            </PrivateRoute>
+          } />
+          <Route path="/admin/registered-not-applied-candidates" element={
+            <PrivateRoute>
+              <AdminDashboardLayout>
+                <RegisteredCandidates />
+              </AdminDashboardLayout>
+            </PrivateRoute>
+          } />
+          <Route path="/admin/quick-applied-candidates" element={
+            <PrivateRoute>
+              <AdminDashboardLayout>
+                <DraftApplications />
               </AdminDashboardLayout>
             </PrivateRoute>
           } />

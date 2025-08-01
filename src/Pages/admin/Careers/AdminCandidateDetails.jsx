@@ -20,17 +20,17 @@ export default function CandidateDetails() {
   useEffect(() => {
     const fetchAllDetails = async () => {
       try {
-        const [personalRes, eduRes, workRes, otherRes] = await Promise.all([
+        const [personalRes, eduRes, workRes, otherRes] = await Promise.allSettled([
           axiosInstance.get(`/api/personalDetails/${userId}`),
           axiosInstance.get('/api/education/get', { params: { userId } }),
           axiosInstance.get('/api/workExperience/get', { params: { userId } }),
           axiosInstance.get(`/api/otherDetails/${userId}`)
         ]);
 
-        setPersonal(personalRes.data || {});
-        setEducation(eduRes.data || {});
-        setWork(workRes.data || {});
-        setOtherData(otherRes.data || {});
+        setPersonal(personalRes.status === 'fulfilled' ? personalRes.value.data : {});
+        setEducation(eduRes.status === 'fulfilled' ? eduRes.value.data : []);
+        setWork(workRes.status === 'fulfilled' ? workRes.value.data : []);
+        setOtherData(otherRes.status === 'fulfilled' ? otherRes.value.data : {});
 
         if(jobCategory === 'Teaching') {
          const researchRes = await axiosInstance.get(`/api/research/${userId}`);
@@ -66,7 +66,7 @@ export default function CandidateDetails() {
           className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
         >
           <FaFilePdf className="text-md" />
-          <span className="hidden xs:inline">Export PDF</span>
+          <span className="hidden md:inline">Export PDF</span>
         </button>
       </div>
 

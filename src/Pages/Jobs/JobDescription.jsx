@@ -83,7 +83,15 @@ export default function JobDescription() {
               Job Description
             </h2>
             <p
-              className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line"
+              className="text-gray-700 dark:text-white leading-relaxed whitespace-pre-line prose max-w-none
+              [&_strong]:font-semibold
+              [&_p]:mb-1
+              [&_li[data-list='bullet']]:list-disc
+              [&_li[data-list='bullet']]:ml-6
+              [&_li[data-list='ordered']]:list-decimal
+              [&_li[data-list='ordered']]:ml-6
+              [&_li]:mb-1
+              [&_u]:underline"
               dangerouslySetInnerHTML={{ __html: job.jobDescription }}
             />
           </div>

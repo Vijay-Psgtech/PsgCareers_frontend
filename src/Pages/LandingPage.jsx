@@ -8,27 +8,10 @@ import image1 from "../assets/images/image_1.webp";
 import { useAuth } from "../Context/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const carouselImages = ["/About2.jpg", "/About3.jpg"];
-
-const staticTestimonials = [
-  {
-    name: "Prof. Meenakshi Sundaram",
-    role: "Dean, Academic Affairs",
-    message:
-      "A career at PSG is not just a job—it's a mission to shape the future.",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    name: "Dr. Shruti Nair",
-    role: "Assistant Professor",
-    message:
-      "Supportive community, modern facilities, and a purpose‑driven vision.",
-    image: "https://randomuser.me/api/portraits/women/45.jpg",
-  },
-];
-
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 6;
 
 export default function LandingPage() {
   const [idx, setIdx] = useState(0);
@@ -37,6 +20,14 @@ export default function LandingPage() {
   const [filterCat, setFilterCat] = useState("Categories");
   const [filterInst, setFilterInst] = useState("Institutions");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupForm, setPopupForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    education: "",
+    resume: null,
+  });
   const jobsRef = useRef();
   const navigate = useNavigate();
 
@@ -82,6 +73,7 @@ export default function LandingPage() {
     return catMatch && instMatch && (titleMatch || descMatch);
   });
 
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleViewDetails = (jobId) => {
@@ -119,6 +111,73 @@ export default function LandingPage() {
     }
   };
 
+  useEffect(() => {
+    const trackLandingVisit = async () => {
+      try {
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        const visitorId = result.visitorId;
+
+        await axiosInstance.post('/api/visitors/landing-visit', {
+          fingerprint: visitorId
+        });
+      } catch (err) {
+        console.error('Error tracking landing visit:', err);
+      }
+    };
+
+    trackLandingVisit();
+  }, []);
+
+  const handlePopupChange = (e) => {
+    const { name, value } = e.target;
+    setPopupForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleResumeUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPopupForm((prev) => ({ ...prev, resume: file }));
+    }
+  };
+
+  const handleResumeDelete = () => {
+    setPopupForm((prev) => ({ ...prev, resume: null }));
+  };
+
+  const handlePopupSubmit = async (e) => {
+    e.preventDefault();
+
+    if (
+      !popupForm.name ||
+      !popupForm.email ||
+      !popupForm.phone ||
+      !popupForm.education
+    ) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", popupForm.name);
+    formData.append("email", popupForm.email);
+    formData.append("phone", popupForm.phone);
+    formData.append("education", popupForm.education);
+    if (popupForm.resume) {
+      formData.append("resume", popupForm.resume);
+    }
+
+    try {
+      await axiosInstance.post("/api/applications/save-draft", formData);
+      toast.success("Draft saved successfully!");
+      setShowPopup(false);
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      toast.error("Failed to save draft.");
+    }
+  };
+
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-blue-900 font-sans">
       <LandingHeader />
@@ -148,10 +207,20 @@ export default function LandingPage() {
             loading="lazy"
           />
           <motion.h1
-            className="text-4xl sm:text-5xl font-bold font-serif mb-2"
+            className="text-4xl sm:text-5xl font-extrabold font-serif mb-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
+          >
+            <span className="bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent animate-pulse">
+             PSG Careers
+            </span>
+          </motion.h1>
+          <motion.h1
+            className="text-2xl sm:text-4xl font-bold font-serif mb-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
           >
             <span className="bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent">
               Build Your Future with Us
@@ -161,17 +230,117 @@ export default function LandingPage() {
             className="text-lg sm:text-xl max-w-3xl text-white/90"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.9 }}
           >
             Explore exciting opportunities in a vibrant academic and research
             environment.
           </motion.p>
         </div>
+        {showPopup && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
+            <div className="bg-white/90 border border-blue-200 p-6 rounded-2xl w-full max-w-lg shadow-2xl">
+              <h3 className="text-2xl font-semibold text-blue-800 mb-6 text-center">
+                Easy Apply Form
+              </h3>
+              <form onSubmit={handlePopupSubmit} className="space-y-4">
+                <input
+                  name="name"
+                  value={popupForm.name}
+                  onChange={handlePopupChange}
+                  placeholder="Name"
+                  className="w-full border border-amber-200 px-2 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  name="email"
+                  value={popupForm.email}
+                  onChange={handlePopupChange}
+                  placeholder="Email"
+                  className="w-full border border-amber-200 px-2 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  name="phone"
+                  value={popupForm.phone}
+                  onChange={handlePopupChange}
+                  placeholder="Mobile Number"
+                  className="w-full border border-amber-200 px-2 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  name="education"
+                  value={popupForm.education}
+                  onChange={handlePopupChange}
+                  placeholder="Highest Qualification"
+                  className="w-full border border-amber-200 px-2 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload Resume
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleResumeUpload}
+                    className="w-full text-sm text-gray-700 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                  />
+                  {popupForm.resume && (
+                    <div className="mt-2 flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+                      <span className="text-sm text-gray-700 truncate w-4/5">
+                        {popupForm.resume.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleResumeDelete}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        ✕
+                      </button>
+
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleResumeUpload}
+                        className="w-full text-sm text-gray-700 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                      />
+                      {popupForm.resume && (
+                        <div className="mt-2 flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+                          <span className="text-sm text-gray-700 truncate w-4/5">
+                            {popupForm.resume.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleResumeDelete}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-between pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowPopup(false)}
+                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* About & Login Section */}
       <section className="py-10 bg-gradient-to-br from-blue-50 to-white">
-        <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg flex flex-col lg:flex-row h-auto lg:h-[550px]">
+        <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg flex flex-col lg:flex-row h-auto lg:h-[600px]">
           <div className="w-full lg:w-3/4 flex flex-col justify-center px-6 py-10 bg-white">
             <img
               src={image1}
@@ -273,6 +442,21 @@ export default function LandingPage() {
                 </a>
               </p>
             </form>
+            {/* Easy Apply Without Registration */}
+            <div className="mt-10 p-6 bg-blue-100 rounded-xl">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                Don’t want to register?
+              </h3>
+              <p className="text-sm text-blue-700 mb-4">
+                Share your basic details and resume – we’ll reach out if there's a suitable match!
+              </p>
+              <button
+                onClick={() => setShowPopup(true)}
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+              >
+                Submit Without Registering
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -322,37 +506,45 @@ export default function LandingPage() {
       </section>
 
       {/* Job Listings */}
-      <main className="flex-grow bg-white">
+      <main className="flex-col bg-white">
         <section ref={jobsRef} className="py-12 max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-serif text-blue-900 mb-6">
             Open Positions
           </h2>
           {paginated.length > 0 ? (
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {paginated.map((job) => (
                 <motion.div
                   key={job._id}
-                  className="bg-blue-50 p-6 rounded-lg shadow hover:shadow-md transition"
+                  className="bg-white border border-blue-100 p-8 rounded-xl shadow hover:shadow-md transition"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                 >
-                  <h3 className="text-xl font-semibold text-blue-800">
+                  <h3 className="text-lg font-semibold text-indigo-900 mb-1">
                     {job.jobTitle}
                   </h3>
-                  <p className="text-blue-600">
+                  <p className="text-sm text-indigo-600 mb-1">
+                    {job.instituteName}
+                  </p>
+                  <p className="text-sm text-gray-600">
                     {job.location} | {job.jobType}
                   </p>
-                  <div className="mt-2 flex gap-4">
+                  {job.institution && (
+                    <p className="text-shadow-xs antialiased text-indigo-900 mt-3 font-mono font-light">
+                      {job.institution}
+                    </p>
+                  )}
+                  <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => handleViewDetails(job.jobId || job._id)}
-                      className="text-blue-700 hover:underline"
+                      className="text-white bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 text-sm"
                     >
-                      View Details
+                      More Details
                     </button>
                     <Link
                       to="/login"
-                      className="text-white bg-blue-700 px-4 py-2 rounded hover:bg-blue-800"
+                      className="text-white bg-purple-600 px-4 py-2 rounded hover:bg-purple-700 text-sm"
                     >
                       Apply
                     </Link>
@@ -365,62 +557,53 @@ export default function LandingPage() {
               No active job listings found.
             </p>
           )}
-
-          {/* Pagination */}
-          <div className="flex justify-center gap-4 mt-8">
+          <div className="flex justify-center items-center gap-2 mt-8">
             <button
-              disabled={page === 1}
               onClick={() => {
-                setPage((p) => p - 1);
-                jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                if (page > 1) {
+                  setPage(page - 1);
+                  jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                }
               }}
-              className="px-4 py-2 bg-blue-700 text-white rounded disabled:bg-gray-300"
+              disabled={page === 1}
+              className="px-3 py-1 rounded text-blue-700 hover:bg-blue-100 disabled:text-gray-400"
             >
-              Prev
+              ←
             </button>
 
+            {[...Array(totalPages)].map((_, index) => {
+              const pageNum = index + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => {
+                    setPage(pageNum);
+                    jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`px-4 py-2 rounded ${
+                    page === pageNum
+                      ? "bg-blue-700 text-white"
+                      : "text-blue-700 hover:bg-blue-100"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
             <button
-              disabled={page * PAGE_SIZE >= filtered.length}
               onClick={() => {
-                setPage((p) => p + 1);
-                jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                if (page < totalPages) {
+                  setPage(page + 1);
+                  jobsRef.current?.scrollIntoView({ behavior: "smooth" });
+                }
               }}
-              className="px-4 py-2 bg-blue-700 text-white rounded disabled:bg-gray-300"
+              disabled={page === totalPages}
+              className="px-2 py-2 rounded text-cyan-900 hover:bg-blue-100 disabled:text-gray-400"
             >
-              Next
+              →
             </button>
           </div>
-        </section>
-
-        {/* Testimonials */}
-        <section className="py-16 mx-auto max-w-4xl px-4">
-          <h2 className="text-2xl font-semibold text-center mb-8">
-            What Our People Say
-          </h2>
-          {staticTestimonials.length > 0 && (
-            <motion.div
-              className="bg-blue-50 p-8 rounded-xl shadow-inner text-center"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-            >
-              <img
-                src={staticTestimonials[idx % staticTestimonials.length].image}
-                alt="Testimonial"
-                className="inline-block w-24 h-24 rounded-full border-4 border-blue-700 mb-4"
-                loading="lazy"
-              />
-              <p className="italic text-lg text-blue-900">
-                “{staticTestimonials[idx % staticTestimonials.length].message}”
-              </p>
-              <h4 className="text-blue-700 font-semibold mt-2">
-                {staticTestimonials[idx % staticTestimonials.length].name}
-              </h4>
-              <p className="text-blue-500">
-                {staticTestimonials[idx % staticTestimonials.length].role}
-              </p>
-            </motion.div>
-          )}
         </section>
       </main>
 

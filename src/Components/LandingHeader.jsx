@@ -14,16 +14,16 @@ export default function LandingHeader() {
               className="h-14 sm:h-20 drop-shadow-xl transition-transform duration-300 hover:scale-105"
             />
           </Link>
-
-          <div className="flex flex-col justify-center sm:block">
+          <div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-500 drop-shadow-sm">
-              PSG Careers
+              PSG Institutions
             </h1>
             <p className="text-sm sm:text-base italic font-medium text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 animate-pulse">
               Start your career on the right path
             </p>
           </div>
         </div>
+
 
         {/* Future Right Side Content */}
         <div className="hidden sm:flex items-center space-x-4">

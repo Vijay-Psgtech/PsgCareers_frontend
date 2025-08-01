@@ -1,3 +1,4 @@
+// Full updated PersonalDetails.jsx component with all validations, styling, and logic
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { useParams } from "react-router-dom";
@@ -7,7 +8,7 @@ import duration from "dayjs/plugin/duration";
 import { toast } from "react-toastify";
 dayjs.extend(duration);
 
-export default function PersonalDetails({updateFormData}) {
+export default function PersonalDetails({ updateFormData }) {
   const { jobId } = useParams();
   const { auth } = useAuth();
   const userId = auth.userId;
@@ -46,55 +47,44 @@ export default function PersonalDetails({updateFormData}) {
   });
 
   const [age, setAge] = useState({ years: "", months: "", days: "" });
+  const [formErrors, setFormErrors] = useState({});
 
-  // Calculate age from DOB
+  const inputRefs = {};
+ 
+
   useEffect(() => {
     if (form.dob) {
       const today = dayjs();
       const dobDate = dayjs(form.dob);
-      const diffInMonths = today.diff(dobDate, "month");
-      const years = Math.floor(diffInMonths / 12);
-      const months = diffInMonths % 12;
-      const days = today.date() - dobDate.date();
-
-      setAge({
-        years,
-        months: months < 0 ? 0 : months,
-        days: days < 0 ? 0 : days,
-      });
+      const years = today.diff(dobDate, "year");
+      const months = today.diff(dobDate.add(years, "year"), "month");
+      const days = today.diff(dobDate.add(years, "year").add(months, "month"), "day");
+      setAge({ years, months, days });
     } else {
       setAge({ years: "", months: "", days: "" });
     }
   }, [form.dob]);
 
-  // Fetch saved personal details
   useEffect(() => {
     const fetchData = async () => {
-      if (!userId ) return;
+      if (!userId) return;
       try {
-        const res = await axiosInstance.get(
-          `/api/personalDetails/${userId}`
-        );
+        const res = await axiosInstance.get(`/api/personalDetails/${userId}`);
         const data = res.data;
-        const formatDate = (date) => {
-          return date ? new Date(date).toISOString().split('T')[0] : '';
-        }
-
+        const formatDate = (date) => (date ? new Date(date).toISOString().split("T")[0] : "");
         setForm((prev) => ({
           ...prev,
           ...data,
           dob: formatDate(data.dob),
-          languagesKnown: Array.isArray(data.languagesKnown)
-            ? data.languagesKnown
-            : [],
+          languagesKnown: Array.isArray(data.languagesKnown) ? data.languagesKnown : [],
           sameAsPermanent:
             data.communicationAddress === data.permanentAddress &&
             data.communicationCity === data.permanentCity &&
             data.communicationState === data.permanentState &&
             data.communicationCountry === data.permanentCountry &&
             data.communicationPincode === data.permanentPincode,
-          photo: null,
-          resume: null,
+          photo: data?.photoUrl,
+          resume: data?.resumeUrl,
         }));
       } catch (err) {
         console.error("Error fetching personal details:", err);
@@ -108,17 +98,28 @@ export default function PersonalDetails({updateFormData}) {
 
     if (type === "file") {
       const file = files[0];
-      if (file && file.size > 20 * 1024 * 1024) {
-        alert(`${name === "photo" ? "Photo" : "Resume"} must be under 20MB`);
+      if (!file) return;
+
+      if (name === "photo" && !file.type.includes("jpeg") && !file.type.includes("jpg")) {
+        toast.error("Only JPEG images are allowed.");
         return;
       }
+
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error("File size must be under 20MB");
+        return;
+      }
+
       setForm((prev) => ({ ...prev, [name]: file }));
       return;
     }
 
+    let updatedValue = type === "checkbox" ? checked : value;
+    if (name === "pan") updatedValue = value.toUpperCase();
+
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: updatedValue,
       ...(name === "sameAsPermanent" && checked
         ? {
             communicationAddress: prev.permanentAddress,
@@ -148,10 +149,7 @@ export default function PersonalDetails({updateFormData}) {
   const addLanguage = () => {
     setForm((prev) => ({
       ...prev,
-      languagesKnown: [
-        ...prev.languagesKnown,
-        { language: "", read: false, write: false, speak: false },
-      ],
+      languagesKnown: [...prev.languagesKnown, { language: "", read: false, write: false, speak: false }],
     }));
   };
 
@@ -161,49 +159,20 @@ export default function PersonalDetails({updateFormData}) {
     setForm((prev) => ({ ...prev, languagesKnown: updated }));
   };
 
-  const validateForm = (form) => {
+  const validateForm = () => {
   const errors = {};
+  const requiredFields = [
+    "fullName", "dob", "gender", "motherTongue", "religion", "community", "category",
+    "maritalStatus", "fatherName", "physicallyChallenged", "aadhar", "pan",
+    "mobile", "email", "permanentAddress", "permanentCity", "permanentState",
+    "permanentCountry", "permanentPincode"
+  ];
 
-  if (form.physicallyChallenged === "Yes" && !form.natureOfChallenge?.trim()) {
-    errors.natureOfChallenge = "Nature of Challenge is required";
-  }
-
-  if (!form.aadhar?.match(/^\d{12}$/)) {
-    errors.aadhar = "Aadhar must be a 12-digit number";
-  }
-
-  if (!form.pan?.match(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)) {
-    errors.pan = "Invalid PAN format (e.g., ABCDE1234F)";
-  }
-
-  if (!form.mobile?.match(/^[6-9]\d{9}$/)) {
-    errors.mobile = "Mobile number must be a 10-digit Indian number";
-  }
-
-  if (!form.email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-    errors.email = "Invalid email format";
-  }
-
-  return errors;
-};
-
-
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  // === VALIDATIONS ===
-  const errors = {};
-
-  if (!form.dob) {
-    errors.dob = "Please select your Date of Birth.";
-  } else {
-    const dobDate = dayjs(form.dob);
-    const today = dayjs();
-    const ageYears = today.diff(dobDate, "year");
-    if (ageYears < 18) {
-      errors.dob = "You must be at least 18 years old.";
+  requiredFields.forEach((field) => {
+    if (!form[field]?.toString().trim()) {
+      errors[field] = "This field is required.";
     }
-  }
+  });
 
   if (form.physicallyChallenged === "Yes" && !form.natureOfChallenge?.trim()) {
     errors.natureOfChallenge = "Nature of Challenge is required.";
@@ -218,24 +187,52 @@ export default function PersonalDetails({updateFormData}) {
   }
 
   if (!form.mobile?.match(/^[6-9]\d{9}$/)) {
-    errors.mobile = "Enter a valid 10-digit mobile number.";
+    errors.mobile = "Enter a valid 10-digit Indian mobile number.";
   }
 
   if (!form.email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
     errors.email = "Enter a valid email address.";
   }
 
-  // If any errors exist, show the first one
-  if (Object.keys(errors).length > 0) {
-    const firstError = Object.values(errors)[0];
-    alert(firstError);
+  const dobDate = dayjs(form.dob);
+  const today = dayjs();
+  const ageYears = today.diff(dobDate, "year");
+  if (ageYears < 18) {
+    errors.dob = "You must be at least 18 years old.";
+  }
+
+  const hasValidLanguage = form.languagesKnown.some(
+    (lang) => lang.language && (lang.read || lang.write || lang.speak)
+  );
+
+  if (!form.languagesKnown.length || !hasValidLanguage) {
+    errors.languagesKnown = "Add at least one language with skills marked.";
+  }
+
+  setFormErrors(errors);
+  return errors;
+};
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  const validationErrors = validateForm();
+  if (Object.keys(validationErrors).length > 0) {
+    toast.error("Please correct the errors before submitting.");
+
+    // 🔽 Scroll to first error field
+    const firstErrorField = Object.keys(validationErrors)[0];
+    const ref = inputRefs[firstErrorField];
+    if (ref && ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      ref.current.focus();
+    }
+
     return;
   }
 
   try {
     const submission = { ...form, userId, jobId };
     const formData = new FormData();
-
     for (const key in submission) {
       if (key === "languagesKnown") {
         formData.append(key, JSON.stringify(submission[key]));
@@ -249,56 +246,66 @@ export default function PersonalDetails({updateFormData}) {
     const response = await axiosInstance.post(
       "/api/personalDetails/save",
       formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
-
     if (response.status === 200 || response.status === 201) {
       toast.success("Personal Details updated successfully");
+      setFormErrors({});
       updateFormData(form);
     } else {
-      alert("Failed to save personal details.");
+      toast.error("Failed to save personal details.");
     }
   } catch (err) {
     console.error("Submission error:", err);
-    if (err.response) {
-      alert(`Error: ${err.response.data.message || "Submission failed"}`);
-    } else {
-      alert("Submission failed. Please try again.");
-    }
+    toast.error("Submission failed. Please try again.");
   }
 };
-  const renderLabeledInput = (label, name, type = "text", required = false) => (
+const renderLabeledInput = (label, name, type = "text", required = false) => {
+  inputRefs[name] = inputRefs[name] || React.createRef();
+
+  return (
     <div>
       <label htmlFor={name} className="block text-sm font-medium mb-1">
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
         id={name}
         type={type}
         name={name}
+        ref={inputRefs[name]}
         value={form[name] || ""}
         onChange={handleChange}
         required={required}
-        className="w-full border rounded px-4 py-2"
+        className={`w-full border rounded px-4 py-2 ${
+          formErrors[name] ? "border-red-500" : ""
+        }`}
       />
+      {formErrors[name] && (
+        <p className="text-red-600 text-sm mt-1">{formErrors[name]}</p>
+      )}
     </div>
   );
+};
 
-  const renderSelect = (label, name, options, required = false) => (
+ 
+const renderSelect = (label, name, options, required = false) => {
+  inputRefs[name] = inputRefs[name] || React.createRef();
+
+  return (
     <div>
       <label htmlFor={name} className="block text-sm font-medium mb-1">
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
       <select
         id={name}
         name={name}
-        
+        ref={inputRefs[name]}
         value={form[name] || ""}
         onChange={handleChange}
         required={required}
-        className="w-full border rounded px-4 py-2 bg-white"
+        className={`w-full border rounded px-4 py-2 bg-white ${
+          formErrors[name] ? "border-red-500" : ""
+        }`}
       >
         <option value="">Select</option>
         {options.map((opt) => (
@@ -307,10 +314,20 @@ export default function PersonalDetails({updateFormData}) {
           </option>
         ))}
       </select>
+      {formErrors[name] && (
+        <p className="text-red-600 text-sm mt-1">{formErrors[name]}</p>
+      )}
     </div>
   );
+};
 
-  return (
+const resolvedPhoto = (form.photo instanceof File
+      ? URL.createObjectURL(form.photo)
+      : form.photo?.startsWith("http")
+      ? form.photo
+      : `${import.meta.env.VITE_API_BASE_URL}/${form.photo}`)
+
+return (
     <form
       onSubmit={handleSubmit}
       className="bg-white shadow-md rounded-xl p-8 space-y-10 max-w-5xl mx-auto"
@@ -483,6 +500,9 @@ export default function PersonalDetails({updateFormData}) {
         >
           Add Language
         </button>
+        {formErrors.languagesKnown && (
+  <p className="text-red-600 text-sm mt-2">{formErrors.languagesKnown}</p>
+)}
       </div>
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -503,7 +523,7 @@ export default function PersonalDetails({updateFormData}) {
     />
     {form.photo && (
       <img
-        src={URL.createObjectURL(form.photo)}
+        src={resolvedPhoto}
         alt="Preview"
         className="mt-2 max-w-xs max-h-48 rounded border border-gray-300"
       />
