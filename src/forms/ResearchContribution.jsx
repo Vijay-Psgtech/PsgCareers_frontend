@@ -13,6 +13,7 @@ import {
 } from '@radix-ui/react-accordion';
 import { useAuth } from '../Context/AuthContext';
 import { Trash2, Plus } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function ResearchContribution({ updateFormData, jobId }) {
   const { auth } = useAuth();
@@ -62,17 +63,44 @@ export default function ResearchContribution({ updateFormData, jobId }) {
     setForm(prev => ({ ...prev, [section]: updated }));
   };
 
+  const validateForm = () => {
+    const requiredFields = ['sci', 'scopus', 'scopusId'];
+    for (let field of requiredFields) {
+      if (!form[field]) return false;
+    }
+    return true;
+  };
+
+  // Auto-adjust list lengths based on national/international count
+  useEffect(() => {
+    const sections = [
+      { key: 'books', national: 'booksNational', international: 'booksInternational' },
+      { key: 'chapters', national: 'chaptersNational', international: 'chaptersInternational' },
+      { key: 'journals', national: 'journalsNational', international: 'journalsInternational' },
+      { key: 'projects', national: 'minorProjects', international: 'majorProjects' }
+    ];
+
+    setForm(prevForm => {
+      const updatedForm = { ...prevForm };
+      sections.forEach(({ key, national, international }) => {
+        const total = (parseInt(prevForm[national]) || 0) + (parseInt(prevForm[international]) || 0);
+        const list = [...(prevForm[key] || [])];
+        while (list.length < total) list.push({});
+        if (list.length > total) list.length = total;
+        updatedForm[key] = list;
+      });
+      return updatedForm;
+    });
+  }, [
+    form.booksNational, form.booksInternational,
+    form.chaptersNational, form.chaptersInternational,
+    form.journalsNational, form.journalsInternational,
+    form.minorProjects, form.majorProjects
+  ]);
+
   const renderNISection = (section, nationalKey, internationalKey, fields, label, labelA = 'National', labelB = 'International') => {
     const national = parseInt(form[nationalKey]) || 0;
     const international = parseInt(form[internationalKey]) || 0;
-    const total = national + international;
-
-    useEffect(() => {
-      const list = [...(form[section] || [])];
-      while (list.length < total) list.push(fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {}));
-      if (list.length > total) list.length = total;
-      setForm(prev => ({ ...prev, [section]: list }));
-    }, [national, international]);
 
     return (
       <AccordionItem value={section} className="border rounded p-4 mb-2">
@@ -101,8 +129,7 @@ export default function ResearchContribution({ updateFormData, jobId }) {
             </div>
           </div>
           {(form[section] || []).map((entry, idx) => {
-            const isNational = idx < national;
-            const entryLabel = isNational ? `${labelA} Entry ${idx + 1}` : `${labelB} Entry ${idx - national + 1}`;
+            const entryLabel = idx < national ? `${labelA} Entry ${idx + 1}` : `${labelB} Entry ${idx - national + 1}`;
             return (
               <div key={idx} className="mb-6 border p-4 rounded bg-gray-50">
                 <h4 className="text-sm font-medium text-indigo-700 mb-2">{entryLabel}</h4>
@@ -177,19 +204,139 @@ export default function ResearchContribution({ updateFormData, jobId }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (!validateForm()) {
+      toast.error("Please fill in all mandatory fields (SCI, Scopus ID, etc.)");
+      return;
+    }
+
     try {
       await axiosInstance.post(`/api/research/${userId}`, { ...form, userId, jobId });
       updateFormData?.(form);
+      toast.success("Research Contribution saved!");
       document.getElementById("work-experience")?.scrollIntoView({ behavior: 'smooth' });
     } catch (err) {
       console.error("Submit failed", err);
+      toast.error("Failed to save Research Contribution.");
     }
   };
+
+  const renderPatentsSection = () => {
+  const handlePatentChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Dynamically adjust rows
+  
+  useEffect(() => {
+    const applied = parseInt(form.appliedPatents) || 0;
+    const published = parseInt(form.publishedPatents) || 0;
+    const granted = parseInt(form.grantedPatents) || 0;
+    const totalRequired = applied + published + granted;
+
+    const updatedPatents = [];
+
+    for (let i = 0; i < applied; i++) {
+      updatedPatents.push({ authors: '', title: '', status: 'Applied' });
+    }
+    for (let i = 0; i < published; i++) {
+      updatedPatents.push({ authors: '', title: '', status: 'Published' });
+    }
+    for (let i = 0; i < granted; i++) {
+      updatedPatents.push({ authors: '', title: '', status: 'Granted' });
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      patents: updatedPatents,
+    }));
+  }, [form.appliedPatents, form.publishedPatents, form.grantedPatents]);
+
+  const handleTopChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <AccordionItem value="patents" className="border rounded p-4 mb-2">
+      <AccordionTrigger className="text-lg font-semibold">Patents</AccordionTrigger>
+      <AccordionContent>
+        <div className="grid md:grid-cols-3 gap-4 mb-4">
+          {['appliedPatents', 'publishedPatents', 'grantedPatents'].map((key) => (
+            <div key={key}>
+              <label className="text-sm font-semibold capitalize">{key.replace('Patents', '')} Patents</label>
+              <input
+                type="number"
+                name={key}
+                value={form[key] || ''}
+                onChange={handlePatentChange}
+                className="border p-2 rounded w-full"
+              />
+            </div>
+          ))}
+        </div>
+
+ {(form.patents || []).map((entry, i) => (
+          <div key={i} className="grid md:grid-cols-3 gap-4 mb-4 relative">
+            <div>
+              <label className="text-sm font-semibold">Authors (In Order)</label>
+              <input
+                value={entry.authors || ''}
+                onChange={(e) => handleDynamicChange('patents', i, 'authors', e.target.value)}
+                className="border p-2 rounded w-full"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Title with ID</label>
+              <input
+                value={entry.title || ''}
+                onChange={(e) => handleDynamicChange('patents', i, 'title', e.target.value)}
+                className="border p-2 rounded w-full"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Status</label>
+              <select
+                value={entry.status || ''}
+                onChange={(e) => handleDynamicChange('patents', i, 'status', e.target.value)}
+                className="border p-2 rounded w-full"
+              >
+                <option value="">-- Select --</option>
+                <option value="Applied">Applied</option>
+                <option value="Published">Published</option>
+                <option value="Granted">Granted</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => removeEntry('patents', i)}
+              className="absolute right-0 -top-2 text-red-600 hover:text-red-800"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={() =>
+            addEntry('patents', { authors: '', title: '', status: '' })
+          }
+          className="text-blue-700 hover:text-blue-900 flex items-center gap-1 mt-2"
+        >
+          <Plus size={16} /> Add Patent Details
+        </button>
+      </AccordionContent>
+    </AccordionItem>
+  );
+};
+
 
   return (
     <form onSubmit={handleSubmit} className="bg-white shadow p-6 rounded-xl space-y-6">
       <h2 className="text-2xl font-bold text-blue-800">Research Contribution</h2>
       <Accordion type="multiple">
+
         {/* 1. Basic Metrics */}
         <AccordionItem value="basic" className="border rounded p-4 mb-2">
           <AccordionTrigger className="text-lg font-semibold">Paper Published - Basic Metrics</AccordionTrigger>
@@ -233,25 +380,21 @@ export default function ResearchContribution({ updateFormData, jobId }) {
           { name: 'year', label: 'Year of Publication' },
         ], 'Journals')}
 
-        {/* 5. Projects using Minor/Major logic */}
+        {/* 5. Projects */}
         {renderNISection('projects', 'minorProjects', 'majorProjects', [
           { name: 'pi', label: 'PI / CO-PI' },
           { name: 'title', label: 'Title' },
           { name: 'agency', label: 'Funding Agency' },
           { name: 'status', label: 'Status' },
-          { name: 'duration', label: 'Duration (YYYY - YYYY)' },
+          { name: 'duration', label: 'Duration' },
         ], 'Projects', 'Minor Projects', 'Major Projects')}
 
-        {/* 6-10 Remaining Sections */}
-        {renderDynamic('patents', 'Patents', [
-          { name: 'authors', label: 'Authors (In Order)' },
-          { name: 'title', label: 'Title with ID' },
-          { name: 'status', label: 'Status', type: 'select', options: ['Applied', 'Published', 'Granted'] },
-        ])}
+        {/* 6-10 Dynamic Sections */}
+        {renderPatentsSection()}
 
         {renderDynamic('pdfs', 'Post Doctoral Fellowship (PDF)', [
           { name: 'type', label: 'National / International', type: 'select', options: ['National', 'International'] },
-          { name: 'institute', label: 'Institute / Country' },
+          { name: 'institute', label: ' Name of the Institution and Country' },
         ])}
 
         {renderDynamic('consultancy', 'Consultancy Undertaken', [
@@ -286,6 +429,7 @@ export default function ResearchContribution({ updateFormData, jobId }) {
     </form>
   );
 }
+
 
 
 

@@ -164,6 +164,7 @@ export default function EducationDetails({ updateFormData, jobCategory }) {
       return { ...item, certificateFile: undefined };
     });
 
+
     formData.append("educationList", JSON.stringify(educationArray));
     formData.append("eligibilityTest", JSON.stringify(jobCategory === "Teaching" ? eligibilityTest : []));
     formData.append("extraCurricular", JSON.stringify(jobCategory === "Teaching" ? extraCurricular : []));
@@ -276,7 +277,7 @@ export default function EducationDetails({ updateFormData, jobCategory }) {
           ))}
 
           {/* Certificate Available */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Certificate Available *
             </label>
@@ -289,7 +290,7 @@ export default function EducationDetails({ updateFormData, jobCategory }) {
               <option value="Yes">Yes</option>
               <option value="No">No</option>
             </select>
-          </div>
+          </div> */}
 
           {edu.certificate === "Yes" && (
             <div className="col-span-full">

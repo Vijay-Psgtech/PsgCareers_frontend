@@ -12,7 +12,7 @@ export default function MainLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo and Title */}
           <div className="flex items-center gap-3">
-            <img src="/Logo2.png" alt="PSG Logo" className="h-14 sm:h-20 drop-shadow-xl transition-transform duration-300 hover:scale-105" />
+            <img src="/Logo2.png" alt="PSG Logo" className="h-20 sm:h-20 drop-shadow-xl transition-transform duration-300 hover:scale-105" />
             <span className="text-lg sm:text-xl md:text-2xl font-semibold text-indigo-700 tracking-tight whitespace-nowrap">
               PSG Careers
             </span>
