@@ -8,10 +8,11 @@ export default function Declaration({ formData = {} }) {
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const { auth } = useAuth();
   const userId = auth?.userId;
-  const { jobId } = useParams(); // e.g., route = /application/:jobId
+  const { jobId } = useParams(); // e.g., /application/:jobId
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +28,6 @@ export default function Declaration({ formData = {} }) {
       return;
     }
 
-    // Add the declaration agreement into formData before sending
     const submissionData = {
       ...formData,
       declaration: { agreed: true },
@@ -35,6 +35,7 @@ export default function Declaration({ formData = {} }) {
 
     try {
       setLoading(true);
+      setErrorMessage('');
 
       const res = await axiosInstance.post(
         `api/applications/submit/${userId}/${jobId}`,
@@ -46,11 +47,21 @@ export default function Declaration({ formData = {} }) {
         setSubmitted(true);
         navigate('/dashboard');
       } else {
-        alert('❌ Submission failed: ' + res.data.message);
+        setErrorMessage(res.data.message || 'Submission failed. Try again.');
       }
     } catch (error) {
       console.error('❌ Error submitting application:', error);
-      alert('Server error. Please try again later.');
+
+      if (
+        error.response &&
+        error.response.status === 400 &&
+        error.response.data?.message === 'Application already submitted for this job.'
+      ) {
+        setErrorMessage('❌ You have already submitted an application for this job.');
+        setSubmitted(true);
+      } else {
+        setErrorMessage('❌ Server error. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
@@ -62,6 +73,10 @@ export default function Declaration({ formData = {} }) {
       className="max-w-2xl mx-auto p-6 bg-white rounded shadow space-y-6"
     >
       <h3 className="text-xl font-semibold text-gray-800">Declaration</h3>
+
+      {errorMessage && (
+        <p className="text-red-600 font-medium border p-2 rounded bg-red-50">{errorMessage}</p>
+      )}
 
       <label className="flex items-start gap-3">
         <input
@@ -81,7 +96,9 @@ export default function Declaration({ formData = {} }) {
           type="submit"
           disabled={!agreed || loading || submitted}
           className={`px-6 py-2 rounded text-white shadow ${
-            submitted ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+            submitted
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-green-600 hover:bg-green-700'
           }`}
         >
           {loading ? 'Submitting...' : submitted ? 'Submitted' : 'Submit Application'}

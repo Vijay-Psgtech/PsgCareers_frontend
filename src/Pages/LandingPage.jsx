@@ -8,9 +8,10 @@ import image1 from "../assets/images/image_1.webp";
 import { useAuth } from "../Context/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 const carouselImages = ["/About2.jpg", "/About3.jpg"];
+
 const PAGE_SIZE = 6;
 
 export default function LandingPage() {
@@ -111,24 +112,6 @@ export default function LandingPage() {
     }
   };
 
-  useEffect(() => {
-    const trackLandingVisit = async () => {
-      try {
-        const fp = await FingerprintJS.load();
-        const result = await fp.get();
-        const visitorId = result.visitorId;
-
-        await axiosInstance.post('/api/visitors/landing-visit', {
-          fingerprint: visitorId
-        });
-      } catch (err) {
-        console.error('Error tracking landing visit:', err);
-      }
-    };
-
-    trackLandingVisit();
-  }, []);
-
   const handlePopupChange = (e) => {
     const { name, value } = e.target;
     setPopupForm((prev) => ({ ...prev, [name]: value }));
@@ -177,6 +160,23 @@ export default function LandingPage() {
     }
   };
 
+  useEffect(() => {
+    const trackLandingVisit = async () => {
+      try {
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        const visitorId = result.visitorId;
+
+        await axiosInstance.post("/api/visitors/landing-visit", {
+          fingerprint: visitorId,
+        });
+      } catch (err) {
+        console.error("Error tracking landing visit:", err);
+      }
+    };
+
+    trackLandingVisit();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-blue-900 font-sans">
@@ -213,7 +213,7 @@ export default function LandingPage() {
             transition={{ delay: 0.5 }}
           >
             <span className="bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent animate-pulse">
-             PSG Careers
+              PSG Careers
             </span>
           </motion.h1>
           <motion.h1
@@ -443,12 +443,13 @@ export default function LandingPage() {
               </p>
             </form>
             {/* Easy Apply Without Registration */}
-            <div className="mt-10 p-6 bg-blue-100 rounded-xl">
+            <div className="mt-10 p-6 bg-blue-100 rounded-xs">
               <h3 className="text-lg font-semibold text-blue-800 mb-2">
                 Don’t want to register?
               </h3>
-              <p className="text-sm text-blue-700 mb-4">
-                Share your basic details and resume – we’ll reach out if there's a suitable match!
+              <p className="text-sm text-blue-700 mb-2">
+                Share your basic details and resume – we’ll reach out if there's
+                a suitable match!
               </p>
               <button
                 onClick={() => setShowPopup(true)}
@@ -516,35 +517,36 @@ export default function LandingPage() {
               {paginated.map((job) => (
                 <motion.div
                   key={job._id}
-                  className="bg-white border border-blue-100 p-8 rounded-xl shadow hover:shadow-md transition"
+                  className="bg-blue-50 p-6 rounded-lg shadow hover:shadow-md transition"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                 >
-                  <h3 className="text-lg font-semibold text-indigo-900 mb-1">
+                  <h3 className="text-xl font-semibold text-blue-800">
                     {job.jobTitle}
                   </h3>
-                  <p className="text-sm text-indigo-600 mb-1">
-                    {job.instituteName}
+                  <p className="text-shadow-transparent-xs antialiased text-indigo-600 mt-1 font-semibold">
+                    {job.department}
                   </p>
-                  <p className="text-sm text-gray-600">
+
+                  <p className="text-blue-600 mt-1">
                     {job.location} | {job.jobType}
                   </p>
-                  {job.institution && (
-                    <p className="text-shadow-xs antialiased text-indigo-900 mt-3 font-mono font-light">
+                   {job.institution && (
+                    <p className="text-shadow-transparent-xs antialiased text-indigo-600 mt-2 font-semibold">
                       {job.institution}
                     </p>
                   )}
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-2 flex gap-4">
                     <button
                       onClick={() => handleViewDetails(job.jobId || job._id)}
-                      className="text-white bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 text-sm"
+                      className="text-blue-700 hover:underline"
                     >
-                      More Details
+                      View Details
                     </button>
                     <Link
                       to="/login"
-                      className="text-white bg-purple-600 px-4 py-2 rounded hover:bg-purple-700 text-sm"
+                      className="text-white bg-blue-700 px-4 py-2 rounded hover:bg-blue-800"
                     >
                       Apply
                     </Link>
@@ -557,6 +559,8 @@ export default function LandingPage() {
               No active job listings found.
             </p>
           )}
+
+          {/* Pagination */}
           <div className="flex justify-center items-center gap-2 mt-8">
             <button
               onClick={() => {
@@ -605,7 +609,39 @@ export default function LandingPage() {
             </button>
           </div>
         </section>
+
+        {/* Testimonials */}
+        {/* <section className="py-16 mx-auto max-w-4xl px-4">
+          <h2 className="text-2xl font-semibold text-center mb-8">
+            What Our People Say
+          </h2>
+          {staticTestimonials.length > 0 && (
+            <motion.div
+              className="bg-blue-50 p-8 rounded-xl shadow-inner text-center"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+            >
+              <img
+                src={staticTestimonials[idx % staticTestimonials.length].image}
+                alt="Testimonial"
+                className="inline-block w-24 h-24 rounded-full border-4 border-blue-700 mb-4"
+                loading="lazy"
+              />
+              <p className="italic text-lg text-blue-900">
+                “{staticTestimonials[idx % staticTestimonials.length].message}”
+              </p>
+              <h4 className="text-blue-700 font-semibold mt-2">
+                {staticTestimonials[idx % staticTestimonials.length].name}
+              </h4>
+              <p className="text-blue-500">
+                {staticTestimonials[idx % staticTestimonials.length].role}
+              </p>
+            </motion.div>
+          )}
+        </section> */}
       </main>
+      
 
       <Footer />
     </div>

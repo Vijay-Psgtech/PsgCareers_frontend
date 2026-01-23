@@ -17,19 +17,19 @@ const Fonts = () => (
 
 const testimonials = [
   {
-    name: "Dr. Anjali Menon",
+    name: "Dr. Christina",
     role: "Professor of Physics",
     message: "PSG is a nurturing environment that truly fosters research and innovation.",
     image: "https://randomuser.me/api/portraits/women/68.jpg"
   },
   {
-    name: "Mr. Arjun Reddy",
+    name: "Mr. Jacob Jhon",
     role: "Lab Technician",
     message: "Working here is like being part of a big, supportive family.",
     image: "https://randomuser.me/api/portraits/men/44.jpg"
   },
   {
-    name: "Ms. Neha Sharma",
+    name: "Ms. Neha",
     role: "Administrative Staff",
     message: "The culture of excellence at PSG motivates me every day.",
     image: "https://randomuser.me/api/portraits/women/12.jpg"
@@ -175,6 +175,7 @@ function CareerPage() {
                   whileHover={{ scale: 1.02 }}
                 >
                   <h3 className="text-xl sm:text-2xl font-semibold text-indigo-900 font-playfair mb-2">{job.jobTitle}</h3>
+                  <p className='text-black mb-1'>{job.department}</p>
                   <p className="text-indigo-700 mb-1">{job.institution}</p>
                   <p className="text-gray-700 line-clamp-4 mb-4">{`${job.location} | ${job.jobType}`}</p>
                   {auth.jobCategory === category && (
@@ -288,7 +289,6 @@ function CareerPage() {
         {renderJobSection("Teaching")}
         {renderJobSection("Non Teaching")}
 
-        {/* <Carousel /> */}
       </main>
       <Footer />
     </>

@@ -191,9 +191,8 @@ const AdminDashboard = () => {
               </span>
 
               {/* Header Info */}
-              <p className="text-sm text-gray-500 mb-1">
-                <strong className="text-gray-700">{job.institution}</strong> – {job.jobCategory}
-              </p>
+              <h3 className='text-md font-semibold leading-snug'>{job.institution}</h3>
+              <span className='text-sm text-gray-800 line-clamp-1'>{job.jobCategory}</span>
 
               {/* Job Title */}
               <h3 className="text-lg font-semibold text-gray-800 leading-snug truncate">{job.jobTitle}</h3>

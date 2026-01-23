@@ -45,11 +45,12 @@ export default function ApplicationForm() {
 
   useEffect(() => {
     fetchJobsByID();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   const scrollToSection = (index) => {
     if (sectionRefs.current[index]) {
-      sectionRefs.current[index].scrollIntoView({ behavior: 'smooth' });
+      sectionRefs.current[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -62,15 +63,38 @@ export default function ApplicationForm() {
       setJobCategory(data.jobCategory);
     }
 
-    const nextStep = currentStep + 1;
-    setCurrentStep(nextStep);
-    scrollToSection(nextStep);
+        // Calculate index of the current section
+    const sectionIndex = fullSteps.findIndex(step => step.key === sectionKey) + 1;
+
+    // Move to next step and scroll
+    if (currentStep === sectionIndex) {
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+
+   // Ensure scroll happens *after* DOM update
+      setTimeout(() => scrollToSection(nextStep), 300);
+    }
   };
 
-  const steps = ['Personal Details', 'Educational Details'];
-  const teachingFlow = ['Research Contribution', 'Work Experience', 'Other Information', 'Declaration & Upload Resume'];
-  const nonTeachingFlow = ['Work Experience', 'Other Information', 'Declaration & Upload Resume'];
-  const fullSteps = steps.concat(jobCategory === 'Teaching' ? teachingFlow : nonTeachingFlow);
+   const steps = [
+    { title: 'Personal Details', key: 'personalDetails', component: PersonalDetails },
+    { title: 'Educational Details (10th & 12th Mandatory)', key: 'educationDetails', component: EducationDetails },
+  ];
+
+    const teachingFlow = [
+    { title: 'Research Contribution', key: 'researchContribution', component: ResearchContribution },
+    { title: 'Work Experience', key: 'workExperience', component: WorkExperience },
+    { title: 'Other Information', key: 'otherDetails', component: OtherDetails },
+    { title: 'Declaration & Upload Resume', key: 'declaration', component: Declaration },
+  ];
+
+    const nonTeachingFlow = [
+    { title: 'Work Experience', key: 'workExperience', component: WorkExperience },
+    { title: 'Other Information', key: 'otherDetails', component: OtherDetails },
+    { title: 'Declaration & Upload Resume', key: 'declaration', component: Declaration },
+  ];
+
+  const fullSteps = [...steps, ...(jobCategory === 'Teaching' ? teachingFlow : nonTeachingFlow)];
 
   const renderSection = (stepIndex, title, Component, dataKey) => {
     if (currentStep >= stepIndex) {
@@ -111,7 +135,7 @@ export default function ApplicationForm() {
                   idx + 1 <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
                 }`}
               >
-                {idx + 1}. {step}
+                {idx + 1}. {step.title}
               </span>
             ))}
           </div>
@@ -119,13 +143,11 @@ export default function ApplicationForm() {
       </div>
 
       {/* Form Sections */}
-      {renderSection(1, 'Personal Details', PersonalDetails, 'personalDetails')}
-      {renderSection(2, 'Educational Details (10th & 12th Mandatory)', EducationDetails, 'educationDetails')}
-      {jobCategory === 'Teaching' &&
-        renderSection(3, 'Research Contribution', ResearchContribution, 'researchContribution')}
-      {renderSection(jobCategory === 'Teaching' ? 4 : 3, 'Work Experience', WorkExperience, 'workExperience')}
-      {renderSection(jobCategory === 'Teaching' ? 5 : 4, 'Other Information', OtherDetails, 'otherDetails')}
-      {renderSection(jobCategory === 'Teaching' ? 6 : 5, 'Declaration & Upload Resume', Declaration, 'declaration')}
+      {fullSteps.map((step, index) =>
+        renderSection(index + 1, step.title, step.component, step.key)
+      )}
     </div>
   );
 }
+
+

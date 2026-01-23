@@ -6,8 +6,8 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
-} from "../../components/ui/tabs";
-import { Input } from "../../components/ui/input";
+} from "../../Components/ui/tabs";
+import { Input } from "../../Components/ui/input";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";

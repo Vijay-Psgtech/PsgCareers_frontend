@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams,useLocation } from 'react-router-dom';
+import { useParams,useLocation,useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../utils/axiosInstance';
 import CandidateProfileTabs from '../../../Components/Cards/candidateProfileTab';
-import { FaFilePdf  } from "react-icons/fa";
+import { FaArrowLeft, FaFilePdf  } from "react-icons/fa";
 import { exportCandidateDetailsToPDF } from '../../../Components/ExportPdf';
 
 
@@ -16,6 +16,7 @@ export default function CandidateDetails() {
   const [research, setResearch] = useState({});
   const [otherData, setOtherData] = useState({});
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAllDetails = async () => {
@@ -58,17 +59,28 @@ export default function CandidateDetails() {
   return (
     <div className="max-w-5xl mx-auto p-6">
       
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-        <h1 className="text-xl sm:text-2xl font-bold">Candidate Details</h1>
+       <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 p-4 rounded-lg bg-white shadow-sm mb-6 border border-gray-200">
+          {/* Left: Go Back and Title */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded-md shadow transition"
+            >
+              <FaArrowLeft />
+              <span>Go Back</span>
+            </button>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Candidate Details</h1>
+          </div>
 
-        <button 
-          onClick={() => exportCandidateDetailsToPDF(personal, education, work, research, otherData, jobCategory)} 
-          className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
-        >
-          <FaFilePdf className="text-md" />
-          <span className="hidden md:inline">Export PDF</span>
-        </button>
-      </div>
+          {/* Right: Export PDF Button */}
+          <button 
+            onClick={() => exportCandidateDetailsToPDF(personal, education, work, research, otherData, jobCategory)} 
+            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow transition"
+          >
+            <FaFilePdf className="text-md" />
+            <span className="hidden sm:inline">Export PDF</span>
+          </button>
+        </div>
 
         
 
